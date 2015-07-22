@@ -15,7 +15,7 @@ var BioThreads = React.createClass({
 
   componentDidMount: function(){
     // TODO: Fetch User Page by ID
-    // ThreadActions.fetchUserPage({page:this.state.page});
+    ThreadActions.fetchOtherPage({id: this.props.id, page:this.state.page});
     ThreadStore.addChangeListener(this._onChange);
   },
 
@@ -25,9 +25,9 @@ var BioThreads = React.createClass({
 
   _onChange: function(){
     // TODO: Get User Threads by ID
-    // this.setState({
-    //   threads: ThreadStore.getUserThreads().forumThreads
-    // });
+    this.setState({
+      threads: ThreadStore.getOtherUserThreads().forumThreads
+    });
   },
 
   render: function() {

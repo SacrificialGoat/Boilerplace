@@ -16,9 +16,18 @@ var ThreadActions = {
     });
   },
 
+  // Fetch profile threads
   fetchUserPage: function(data){
     AppDispatcher.handleAction({
       actionType: ThreadConstants.FETCHUSERPAGE,
+      data: data
+    });
+  },
+
+  // Fetch other people's profile threads
+  fetchOtherPage: function(data){
+    AppDispatcher.handleAction({
+      actionType: ThreadConstants.FETCHOTHERPAGE,
       data: data
     });
   },
@@ -30,6 +39,7 @@ var ThreadActions = {
       data: data
     });
   },
+
   // Rate a thread up or down
   upVote: function(data){
     AppDispatcher.handleAction({

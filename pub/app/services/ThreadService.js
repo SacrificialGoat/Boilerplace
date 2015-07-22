@@ -89,6 +89,26 @@ var fetchUserPage = function(page, callback) {
   });
 };
 
+var fetchOtherPage = function(id, page, callback) {
+  
+  $.ajax({
+    type: 'POST',
+    url: '/getForumThreadsByUserIdByRating',
+    data: JSON.stringify({"user_id":parseInt(id),  "page_number" : parseInt(page)}),
+    crossDomain: true,
+    success: function(resp) { // WORKING for fetchuser?
+      // console.log('success',resp);
+      callback(resp);
+    },
+    error: function(resp) {
+      // TODO: Fix this, this always goes to error - not sure.
+      // Found out - jQuery 1.4.2 works with current go server, but breaks with newer ver.
+      console.log('error',resp);
+      callback(null);
+    }
+  });
+};
+
 var updateThread = function(bio,avatar,callback) {
   return $.ajax({
     type: 'POST',
@@ -181,6 +201,16 @@ var Thread = {
   fetchUserPage: function(page,callback) {
     var that = this;
     fetchUserPage(page,function(res) {
+        if (callback) {
+          callback(res);
+        }
+        that.onChange(res);
+    });
+  },
+
+  fetchOtherPage: function(id,page,callback) {
+    var that = this;
+    fetchOtherPage(id,page,function(res) {
         if (callback) {
           callback(res);
         }

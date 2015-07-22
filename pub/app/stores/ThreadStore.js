@@ -8,6 +8,7 @@ var CHANGE_EVENT = 'change';
 
 var _threads = [];
 var _userThreads = [];
+var _otherUserThreads = [];
 var _thread = null;
 
 var ThreadStore = assign({}, EventEmitter.prototype, {
@@ -27,6 +28,11 @@ var ThreadStore = assign({}, EventEmitter.prototype, {
   getUserThreads: function(){
     return _userThreads;
   },
+
+  getOtherUserThreads: function(){
+    return _otherUserThreads;
+  },
+
 
   fetchThread: function(id){
     var that = this;
@@ -48,6 +54,14 @@ var ThreadStore = assign({}, EventEmitter.prototype, {
     var that = this;
     Thread.fetchUserPage(page, function(data){
       _userThreads = data;
+      that.emitChange();
+    });
+  },
+
+  fetchOtherPage: function(id,page){
+    var that = this;
+    Thread.fetchOtherPage(id, page, function(data){
+      _otherUserThreads = data;
       that.emitChange();
     });
   },
@@ -106,6 +120,10 @@ AppDispatcher.register(function(payload){
       break;
     case ThreadConstants.FETCHUSERPAGE:
       ThreadStore.fetchUserPage(action.data.page);
+      ThreadStore.emitChange();
+      break;
+    case ThreadConstants.FETCHOTHERPAGE:
+      ThreadStore.fetchOtherPage(action.data.id, action.data.page);
       ThreadStore.emitChange();
       break;
     case ThreadConstants.FETCHTHREAD:
