@@ -47,7 +47,7 @@ var User = React.createClass({
     return (
       <div className="profile">
         <Bio item={this.state} />
-        <BioThreads />
+        <BioThreads id={this.props.params.id}/>
       </div>
     );
   }
