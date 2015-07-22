@@ -73,7 +73,7 @@ var fetchUserPage = function(page, callback) {
   
   $.ajax({
     type: 'POST',
-    url: '/getForumThreadsByUserId',
+    url: '/getForumThreadsByLoggedInUserIdByRating',
     data: JSON.stringify({"page_number" : page}),
     crossDomain: true,
     success: function(resp) { // WORKING for fetchuser?
