@@ -96,10 +96,10 @@ func createThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store 
 }
 
 
-//option: 0 - by user id, 1 - by rating, 2 - by datetime
-//TODO: Return correct status and message if session is invalid
+//option1: query by - 0) post id, 1) thread id, 2) user id, 3) all
+//option2: sort by (does not apply to by post id since by post id is unique) - 0) rating, 1) datetime
 //TODO: Return correct status and message if query failed
-func getThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore, option int) {
+func getThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, option1 int, option2 int) {
 
   fmt.Println("Getting forum thread post...")
 
@@ -141,12 +141,6 @@ func getThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *se
   if err := json.Unmarshal(byt, &dat); err != nil {
     panic(err)
   }
-  thread_id := int(dat["thread_id"].(float64))
-  page_number := int(dat["page_number"].(float64))
-
-  //only get 25 threads per query, and get records based on page number
-  limit := 25
-  offset := (page_number - 1) * limit
 
   //variable(s) to hold the returned values from the query
   var (
@@ -162,15 +156,77 @@ func getThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *se
 
   //change query based on option
   var dbQuery string 
-  if option == 0 { //find forum threads created by the user
-    //get the user from the cookie
-    userid := session.Values["userid"].(int)
 
-    dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id where thread_posts.user_id = " + strconv.Itoa(userid) + " and thread_id = " + strconv.Itoa(thread_id) + " limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
-  } else if option == 1 { //find the most popular forum threads
-    dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id where thread_id = " + strconv.Itoa(thread_id) + " order by rating desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
-  } else { //find the most recent forum threads
-    dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id where thread_id = " + strconv.Itoa(thread_id)  + " order by creation_time desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+  if option1 == 0 { //query by post id
+
+    //get the post id from the JSON message
+    post_id := int(dat["post_id"].(float64))
+
+    dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id where post_id = " + strconv.Itoa(post_id)
+  
+  } else if option1 == 1 { //query by thread id
+
+    //get the thread id from the JSON message
+    thread_id := int(dat["thread_id"].(float64))
+
+    //get the page number from the JSON message
+    page_number := int(dat["page_number"].(float64))
+
+    //only get 25 threads per query, and get records based on page number
+    limit := 25
+    offset := (page_number - 1) * limit  
+
+    if option2 == 0 { //get by rating
+
+      dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id where thread_id = " + strconv.Itoa(thread_id) + " order by rating desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+
+    } else { //get by creation time
+
+      dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id where thread_id = " + strconv.Itoa(thread_id)  + " order by creation_time desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+
+    }
+
+  } else if option1 == 2 { //query by user id
+
+     //get the userid from the JSON message
+    userid := int(dat["user_id"].(float64))   
+
+    //get the page number from the JSON message
+    page_number := int(dat["page_number"].(float64))
+
+    //only get 25 threads per query, and get records based on page number
+    limit := 25
+    offset := (page_number - 1) * limit   
+
+    if option2 == 0 { //get by rating
+
+      dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id where user_id = " + strconv.Itoa(userid) + " order by rating desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+
+    } else { //get by creation time
+
+      dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id where user_id = " + strconv.Itoa(userid)  + " order by creation_time desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+
+    }
+
+  } else { //query all
+
+    //get the page number from the JSON message
+    page_number := int(dat["page_number"].(float64))
+
+    //only get 25 threads per query, and get records based on page number
+    limit := 25
+    offset := (page_number - 1) * limit  
+
+    if option2 == 0 { //get by rating
+
+      dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id order by rating desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+
+    } else { //get by creation time
+
+      dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id order by creation_time desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+
+    }
+
   }
 
   //perform query and check for errors

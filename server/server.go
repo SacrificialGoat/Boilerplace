@@ -78,25 +78,40 @@ func main() {
     createForumThread(w, r, db, store)
   })
 
-  //get forum threads by user id
-  http.HandleFunc("/getForumThreadsByUserId", func(w http.ResponseWriter, r *http.Request) {
-    getForumThread(w, r, db, store, 0)
+  //get forum threads by logged in user id sort by rating
+  http.HandleFunc("/getForumThreadsByLoggedInUserIdByRating", func(w http.ResponseWriter, r *http.Request) {
+    getForumThreadProtected(w, r, db, store, 0)
   })
 
-  //get forum threads by rating
-  http.HandleFunc("/getForumThreadsByRating", func(w http.ResponseWriter, r *http.Request) {
-    getForumThread(w, r, db, store, 1)
-  })
-
-  //get forum threads by datetime
-  http.HandleFunc("/getForumThreadsByDatetime", func(w http.ResponseWriter, r *http.Request) {
-    getForumThread(w, r, db, store, 2)
-  })   
+  //get forum threads by logged in user id sort by time
+  http.HandleFunc("/getForumThreadsByLoggedInUserIdByTime", func(w http.ResponseWriter, r *http.Request) {
+    getForumThreadProtected(w, r, db, store, 1)
+  })  
 
   //get forum threads by thread id
   http.HandleFunc("/getForumThreadsByThreadId", func(w http.ResponseWriter, r *http.Request) {
-    getForumThread(w, r, db, store, 3)
+    getForumThread(w, r, db, 0, 0)
+  })     
+
+  //get forum threads by user id sort by rating
+  http.HandleFunc("/getForumThreadsByUserIdByRating", func(w http.ResponseWriter, r *http.Request) {
+    getForumThread(w, r, db, 1, 0)
+  })
+
+  //get forum threads by user id sort by datetime
+  http.HandleFunc("/getForumThreadsByUserIdByTime", func(w http.ResponseWriter, r *http.Request) {
+    getForumThread(w, r, db, 1, 1)
   })   
+
+  //get all forum threads by rating
+  http.HandleFunc("/getForumThreadsByRating", func(w http.ResponseWriter, r *http.Request) {
+    getForumThread(w, r, db, 2, 0)
+  })   
+
+  //get all forum threads by datetime
+  http.HandleFunc("/getForumThreadsByTime", func(w http.ResponseWriter, r *http.Request) {
+    getForumThread(w, r, db, 2, 1)
+  })      
 
   //upvote forum thread
   http.HandleFunc("/upvoteForumThread", func(w http.ResponseWriter, r *http.Request) {
@@ -116,19 +131,14 @@ func main() {
     createThreadPost(w, r, db, store)
   })
 
-  //get forum threads by user id
-  http.HandleFunc("/getThreadPostsByUserId", func(w http.ResponseWriter, r *http.Request) {
-    getThreadPost(w, r, db, store, 0)
-  })
-
-  //get forum threads by rating
+  //get posts by thread id sort by rating
   http.HandleFunc("/getThreadPostsByRating", func(w http.ResponseWriter, r *http.Request) {
-    getThreadPost(w, r, db, store, 1)
+    getThreadPost(w, r, db, 1, 0)
   })
 
-  //get forum threads by datetime
+  //get posts by thread id sort by datetime
   http.HandleFunc("/getThreadPostsByDatetime", func(w http.ResponseWriter, r *http.Request) {
-    getThreadPost(w, r, db, store, 2)
+    getThreadPost(w, r, db, 1, 1)
   })   
 
   //upvote thread post
