@@ -1,0 +1,12 @@
+var ThreadConstants = {
+  ADD: 'ADD',
+  FETCHTHREAD: 'FETCHTHREAD',
+  FETCHPAGE: 'FETCHPAGE',
+  FETCHUSERPAGE: 'FETCHUSERPAGE',
+  UPVOTE: 'UPVOTE',
+  DOWNVOTE: 'DOWNVOTE',
+  UPDATE: 'UPDATE',
+  DELETE: 'DELETE'
+};
+
+module.exports = ThreadConstants;

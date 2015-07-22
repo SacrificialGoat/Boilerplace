@@ -1,0 +1,124 @@
+#content h1{
+  text-align:center;
+}
+
+body{
+  /*background-image: url("../assets/animus-mix.gif");*/
+  /*background-repeat: repeat;*/
+}
+
+.profile img{
+  width:200px;
+  height:200px;
+}
+
+.profile p{
+  color:black;
+}
+
+.profile .btn{
+  margin-right:5px;
+}
+
+.navbar input{
+  width:150px;
+  display:inline-block;
+  text-align:center;
+  margin-left:5px;
+  margin-right:5px;
+}
+
+.navbar button{
+  margin-top:10px;
+}
+
+.navbar-form .form-control{
+  width: 150px;
+}
+
+.error{
+  display:inline-block;
+  margin-top:10px;
+  color:red;
+}
+
+.Auth{
+  background-color:rgb(22, 35, 39);
+  text-align:center;
+  opacity:.9;
+  border-radius:20px;
+  font-family: 'century gothic';
+  padding:15px;
+  width:25%;
+  min-width:300px;
+  overflow:auto;
+}
+.Auth h2,.Auth p{
+  color:white;
+}
+.Auth input{
+  text-align:center;
+  margin: 5px 0 5px 0;
+}
+.Auth button{
+  float: right;
+  display: block;
+}
+.Auth a{
+  float:left;
+}
+
+.nameField input[name="first"]{
+  display:inline-block;
+  float:left;
+  margin: 5px 5px 5px 0;
+  width:48%;
+}
+
+.nameField input[name="last"]{
+  display:inline-block;
+  float:right;
+  margin: 5px 0 5px 5px;
+  width:48%;
+}
+
+.newThread form{
+  width:40%;
+}
+
+.newThread input[type="textarea"]{
+  height:200px;
+}
+
+.newThread input, .newThread button{
+  margin:10px;
+}
+
+.newComment input{
+  margin-bottom:20px;
+  height:60px;
+  width:400px;
+}
+
+.glyphicon-chevron-down{
+  color:red;
+}
+
+.glyphicon-chevron-up{
+  color:green;
+}
+
+.card {
+  display:inline-block;
+  background: white;
+  width: 100%;
+  /*margin: 0 12px 12px 0 ;*/
+  margin-bottom:10px;
+  box-shadow:-1px 1px 3px 1px lightgrey;
+  padding: 2%;
+  border-radius: 3px;
+  cursor: pointer;
+  -webkit-box-sizing: border-box;
+     -mox-box-sizing: border-box;
+          box-sizing: border-box;
+}
