@@ -1,7 +1,7 @@
 var fetchUser = function(callback) {
   $.ajax({
     type: 'GET',
-    url: '/getUserInfo',
+    url: '/profile/',
     crossDomain: true,
     success: function(resp) { // WORKING for fetchuser?
       // console.log('success',resp);
@@ -18,9 +18,8 @@ var fetchUser = function(callback) {
 
 var fetchUserById = function(id,callback) {
   $.ajax({
-    type: 'POST',
-    url: '/getUserInfoByUserId',
-    data: JSON.stringify({"user_id" : parseInt(id)}),
+    type: 'GET',
+    url: '/user/'+id,
     crossDomain: true,
     success: function(resp) { // WORKING for fetchuser?
       // console.log('success',resp);
@@ -39,7 +38,7 @@ var fetchUserById = function(id,callback) {
 var updateUser = function(bio,avatar,callback) {
   return $.ajax({
     type: 'POST',
-    url: '/updateUserInfo',
+    url: '/profile/',
     data: JSON.stringify({
       "bio": bio,
       "avatar_link": avatar
