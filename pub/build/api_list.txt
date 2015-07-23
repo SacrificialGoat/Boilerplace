@@ -1,0 +1,80 @@
+ 
+
+
+GET:
+      
+
+getUserInfo                                    profile/
+
+
+
+getForumThreadsByLoggedInUserIdByRating        profilethreads/ ? sortby = rating & pagenumber = XXX
+
+getForumThreadsByLoggedInUserIdByTime          profilethreads/ ? sortby = creationtime & pagenumber = XXX
+
+
+
+getForumThreadsByUserIdByRating                threads/ ? userid = XXX & sortby = rating & pagenumber = XXX
+
+getForumThreadsByUserIdByTime                  threads/ ? userid = XXX & sortby = creationtime & pagenumber = XXX
+
+getForumThreadsByRating                        threads/ ? sortby = rating & pagenumber = XXX
+
+getForumThreadsByTime                          threads/ ? sortby = creationtime & pagenumber = XXX
+
+getForumThreadsByThreadId                      thread/ id
+
+
+
+getThreadPostsByThreadIdByRating               posts / ? threadid = XXX & sortby = rating & pagenumber = XXX
+
+getThreadPostsByThreadIdByTime                 posts / ? threadid = XXX & sortby = creationtime & pagenumber = XXX
+
+getThreadPostsByUserIdByRating                 posts/ ? userid = XXX & sortby = rating & pagenumber = XXX
+
+getThreadPostsByUserIdByTime                   posts/ ? userid = XXX & sortby = creationtime & pagenumber = XXX
+
+getThreadPostsByRating                         posts / ? sortby = rating & pagenumber = XXX
+
+getThreadPostsByTime                           posts / ? sortby = creationtime & pagenumber = XXX
+
+getThreadPostByPostId                          post/ id
+
+
+
+getUserInfoByUserId                            user / 1
+
+getUserInfoByUsername                          user / ? username = XXX
+
+
+
+
+
+POST:
+
+
+createUser                  users                          body: {"username" : username, "password" : password, "firstname" : firstname, "lastname" : lastname}
+
+updateUserInfo              profile                        body: {"bio" : bio, "avatar_link" : avatar_link}
+
+authenticate                authenticate                   body: {"username" : username, "password" : password}
+
+createForumThread           threads                        body: {"title" : title, "body" : body}
+
+upvoteForumThread           thread/XidX/?upvote=true       //id in url so don't need body
+
+downvoteForumThread         thread/XidX/?downvote=true     //id in url so don't need body
+
+createThreadPost            posts                          body: {"thread_id" : threadId, "contents" : contents}
+
+upvoteThreadPost            post/XidX/?upvote=true         //id in url so don't need body
+
+downvoteThreadPost          post/XidX/?downvote=true       //id in url so don't need body
+
+
+
+
+
+
+
+

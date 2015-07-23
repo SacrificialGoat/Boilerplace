@@ -96,10 +96,10 @@ func createThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store 
 }
 
 
-//option1: query by - 0) post id, 1) thread id, 2) user id, 3) all
-//option2: sort by (does not apply to by post id since by post id is unique) - 0) rating, 1) datetime
+//option: query by - 0) post id, 1) thread id, 2) user id, 3) all
+//sortBy: sort by (does not apply to by post id since by post id is unique) - 0) rating, 1) datetime
 //TODO: Return correct status and message if query failed
-func getThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, option1 int, option2 int) {
+func getThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, option int, sortBy int, pageNumber int, id int) {
 
   fmt.Println("Getting forum thread post...")
 
@@ -128,20 +128,6 @@ func getThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, option1 i
   }
   //session.Save(r, w)
 
-  //parse the body of the request into a string
-  body, err := ioutil.ReadAll(r.Body)
-  if err != nil {
-    panic(err)
-  }
-  //fmt.Println(string(body))
-  
-  //parse the JSON string body to get the page number
-  byt := body
-  var dat map[string]interface{}
-  if err := json.Unmarshal(byt, &dat); err != nil {
-    panic(err)
-  }
-
   //variable(s) to hold the returned values from the query
   var (
     queried_post_id int
@@ -157,67 +143,49 @@ func getThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, option1 i
   //change query based on option
   var dbQuery string 
 
-  if option1 == 0 { //query by post id
+  if option == 0 { //query by post id
 
-    //get the post id from the JSON message
-    post_id := int(dat["post_id"].(float64))
-
-    dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id where post_id = " + strconv.Itoa(post_id)
+    dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id where post_id = " + strconv.Itoa(id)
   
-  } else if option1 == 1 { //query by thread id
-
-    //get the thread id from the JSON message
-    thread_id := int(dat["thread_id"].(float64))
-
-    //get the page number from the JSON message
-    page_number := int(dat["page_number"].(float64))
+  } else if option == 1 { //query by thread id
 
     //only get 25 threads per query, and get records based on page number
     limit := 25
-    offset := (page_number - 1) * limit  
+    offset := (pageNumber - 1) * limit  
 
-    if option2 == 0 { //get by rating
+    if sortBy == 0 { //get by rating
 
-      dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id where thread_id = " + strconv.Itoa(thread_id) + " order by rating desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+      dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id where thread_id = " + strconv.Itoa(id) + " order by rating desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
 
     } else { //get by creation time
 
-      dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id where thread_id = " + strconv.Itoa(thread_id)  + " order by creation_time desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+      dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id where thread_id = " + strconv.Itoa(id)  + " order by creation_time desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
 
     }
 
-  } else if option1 == 2 { //query by user id
-
-     //get the userid from the JSON message
-    userid := int(dat["user_id"].(float64))   
-
-    //get the page number from the JSON message
-    page_number := int(dat["page_number"].(float64))
+  } else if option == 2 { //query by user id
 
     //only get 25 threads per query, and get records based on page number
     limit := 25
-    offset := (page_number - 1) * limit   
+    offset := (pageNumber - 1) * limit   
 
-    if option2 == 0 { //get by rating
+    if sortBy == 0 { //get by rating
 
-      dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id where user_id = " + strconv.Itoa(userid) + " order by rating desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+      dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id where thread_posts.user_id = " + strconv.Itoa(id) + " order by rating desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
 
     } else { //get by creation time
 
-      dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id where user_id = " + strconv.Itoa(userid)  + " order by creation_time desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+      dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id where thread_posts.user_id = " + strconv.Itoa(id)  + " order by creation_time desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
 
     }
 
   } else { //query all
 
-    //get the page number from the JSON message
-    page_number := int(dat["page_number"].(float64))
-
     //only get 25 threads per query, and get records based on page number
     limit := 25
-    offset := (page_number - 1) * limit  
+    offset := (pageNumber - 1) * limit  
 
-    if option2 == 0 { //get by rating
+    if sortBy == 0 { //get by rating
 
       dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id order by rating desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
 
@@ -270,7 +238,7 @@ func getThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, option1 i
 
 //TODO: Return correct status and message if session is invalid
 //TODO: Return correct status and message if query failed
-func scoreThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore, option int) {
+func scoreThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore, option int, post_id int) {
 
   fmt.Println("Score thread post...")
 
@@ -302,21 +270,6 @@ func scoreThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *
   //get the user id and username from the cookie
   userid := session.Values["userid"].(int)
   //username := session.Values["username"].(string)  
-
-  //parse the body of the request into a string
-  body, err := ioutil.ReadAll(r.Body)
-  if err != nil {
-    panic(err)
-  }
-  //fmt.Println(string(body))
-  
-  //parse the JSON string body to get the thread post to update
-  byt := body
-  var dat map[string]interface{}
-  if err := json.Unmarshal(byt, &dat); err != nil {
-    panic(err)
-  }
-  post_id := int(dat["post_id"].(float64))
 
   //variable(s) to hold the returned values from the query
   var (

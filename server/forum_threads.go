@@ -96,10 +96,10 @@ func createForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store
 }
 
 
-//option1: query by - 0) thread id, 1) user id, 2) all
-//option2: sort by (does not apply to by thread id since by thread id is unique) - 0) rating, 1) datetime
+//option: query by - 0) thread id, 1) user id, 2) all
+//sortBy: sort by (does not apply to by thread id since by thread id is unique) - 0) rating, 1) datetime
 //TODO: Return correct status and message if query failed
-func getForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, option1 int, option2 int) {
+func getForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, option int, sortBy int, pageNumber int, id int) {
 
   fmt.Println("Getting forum thread...")
 
@@ -113,20 +113,6 @@ func getForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, option1 
     fmt.Println("options request received")
     w.WriteHeader(http.StatusTemporaryRedirect)
     return
-  }
-
-  //parse the body of the request into a string
-  body, err := ioutil.ReadAll(r.Body)
-  if err != nil {
-    panic(err)
-  }
-  //fmt.Println(string(body))
-  
-  //parse the JSON string body
-  byt := body
-  var dat map[string]interface{}
-  if err := json.Unmarshal(byt, &dat); err != nil {
-    panic(err)
   }
 
   //variable(s) to hold the returned values from the query
@@ -145,45 +131,31 @@ func getForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, option1 
   //change query based on option
   var dbQuery string 
 
-  if option1 == 0 { //query by thread id
-
-    //get the thread id from the JSON message
-    thread_id := int(dat["thread_id"].(float64))
-
-    dbQuery = "select thread_id, forum_threads.user_id, title, body, post_count, rating, forum_threads.creation_time, forum_threads.last_update_time, user_name from forum_threads inner join users on forum_threads.user_id = users.user_id where thread_id = " + strconv.Itoa(thread_id)   
-  
-  } else if option1 == 1 { //query by user id
-
-    //get the userid from the JSON message
-    userid := int(dat["user_id"].(float64))
-
-    //get the page number from the JSON message
-    page_number := int(dat["page_number"].(float64))
-
+  if option == 0 { //query by thread id
+    dbQuery = "select thread_id, forum_threads.user_id, title, body, post_count, rating, forum_threads.creation_time, forum_threads.last_update_time, user_name from forum_threads inner join users on forum_threads.user_id = users.user_id where thread_id = " + strconv.Itoa(id)   
+  } else if option == 1 { //query by user id
     //only get 25 threads per query, and get records based on page number
     limit := 25
-    offset := (page_number - 1) * limit   
+    offset := (pageNumber - 1) * limit   
 
-    if option2 == 0 { //get by rating
+    if sortBy == 0 { //get by rating
 
-      dbQuery = "select thread_id, forum_threads.user_id, title, body, post_count, rating, forum_threads.creation_time, forum_threads.last_update_time, user_name from forum_threads inner join users on forum_threads.user_id = users.user_id where forum_threads.user_id = " + strconv.Itoa(userid) + " order by rating desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+      dbQuery = "select thread_id, forum_threads.user_id, title, body, post_count, rating, forum_threads.creation_time, forum_threads.last_update_time, user_name from forum_threads inner join users on forum_threads.user_id = users.user_id where forum_threads.user_id = " + strconv.Itoa(id) + " order by rating desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
 
     } else { //get by creation time
 
-      dbQuery = "select thread_id, forum_threads.user_id, title, body, post_count, rating, forum_threads.creation_time, forum_threads.last_update_time, user_name from forum_threads inner join users on forum_threads.user_id = users.user_id where forum_threads.user_id = " + strconv.Itoa(userid) + " order by creation_time desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+      dbQuery = "select thread_id, forum_threads.user_id, title, body, post_count, rating, forum_threads.creation_time, forum_threads.last_update_time, user_name from forum_threads inner join users on forum_threads.user_id = users.user_id where forum_threads.user_id = " + strconv.Itoa(id) + " order by creation_time desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
 
     }
 
   } else { //query all
 
-    //get the page number from the JSON message
-    page_number := int(dat["page_number"].(float64))
 
     //only get 25 threads per query, and get records based on page number
     limit := 25
-    offset := (page_number - 1) * limit  
+    offset := (pageNumber - 1) * limit  
 
-    if option2 == 0 { //get by rating
+    if sortBy == 0 { //get by rating
 
       dbQuery = "select thread_id, forum_threads.user_id, title, body, post_count, rating, forum_threads.creation_time, forum_threads.last_update_time, user_name from forum_threads inner join users on forum_threads.user_id = users.user_id order by rating desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
 
@@ -233,10 +205,10 @@ func getForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, option1 
 
 }
 
-//option: sort by - 0) rating, 1) datetime
+//sortBy: sort by - 0) rating, 1) datetime
 //TODO: Return correct status and message if session is invalid
 //TODO: Return correct status and message if query failed
-func getForumThreadProtected(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore, option int) {
+func getForumThreadProtected(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore, sortBy int, pageNumber int) {
 
   fmt.Println("Getting forum thread...")
 
@@ -268,26 +240,9 @@ func getForumThreadProtected(w http.ResponseWriter, r *http.Request, db *sql.DB,
   //get the user from the cookie
   userid := session.Values["userid"].(int)  
 
-  //parse the body of the request into a string
-  body, err := ioutil.ReadAll(r.Body)
-  if err != nil {
-    panic(err)
-  }
-  //fmt.Println(string(body))
-  
-  //parse the JSON string body
-  byt := body
-  var dat map[string]interface{}
-  if err := json.Unmarshal(byt, &dat); err != nil {
-    panic(err)
-  }
-
-  //get the page number from the JSON message
-  page_number := int(dat["page_number"].(float64))
-
   //only get 25 threads per query, and get records based on page number
   limit := 25
-  offset := (page_number - 1) * limit 
+  offset := (pageNumber - 1) * limit 
 
   //variable(s) to hold the returned values from the query
   var (
@@ -304,7 +259,7 @@ func getForumThreadProtected(w http.ResponseWriter, r *http.Request, db *sql.DB,
 
   //change query based on option
   var dbQuery string 
-  if option == 0 { 
+  if sortBy == 0 { 
 
     dbQuery = "select thread_id, forum_threads.user_id, title, body, post_count, rating, forum_threads.creation_time, forum_threads.last_update_time, user_name from forum_threads inner join users on forum_threads.user_id = users.user_id where forum_threads.user_id = " + strconv.Itoa(userid) + " order by rating desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
   
@@ -355,7 +310,7 @@ func getForumThreadProtected(w http.ResponseWriter, r *http.Request, db *sql.DB,
 
 //TODO: Return correct status and message if session is invalid
 //TODO: Return correct status and message if query failed
-func scoreForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore, option int) {
+func scoreForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore, option int, thread_id int) {
 
   fmt.Println("Score forum thread...")
 
@@ -387,21 +342,6 @@ func scoreForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store 
   //get the user id and username from the cookie
   userid := session.Values["userid"].(int)
   //username := session.Values["username"].(string)  
-
-  //parse the body of the request into a string
-  body, err := ioutil.ReadAll(r.Body)
-  if err != nil {
-    panic(err)
-  }
-  //fmt.Println(string(body))
-  
-  //parse the JSON string body to get the thread to update
-  byt := body
-  var dat map[string]interface{}
-  if err := json.Unmarshal(byt, &dat); err != nil {
-    panic(err)
-  }
-  thread_id := int(dat["thread_id"].(float64))
 
   //variable(s) to hold the returned values from the query
   var (
