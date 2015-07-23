@@ -41,7 +41,7 @@
 
           $.ajax({
           type: 'POST',
-          url: 'http://127.0.0.1:8080/authenticate',
+          url: 'http://127.0.0.1:8080/authenticate/',
           data: JSON.stringify({"username" : username, "password" : password}),
           // contentType: "application/json",
           crossDomain: true,
