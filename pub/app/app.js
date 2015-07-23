@@ -4,6 +4,7 @@ var React = require('react');
 var Router = require('react-router');
 
 var Navbar = require('./components/navbar/navbar');
+var Sidebar = require('./components/sidebar/sidebar');
 var Profile = require('./components/profile/profile');
 var Front = require('./components/front/front');
 var Login = require('./components/login/login');
@@ -40,8 +41,14 @@ var App = React.createClass({
   render: function(){
     return (
       <div className="container-fluid">
-        <Navbar/>
-        <RouteHandler/>
+        <div className="col-md-2">
+          <Sidebar />
+        </div>
+
+        <div className="col-md-10">
+          <Navbar/>
+          <RouteHandler/>
+        </div>
       </div>
     );
   }
