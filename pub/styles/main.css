@@ -40,6 +40,27 @@ h1,h2,h3,p,a,td{
   cursor:pointer;
 }
 
+.chatbox{
+  width:200px;
+  height:200px;
+  background-color:darkgrey;
+  position:absolute;
+  left:80%;
+  top:100%;
+  padding:5px;
+}
+
+.chatbox input{
+  width:100%;
+}
+
+.chatbox ul{
+  margin:0;
+  padding:0;
+  height:80%;
+  list-style: none;
+}
+
 /* Navigation Bar */
 
 .navbar input{

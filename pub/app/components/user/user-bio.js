@@ -6,7 +6,7 @@ var Bio = React.createClass({
     e.preventDefault();
     //TODO: Open chat box.
     console.log('chatbox clicked');
-
+    this.props.onChat();
   },
 
   message: function(e){
