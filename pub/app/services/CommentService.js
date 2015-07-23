@@ -1,7 +1,7 @@
 var addComment = function(threadId,body,callback) {
   return $.ajax({
     type: 'POST',
-    url: '/createThreadPost',
+    url: '/posts/',
     data: JSON.stringify({
       "thread_id": parseInt(threadId),
       "contents": body
@@ -28,10 +28,10 @@ var addComment = function(threadId,body,callback) {
 var fetchComment = function(id,callback) {
   $.ajax({
     type: 'GET',
-    url: '/getUserInfo',
+    url: '/profile/',
     crossDomain: true,
     success: function(resp) { // WORKING for fetchuser?
-      // console.log('success',resp);
+      console.log('success',resp);
       callback(resp);
     },
     error: function(resp) {
@@ -46,12 +46,11 @@ var fetchComment = function(id,callback) {
 // Grabs Comments for page number
 var fetchPage = function(threadId, page, callback) {
   $.ajax({
-    type: 'POST',
-    url: '/getThreadPostsByRating',
-    data: JSON.stringify({"thread_id": parseInt(threadId), "page_number" : parseInt(page)}),
+    type: 'GET',
+    url: '/posts/?threadid='+threadId+'&sortby=rating&pagenumber='+page,
     crossDomain: true,
     success: function(resp) { // WORKING for fetchuser?
-      // console.log('success',resp);
+      console.log('success',resp);
       callback(resp);
     },
     error: function(resp) {
@@ -67,9 +66,8 @@ var fetchPage = function(threadId, page, callback) {
 var fetchUserPage = function(page, callback) {
   
   $.ajax({
-    type: 'POST',
-    url: '/getForumThreadsByUserId',
-    data: JSON.stringify({"page_number" : page}),
+    type: 'GET',
+    url: '/profilethreads/?sortby=rating&pagenumber='+ page,
     crossDomain: true,
     success: function(resp) { // WORKING for fetchuser?
       // console.log('success',resp);
@@ -87,7 +85,7 @@ var fetchUserPage = function(page, callback) {
 var updateComment = function(bio,avatar,callback) {
   return $.ajax({
     type: 'POST',
-    url: '/updateUserInfo',
+    url: '/profile/',
     data: JSON.stringify({
       "bio": bio,
       "avatar_link": avatar
@@ -114,8 +112,7 @@ var upVote = function(post_id, callback) {
   console.log('upvoting...',post_id);
   $.ajax({
     type: 'POST',
-    url: '/upvoteThreadPost',
-    data: JSON.stringify({"post_id" : parseInt(post_id)}),
+    url: '/post/'+ post_id + '/?upvote=true',
     crossDomain: true,
     success: function(resp) { // WORKING for fetchuser?
       // console.log('success',resp);
@@ -135,8 +132,7 @@ var downVote = function(post_id, callback) {
   console.log('downvoting...',post_id);
   $.ajax({
     type: 'POST',
-    url: '/downvoteThreadPost',
-    data: JSON.stringify({"post_id" : parseInt(post_id)}),
+    url: '/post/'+ post_id + '/?downvote=true',
     crossDomain: true,
     success: function(resp) { // WORKING for fetchuser?
       // console.log('success',resp);

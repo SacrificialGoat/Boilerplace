@@ -12,6 +12,7 @@ h1,h2,h3,p,a,td{
 }
 
 /* Profile Page */
+
 .profile img{
   width:200px;
   height:200px;
@@ -25,7 +26,43 @@ h1,h2,h3,p,a,td{
   margin-right:5px;
 }
 
+/* User Page */
+
+.chatIcon{
+  font-size:20px;
+  color:green;
+  cursor:pointer;
+}
+
+.messageBox{
+  font-size:20px;
+  color:red;
+  cursor:pointer;
+}
+
+.chatbox{
+  width:200px;
+  height:200px;
+  background-color:darkgrey;
+  position:absolute;
+  left:80%;
+  top:100%;
+  padding:5px;
+}
+
+.chatbox input{
+  width:100%;
+}
+
+.chatbox ul{
+  margin:0;
+  padding:0;
+  height:80%;
+  list-style: none;
+}
+
 /* Navigation Bar */
+
 .navbar input{
   width:150px;
   display:inline-block;
@@ -42,13 +79,25 @@ h1,h2,h3,p,a,td{
   width: 150px;
 }
 
-.error{
-  display:inline-block;
-  margin-top:10px;
-  color:red;
+
+.btn{
+  margin-right:5px;
+  border-radius:0px;
 }
 
+.search-submit{
+  background:white;
+  padding:6px;
+  border-radius:10px;
+}
+
+.navbar-inverse{
+  background-color:#1A3F42;
+}
+
+
 /* Login/Signup Page */
+
 .Auth{
   background-color:rgb(22, 35, 39);
   text-align:center;
@@ -89,6 +138,12 @@ h1,h2,h3,p,a,td{
   width:48%;
 }
 
+.error{
+  display:inline-block;
+  margin-top:10px;
+  color:red;
+}
+
 /* New Thread Page */
 .newThread form{
   width:40%;
@@ -108,13 +163,6 @@ h1,h2,h3,p,a,td{
   width:400px;
 }
 
-.glyphicon-chevron-down{
-  color:red;
-}
-
-.glyphicon-chevron-up{
-  color:green;
-}
 
 /* Front Page */
 
@@ -124,19 +172,22 @@ h1,h2,h3,p,a,td{
   width: 100%;
   /*margin: 0 12px 12px 0 ;*/
   margin-bottom:5px;
-  box-shadow:-1px 1px 3px 1px lightgrey;
+  /*box-shadow:-1px 1px 3px 1px lightgrey;*/
   padding: 10px;
   border-radius: 3px;
-  cursor: pointer;
   -webkit-box-sizing: border-box;
      -mox-box-sizing: border-box;
           box-sizing: border-box;
 }
 
+.showing{
+  text-align:center;
+}
+
 .frontPage h2{
   display:inline-block;
   font-style:none;
-  font-size:20px;
+  font-size:16px;
   float:top;
   margin-top:10px;
 }
@@ -157,28 +208,34 @@ h1,h2,h3,p,a,td{
 }
 
 .frontPage .title p{
-  font-size:18px;
+  font-size:14px;
 }
 
 .frontPage .votes{
   float:left;
 }
 
+.glyphicon-chevron-down{
+  color:red;
+}
+
+.glyphicon-chevron-up{
+  color:green;
+}
+
 .updateInfo span{
   float:right;
 }
 
-.btn{
-  margin-right:5px;
-  border-radius:0px;
+#sidebar-wrapper{
+  background:#1A3F42;
 }
 
-.search-submit{
-  background:white;
-  padding:6px;
-  border-radius:10px;
+/* Location */
+
+#map {
+  width: 230px;
+  height: 230px;
+  margin:auto;
 }
 
-.navbar-inverse{
-  background-color:#1A3F42;
-}

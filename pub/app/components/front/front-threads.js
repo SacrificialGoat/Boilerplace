@@ -47,6 +47,7 @@ var Threads = React.createClass({
   render: function() {
     return (
       <div className="threads">
+        <p className="showing">showing {this.state.threads.length} threads out of {this.state.threads.length} </p>
           {
             this.state.threads.map(function(item){
               return (

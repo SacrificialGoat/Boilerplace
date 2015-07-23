@@ -4,6 +4,7 @@ var ProfileStore = require('../../stores/ProfileStore');
 var ProfileActions = require('../../actions/ProfileActions');
 var Bio = require('./user-bio');
 var BioThreads = require('./user-threads');
+var Chatbox = require('./user-chatbox');
 
 var User = React.createClass({
   // TODO: Incorporate Later when Auth is in.
@@ -16,7 +17,8 @@ var User = React.createClass({
       last_name: "",
       user_name: "",
       user_id: this.props.params.id,
-      rep: 0
+      rep: 0,
+      chatbox: false
     };
   },
 
@@ -43,11 +45,23 @@ var User = React.createClass({
       });
   },
 
+  chat: function(){
+    // Set open state
+    this.setState({
+      chatbox: !this.state.chatbox
+    });
+  },
+
   render: function() {
     return (
       <div className="profile">
-        <Bio item={this.state} />
+        <Bio onChat={this.chat} item={this.state} />
         <BioThreads id={this.props.params.id}/>
+        {this.state.chatbox ? (
+          <Chatbox />
+        ) : (
+          null
+        )}
       </div>
     );
   }

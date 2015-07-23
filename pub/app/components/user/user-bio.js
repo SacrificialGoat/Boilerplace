@@ -1,7 +1,18 @@
 var React = require('react');
 
 var Bio = React.createClass({
-  // TODO: Incorporate Later when Auth is in.
+
+  chat: function(e){
+    e.preventDefault();
+    //TODO: Open chat box.
+    console.log('chatbox clicked');
+    this.props.onChat();
+  },
+
+  message: function(e){
+    e.preventDefault();
+    console.log('message clicked');
+  },
 
   render: function() {
     return (
@@ -15,6 +26,9 @@ var Bio = React.createClass({
         <p>Rep: {this.props.item.rep}</p>
         <p>Id: {this.props.item.user_id}</p>
         <p>Bio: {this.props.item.bio}</p>
+
+        <i className="glyphicon glyphicon-comment chatIcon" onClick={this.chat}>&nbsp;</i>
+        <i className="glyphicon glyphicon-envelope messageBox" onClick={this.message}></i>
 
       </div>
     );

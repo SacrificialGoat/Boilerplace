@@ -1,7 +1,7 @@
 var authenticateUser = function(username, password, callback) {
   $.ajax({
     type: 'POST',
-    url: '/authenticate',
+    url: '/authenticate/',
     data: JSON.stringify({
       username: username,
       password: password
@@ -35,7 +35,7 @@ var authenticateUser = function(username, password, callback) {
 var createUser = function(username, password, firstname, lastname, callback) {
   return $.ajax({
     type: 'POST',
-    url: '/createUser',
+    url: '/users/',
     data: JSON.stringify({
       "username": username,
       "password": password,
