@@ -58,7 +58,7 @@ var ThreadItem = React.createClass({
         </div>
 
         <div className="info">
-          <p>created <FormattedRelative value={created} /> by <a href={"#/user/"+this.props.item.user_id}> {this.props.item.user_name} </a> <span className="updateInfo"> <FormattedRelative value= {updated} /> updated_ </span></p>
+          <p>created <FormattedRelative value={created} /> by <a href={"#/user/"+this.props.item.user_id}> {this.props.item.user_name} </a> <span className="updateInfo"> <FormattedRelative value= {updated} /> updated&nbsp;</span></p>
         </div>
         
         <div className="votes">
