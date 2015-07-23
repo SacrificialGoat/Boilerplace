@@ -11,6 +11,7 @@ h1,h2,h3,p,a,td{
   font-family:'century gothic';
 }
 
+/* Profile Page */
 .profile img{
   width:200px;
   height:200px;
@@ -24,6 +25,7 @@ h1,h2,h3,p,a,td{
   margin-right:5px;
 }
 
+/* Navigation Bar */
 .navbar input{
   width:150px;
   display:inline-block;
@@ -46,6 +48,7 @@ h1,h2,h3,p,a,td{
   color:red;
 }
 
+/* Login/Signup Page */
 .Auth{
   background-color:rgb(22, 35, 39);
   text-align:center;
@@ -86,6 +89,7 @@ h1,h2,h3,p,a,td{
   width:48%;
 }
 
+/* New Thread Page */
 .newThread form{
   width:40%;
 }
@@ -112,6 +116,8 @@ h1,h2,h3,p,a,td{
   color:green;
 }
 
+/* Front Page */
+
 .card {
   display:inline-block;
   background: white;
@@ -127,7 +133,6 @@ h1,h2,h3,p,a,td{
           box-sizing: border-box;
 }
 
-/* Front Page */
 .frontPage h2{
   display:inline-block;
   font-style:none;
@@ -166,4 +171,14 @@ h1,h2,h3,p,a,td{
 .btn{
   margin-right:5px;
   border-radius:0px;
+}
+
+.search-submit{
+  background:white;
+  padding:6px;
+  border-radius:10px;
+}
+
+.navbar-inverse{
+  background-color:#1A3F42;
 }

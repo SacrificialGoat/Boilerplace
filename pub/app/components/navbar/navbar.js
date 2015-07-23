@@ -72,6 +72,11 @@ var Navbar = React.createClass({
         <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
           <ul className="nav navbar-nav navbar-right">
 
+          <form className="navbar-form navbar-left">
+            <input type="text" className="form-control" placeholder="Search"/>
+            <i className="glyphicon glyphicon-search search-submit" required=""></i>
+          </form>
+
           {this.state.loggedIn ? (
             <form className="navbar-form navbar-right" role="login">
               <div className="form-group">
