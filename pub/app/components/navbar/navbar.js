@@ -75,6 +75,7 @@ var Navbar = React.createClass({
           {this.state.loggedIn ? (
             <form className="navbar-form navbar-right" role="login">
               <div className="form-group">
+                <Link className="btn btn-info" to="/new">New</Link>
                 <Link className="btn btn-warning" to="/logout" onClick={this.navlogout}>Log out</Link>
               </div>
             </form>
@@ -100,6 +101,7 @@ var Navbar = React.createClass({
                 <li><a href="#">One more separated link</a></li>
               </ul>
             </li>
+
             {this.state.loggedIn ? (
               null
             ) : (

@@ -28,9 +28,6 @@ var Front = React.createClass({
   render: function() {
     return (
       <div className="col-md-12"> 
-        {this.state.loggedIn ? (
-        <Link className="btn btn-info" to="/new">New</Link>
-        ): null }
         <Threads />
       </div>
     );

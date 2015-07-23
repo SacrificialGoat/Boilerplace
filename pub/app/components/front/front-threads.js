@@ -47,38 +47,19 @@ var Threads = React.createClass({
   render: function() {
     return (
       <div className="threads">
-        
-          <h3>Front Page</h3>
-          <table className="table table-hover">
-            <thead>
-              <tr>
-                <th>Rating</th>
-                <th>Title</th>
-                <th>Body</th>
-                <th>Submitted</th>
-                <th>Created</th>
-                <th>Updated</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {
-                this.state.threads.map(function(item){
-                  return (
-                    <ThreadItem 
-                      ref = "thread" 
-                      onGoThread = {this.goThread} 
-                      onUpVote = {this.upVote} 
-                      onDownVote = {this.downVote} 
-                      key = {item.thread_id} 
-                      item = {item} />
-                  );
-                },this)
-              }
-            </tbody>
-
-          </table>
-          
+          {
+            this.state.threads.map(function(item){
+              return (
+                <ThreadItem 
+                  ref = "thread" 
+                  onGoThread = {this.goThread} 
+                  onUpVote = {this.upVote} 
+                  onDownVote = {this.downVote} 
+                  key = {item.thread_id} 
+                  item = {item} />
+              );
+            },this)
+          }
       </div>
     );
   }
