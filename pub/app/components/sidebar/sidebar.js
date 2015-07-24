@@ -1,4 +1,8 @@
 var React = require('react');
+var Chat = require('./sidebar-chat');
+var ChatActions = require('../../actions/ChatActions');
+var AuthStore = require('../../stores/AuthStore');
+var Map = require('./map');
 
 // TODO - factor out navbar login form
 
@@ -6,50 +10,59 @@ var Sidebar = React.createClass({
 
     getInitialState: function(){
       return {
-
+        from: ""
       };
     },
 
-    componentWillMount: function(){
-        setTimeout(function(){
-            var map = new GMaps({
-                  el: '#map',
-                  lat: -12.043333,
-                  lng: -77.028333
-            });
-
-            GMaps.geolocate({
-              success: function(position) {
-                map.setCenter(position.coords.latitude, position.coords.longitude);
-              },
-              error: function(error) {
-                alert('Geolocation failed: '+error.message);
-              },
-              not_supported: function() {
-                alert("Your browser does not support geolocation");
-              },
-              always: function() {
-                console.log('now at current location');
-              }
-            });
-
-        },1000);
+    componentDidMount: function(){
+      AuthStore.addChangeListener(this._onChange);
     },
 
-  render: function(){
+    componentWillUnmount: function(){
+      AuthStore.removeChangeListener(this._onChange);
+    },
+
+    _onChange: function(){
+        this.setState({
+          from: AuthStore.getUser().username
+        });
+    },
+
+    joinChat: function(){
+      ChatActions.connect();
+    },
+
+    sendMessage: function(msg){
+      ChatActions.send({message:msg});
+    },
+
+    render: function(){
 
     return (
     <div id="sidebar-wrapper">
         <ul className="sidebar-nav">
+            <a href="#"><img src="/assets/logo.png"></img></a>
+
             <li className="sidebar-brand">
                 <a href="#">
-                    Current Location
+                    Welcome
                 </a>
             </li>
-            <li id="map">Map goes here.</li>
+
             <li>
                 <a href="#">Trending</a>
             </li>
+
+            <li>
+                <a href="#">Friends</a>
+            </li>
+
+            <li>
+                <a href="#">Chat (global)</a>
+            </li>
+
+            <Chat user={this.state.from} onSend={this.sendMessage} onChat={this.joinChat} />
+
         </ul>
     </div>
     );

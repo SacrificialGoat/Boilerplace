@@ -1,4 +1,5 @@
 var React = require('react');
+var AuthStore = require('../../stores/AuthStore');
 var CommentStore = require('../../stores/CommentStore');
 var CommentActions = require('../../actions/CommentActions');
 var CommentItem = require('./comment-item');
@@ -18,7 +19,8 @@ var CommentList = React.createClass({
         last_update_time: "2015-07-20T12:31:00Z",
         comment_id: 4,
         user_id: 1,
-        user_name: ''
+        user_name: '',
+        loggedIn: AuthStore.loggedIn()
       }]
     };
   },
@@ -26,15 +28,18 @@ var CommentList = React.createClass({
   componentDidMount: function(){
     CommentActions.fetchPage({threadId: this.props.threadId, page:this.state.page});
     CommentStore.addChangeListener(this._onChange);
+    AuthStore.addChangeListener(this._onChange);
   },
 
   componentWillUnmount: function(){
     CommentStore.removeChangeListener(this._onChange);
+    AuthStore.removeChangeListener(this._onChange);
   },
 
   _onChange: function(){
     this.setState({
-      comments: CommentStore.getComments().threadPosts
+      comments: CommentStore.getComments().threadPosts,
+      loggedIn: AuthStore.loggedIn()
     });
   },
 
@@ -58,7 +63,10 @@ var CommentList = React.createClass({
     return (
       <div className="Comments">
         
+        {this.state.loggedIn ? (
           <NewComment onAddComment={this.addComment}/>
+          ) : <p> Please log in to comment. </p> }
+
           <h3>Comments</h3>
           <table className="table table-hover">
           
