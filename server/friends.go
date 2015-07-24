@@ -8,10 +8,10 @@ import (
   "database/sql"
   _ "github.com/go-sql-driver/mysql"
   "log"
-  // "strconv"
+  "strconv"
 )
 
-func getFriendData(w http.ResponseWriter, r *http.Request, db *sql.DB) (string, map[string]interface{}) {
+func getFriendData(w http.ResponseWriter, r *http.Request, db *sql.DB) (int, map[string]interface{}) {
 
   w.Header()["access-control-allow-origin"] = []string{"http://localhost:8080"} //TODO: fix this?                                                           
   w.Header()["access-control-allow-methods"] = []string{"GET, POST, OPTIONS"}
@@ -38,7 +38,7 @@ func getFriendData(w http.ResponseWriter, r *http.Request, db *sql.DB) (string, 
   }
 
   //get the user id and username from the cookie
-  userId := session.Values["userid"].(string) 
+  userId := session.Values["userid"].(int) 
 
   //parse the body of the request into a []byte
   body, err := ioutil.ReadAll(r.Body)

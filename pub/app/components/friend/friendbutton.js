@@ -4,11 +4,11 @@ var FriendStore = require("../../stores/FriendStore");
 var FriendAction = require("../../actions/FriendActions");
 var ProfileStore = require('../../stores/ProfileStore');
 
-
-var _userBio = 2;
-var userId = function(){
-	_userBio = user_id;  // dont know where to get user ID.  Temp set to window.user_id
-}
+		// TESTING
+			var _userBio = 2;
+			var userId = function(){
+				_userBio = user_id;  // dont know where to get user ID.  Temp set to window.user_id
+			}
 
 var FriendButton = React.createClass({
 	getInitialState: function(){
@@ -50,12 +50,12 @@ var FriendButton = React.createClass({
 	},
 
 	handleRemoveFriend: function(){
-		FriendAction.removeFriend(_userBio, this.props.targetuser.user_id)
+		// FriendAction.removeFriend(_userBio, this.props.targetuser.user_id)
 	},	
 
 	_onChange: function(){ // When target friend list state change, reset state here.
 	  this.setState({
-	    friendList: FriendStore.fetchFriendList(_userBio),   // Pass in target_user and current_user?
+	    // friendList: FriendStore.fetchFriendList(_userBio),   // Pass in target_user and current_user?
 	    showFriendStatus: FriendStore.getFriendStatus()
 	  })
 
@@ -65,7 +65,9 @@ var FriendButton = React.createClass({
 	render: function() {
 	  return (
 	  	<div>
-		  	<div>Friend Status:{this.state.showFriendStatus ? <Button onClick={this.handleRemoveFriend}>Unfriend</Button>:<Button onClick={this.handleAddFriend}>Friend</Button> }</div>
+		  	<div>Friend Status:{this.state.showFriendStatus}</div>
+	  		<Button onClick={this.handleAddFriend}>Friend</Button>
+	  		<Button onClick={this.handleRemoveFriend}>Unfriend</Button>
 	  	</div>
 	  );
 	}
@@ -78,6 +80,8 @@ module.exports = FriendButton;
 
 
 /*  Notes:
+<Button onClick={this.handleRemoveFriend}>Unfriend</Button>:<Button onClick={this.handleAddFriend}>Friend</Button>
+
 input:   <FriendButton targetuser={this.props.item}/>
 
 
