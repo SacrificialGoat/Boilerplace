@@ -11,18 +11,8 @@ import (
   "strconv"
 )
 
-func getFriendData(w http.ResponseWriter, r *http.Request, db *sql.DB) (string, map[string]interface{}) {
 
-  w.Header()["access-control-allow-origin"] = []string{"http://localhost:8080"} //TODO: fix this?                                                           
-  w.Header()["access-control-allow-methods"] = []string{"GET, POST, OPTIONS"}
-  w.Header()["Content-Type"] = []string{"application/json"}
-
-  //ignore options requests
-  if r.Method == "OPTIONS" {
-    fmt.Println("options request received")
-    w.WriteHeader(http.StatusTemporaryRedirect)
-    // return "", nil
-  }
+func checkSession(w http.ResponseWriter, r *http.Request) (string) {
 
   //check for session to see if client is authenticated
   session, err := store.Get(r, "flash-session")
@@ -33,12 +23,17 @@ func getFriendData(w http.ResponseWriter, r *http.Request, db *sql.DB) (string, 
   if fm == nil {
     fmt.Println("Trying to vote on forum thread as an invalid user")
     fmt.Fprint(w, "No flash messages")
-    // w.WriteHeader(http.StatusUnauthorized)
-    return "", nil
+    w.WriteHeader(http.StatusUnauthorized)
+    return ""
   }
 
   //get the user id and username from the cookie
-  userId := session.Values["userid"].(int) 
+  userId := session.Values["userid"].(int)
+
+  return strconv.Itoa(userId)
+}
+
+func parseRequest(r *http.Request) (map[string]interface{}) {
 
   //parse the body of the request into a []byte
   body, err := ioutil.ReadAll(r.Body)
@@ -52,31 +47,13 @@ func getFriendData(w http.ResponseWriter, r *http.Request, db *sql.DB) (string, 
   if err := json.Unmarshal(byt, &dat); err != nil {
     panic(err)
   }
-
-  return strconv.Itoa(userId), dat
+  return dat
 }
-
 
 func addFriend(w http.ResponseWriter, r *http.Request, db *sql.DB) {
   
-  userId, dat := getFriendData(w, r, db)
-  if dat == nil {
-    log.Fatal("addFriend not authorized")
-  }
-  
-  // for testing:
-  // body, err := ioutil.ReadAll(r.Body)
-  // if err != nil {
-  //   panic(err)
-  // }
-  // byt := body
-  // var dat map[string]interface{}
-  // if err := json.Unmarshal(byt, &dat); err != nil {
-  //   panic(err)
-  // }
-  // userId := 1
-  // end testing
-
+  userId := checkSession(w, r)
+  dat := parseRequest(r)
 
   friend_id := int(dat["friend_id"].(float64))
 
@@ -98,23 +75,8 @@ func addFriend(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 func removeFriend(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
-  userId, dat := getFriendData(w, r, db)
-  if dat == nil {
-    log.Fatal("removeFriend not authorized")
-  }
-
-  // for testing:
-  // body, err := ioutil.ReadAll(r.Body)
-  // if err != nil {
-  //   panic(err)
-  // }
-  // byt := body
-  // var dat map[string]interface{}
-  // if err := json.Unmarshal(byt, &dat); err != nil {
-  //   panic(err)
-  // }
-  // userId := 1
-  // end testing
+  userId := checkSession(w, r)
+  dat := parseRequest(r)
 
   
   friend_id := int(dat["friend_id"].(float64))
@@ -138,7 +100,7 @@ func removeFriend(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 func getFriendsList(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
-  userId, _ := getFriendData(w, r, db)
+  userId := checkSession(w, r)
 
   rows, err := db.Query("select users.user_id, users.user_name, users.first_name, users.last_name from friends right join users on friends.friend_id = users.user_id where friends.user_id = " + userId + ")")
   if err != nil {
