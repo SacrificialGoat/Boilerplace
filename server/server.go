@@ -45,8 +45,9 @@ func main() {
   defer db.Close() //defer closing the connection
 
   //create the game room
-  var room = createGameRoom(1)
-  go room.run()
+  //var room = createGameRoom(1)
+  //go room.run()
+
 
   //serve static assets
   http.Handle("/", http.FileServer(http.Dir("../pub/build")))
@@ -109,7 +110,7 @@ func main() {
       case "GET":
         break 
       case "POST":
-fmt.Println("here")
+
         loginHandler(w, r, db, store)
 
         break  
@@ -627,21 +628,24 @@ fmt.Println("here")
 */
 
   //routes for sockets
-
+/*
   //listen for player connection
   http.HandleFunc("/connect", func(w http.ResponseWriter, r *http.Request) {
     fmt.Println("trying to connect websocket")
     connect(w, r, room, store)
   })
+*/
 
-  // http.HandleFunc("/addFriend", func(w http.ResponseWriter, r *http.Request) {
-  //   addFriend(w, r, db)
-  // })
 
-  // http.HandleFunc("/removeFriend", func(w http.ResponseWriter, r *http.Request) {
-  //   removeFriend(w, r, db)
-  // })
+  var room = createChatRoom(1)
+  go room.run()
 
+
+  //listen for user chat
+  http.HandleFunc("/chat/", func(w http.ResponseWriter, r *http.Request) {
+    fmt.Println("trying to initiate chat")
+    chat(w, r, store, room)
+  })
 
 
   //listen on specified port
@@ -661,6 +665,35 @@ func initializeDB() *sql.DB {
 
   return db
 }
+
+//handle the chat event which checks if the cookie corresponds to a logged in user and adds the user to the chat room
+//TODO: Return correct status and message if session is invalid
+func chat(w http.ResponseWriter, r *http.Request, store *sessions.CookieStore, room *ChatRoom) {
+
+  //check for session to see if client is authenticated
+  session, err := store.Get(r, "flash-session")
+  if err != nil {
+    http.Error(w, err.Error(), http.StatusInternalServerError)
+  }
+  fm := session.Flashes("message")
+  if fm == nil {
+    fmt.Println("Trying to log in as invalid user")
+    fmt.Fprint(w, "No flash messages")
+    return
+  }
+  //session.Save(r, w)
+
+  fmt.Println("New user connected to chat")
+
+  //use the id and username attached to the session to create the player
+  chatterHandler := ChatterHandler{Id: session.Values["userid"].(int), Username: session.Values["username"].(string), Room: room}
+
+  chatterHandler.createChatter(w, r)
+}
+
+
+
+/*
 
 //handle the connect event which checks if the cookie corresponds to a logged in user
 //and creates the player in the game
@@ -687,3 +720,6 @@ func connect(w http.ResponseWriter, r *http.Request, room *GameRoom, store *sess
 
   playerHandler.createPlayer(w, r)
 }
+*/
+
+

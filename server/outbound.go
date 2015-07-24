@@ -8,6 +8,7 @@ import (
 //structs to be json stringified and sent as outbound messages to the client(s)
 
 
+/*
 //struct containing an array of player positions
 type PlayerPositionListOutbound struct {
   Players []*PlayerPositionOutbound `json:"players"`
@@ -40,6 +41,26 @@ type PlayerHeadPositionOutbound struct {
 
 //struct containing a player's message and identifiers
 type PlayerMessageOutbound struct {
+  Id int `json:"id"`
+  Username string `json:"username"`
+
+  Message string `json:"message"`
+}
+*/
+
+//struct containing an array of chatters
+type ChatterIdentifierListOutbound struct {
+  Chatters []*ChatterIdentifierOutbound `json:"chatters"`
+}
+
+//struct containing a chatter's identifiers
+type ChatterIdentifierOutbound struct {
+  Id int `json:"id"`
+  Username string `json:"username"`
+}
+
+//struct containing a chatter's message and identifiers
+type ChatterMessageOutbound struct {
   Id int `json:"id"`
   Username string `json:"username"`
 
