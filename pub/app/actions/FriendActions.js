@@ -2,41 +2,37 @@ var AppDispatcher = require('../dispatchers/AppDispatcher');
 var FriendConstants = require('../constants/FriendConstants');
 
 var FriendActions = {
-	addFriend: function(currUser, targetUser){
+	addFriend: function(targetUser){
 		AppDispatcher.handleAction({
 			actionType: FriendConstants.ADD_FRIEND,
 			data: {
-				currUser: currUser,
 				targetUser: targetUser
 			}
 		})	
 	},
 
-	removeFriend: function(){
+	removeFriend: function(targetUser){
 		AppDispatcher.handleAction({
 			actionType: FriendConstants.REMOVE_FRIEND,
 			data: {
-				currUser: currUser,
 				targetUser: targetUser
 			}
 		})	
 	},
 
-	fetchFriendList: function(currUser, targetUser){
+	fetchFriendList: function(targetUser){
 		AppDispatcher.handleAction({
 			actionType: FriendConstants.FETCH_FRIENDLIST,
 			data: {
-				currUser: currUser,
 				targetUser: targetUser
 			}
 		})
 	},
 
-	setFriendStatus: function(currUser, targetUser){
+	setFriendStatus: function(targetUser){
 		AppDispatcher.handleAction({
 			actionType: FriendConstants.SET_FRIENDSTATUS,
 			data: {
-				currUser: currUser,
 				targetUser: targetUser
 			}
 		})

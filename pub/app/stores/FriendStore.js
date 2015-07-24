@@ -14,13 +14,8 @@ var _friendData = {
 	isTargetFriend: "false",
 }
 
-var _fetchFriendList = function(currUser, targetUser){
-	  _friendData.friendList = _serverOutput;  // on change should happen at this point
-}
-
 var FriendStore = assign({}, EventEmitter.prototype, {
 	setFriendStatus: function(data){
-		var currUser = data.targetUser;   // data.currUser, data.targetUser
 		var targetUser = data.targetUser;
 		var _userFriendList = _friendData.friendList;
 		var foundFriend = false;
@@ -40,7 +35,6 @@ var FriendStore = assign({}, EventEmitter.prototype, {
 	},
 
 	addFriend: function(data){
-		var currUser = data.targetUser;   // data.currUser, data.targetUser
 		var targetUser = data.targetUser;
 		var context = this;
 		console.log("add friend tirggered")
@@ -59,30 +53,38 @@ var FriendStore = assign({}, EventEmitter.prototype, {
 			},
 			error: function(err){
 				console.log("error, ", err)
+				if (err.status === 200){
+					context.fetchFriendList()
+				}
 			}
 		});
 	},
 
 	removeFriend: function(data){
-		var currUser = data.targetUser;   // data.currUser, data.targetUser
 		var targetUser = data.targetUser;
 		var context = this;
 
 		console.log("Remove Friend triggered")
 		// send Ajax
-		// $.ajax({
-		// 	type: 'POST',
-		// 	url: '/api/removefriend',
-		// 	data: JSON.stringify({
-		// 	  user_id: currUser,
-		// 	  friend_id: targetUser
-		// 	}),
-		// 	crossDomain: true,
-		// 	success: function(resp) { // receive Friend List from Server. Set variable friendlist to resp data
-		// 	  console.log('success',resp);
-		// 	  context.fetchFriendList(data)  // not sure if i should call this here.
-		// 	}
-		// })
+		$.ajax({
+			type: 'POST',
+			url: '/friend/?action=remove',
+			data: JSON.stringify({
+			  // user_id: currUser,
+			  "friend_id": parseInt(targetUser)
+			}),
+			crossDomain: true,
+			success: function(resp) { // receive Friend List from Server. Set variable friendlist to resp data
+			  console.log('success',resp);
+			  // context.fetchFriendList(data)  // not sure if i should call this here.
+			},
+			error: function(err){
+				console.log("error, ", err)
+				if (err.status === 200){
+					context.fetchFriendList()
+				}
+			}
+		});
 	},
 
 	getFriendStatus: function(){
@@ -93,28 +95,28 @@ var FriendStore = assign({}, EventEmitter.prototype, {
 		return _friendData.friendList;
 	},
 
-	fetchFriendList: function(data){
-		var currUser = data.currUser;   // data.currUser, data.targetUser
-		var targetUser = data.targetUser;
+	fetchFriendList: function(){
+		// var currUser = data.currUser;   // data.currUser, data.targetUser
+		// var targetUser = data.targetUser;
 
 		// send Ajax
 		$.ajax({
 			type: 'GET',
-			url: '/get/friendlist',
+			url: '/friend/',
 			data: JSON.stringify({
-			  user_id: currUser,
+			  // user_id: currUser,
 			}),
 			crossDomain: true,
 			success: function(resp) { // receive Friend List from Server. Set variable friendlist to resp data
 			  console.log('success',resp);
-			  // _friendData.friendList = _fakeData;
+			  // update friendList with server resp
 			  _friendData.friendList = resp;
 	  		FriendStore.emitChange();
 			},
+			error: function(err){
+				console.log("err, ", err)
+			}
 		})
-
-		// _fetchFriendList(currUser, targetUser)  // this is for testing
-
 
 	  return _friendData.friendList;
 	},
