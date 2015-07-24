@@ -634,10 +634,10 @@ fmt.Println("here")
   //routes for sockets
 
   //listen for player connection
-  // http.HandleFunc("/connect", func(w http.ResponseWriter, r *http.Request) {
-  //   fmt.Println("trying to connect websocket")
-  //   connect(w, r, room, store)
-  // })
+  http.HandleFunc("/connect", func(w http.ResponseWriter, r *http.Request) {
+    fmt.Println("trying to connect websocket")
+    connect(w, r, room, store)
+  })
 
   // http.HandleFunc("/addFriend", func(w http.ResponseWriter, r *http.Request) {
   //   addFriend(w, r, db)

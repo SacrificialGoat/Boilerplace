@@ -8,7 +8,7 @@ import (
   "database/sql"
   _ "github.com/go-sql-driver/mysql"
   "log"
-  // "strconv"
+  "strconv"
 )
 
 func getFriendData(w http.ResponseWriter, r *http.Request, db *sql.DB) (string, map[string]interface{}) {
@@ -38,7 +38,7 @@ func getFriendData(w http.ResponseWriter, r *http.Request, db *sql.DB) (string, 
   }
 
   //get the user id and username from the cookie
-  userId := session.Values["userid"].(string) 
+  userId := session.Values["userid"].(int) 
 
   //parse the body of the request into a []byte
   body, err := ioutil.ReadAll(r.Body)
@@ -53,7 +53,7 @@ func getFriendData(w http.ResponseWriter, r *http.Request, db *sql.DB) (string, 
     panic(err)
   }
 
-  return userId, dat
+  return strconv.Itoa(userId), dat
 }
 
 
@@ -93,6 +93,7 @@ func addFriend(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
   fmt.Println("about to write 200 header")
   w.WriteHeader(http.StatusOK)
+  return
 }
 
 func removeFriend(w http.ResponseWriter, r *http.Request, db *sql.DB) {

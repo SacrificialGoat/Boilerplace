@@ -5,6 +5,7 @@ var ProfileActions = require('../../actions/ProfileActions');
 var Bio = require('./profile-bio');
 var BioThreads = require('./profile-threads');
 
+
 var Profile = React.createClass({
   // TODO: Incorporate Later when Auth is in.
 
@@ -50,6 +51,8 @@ var Profile = React.createClass({
         avatar_link: ProfileStore.getBio().avatar_link,
         rep: ProfileStore.getBio().rep
       });
+      user_id = this.state.user_id;
+
   },
 
   render: function() {
