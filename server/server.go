@@ -610,6 +610,18 @@ fmt.Println("here")
     connect(w, r, room, store)
   })
 
+  http.HandleFunc("/addFriend", func(w http.ResponseWriter, r *http.Request) {
+    addFriend(w, r, db)
+  })
+
+  http.HandleFunc("/removeFriend", func(w http.ResponseWriter, r *http.Request) {
+    removeFriend(w, r, db)
+  })
+
+  http.HandleFunc("/friendsList", func(w http.ResponseWriter, r *http.Request) {
+    getFriendsList(w, r, db)
+  })
+
 
 
   //listen on specified port

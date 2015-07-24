@@ -92,3 +92,14 @@ type ThreadPostCollectionOutbound struct {
   ThreadPosts []*ThreadPostInfoOutbound `json:"threadPosts"`
 }
 
+type FriendInfoOutbound struct {
+  User_id int `json:"id"`
+  User_name string `json:"username"`
+  First_name string `json:"first"`
+  Last_name string `json:"last"`
+}
+
+type FriendsListOutbound struct {
+  Friends []*FriendInfoOutbound `json:"friends"`
+}
+
