@@ -1,0 +1,195 @@
+<html>
+<head>
+<title>Chat Example</title>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script type="text/javascript">
+    $(function() {
+
+    var conn;
+    var msg = $("#msg");
+    var log = $("#log");
+
+    function appendLog(msg) {
+        var d = log[0]
+        var doScroll = d.scrollTop == d.scrollHeight - d.clientHeight;
+        msg.appendTo(log)
+        if (doScroll) {
+            d.scrollTop = d.scrollHeight - d.clientHeight;
+        }
+    }
+
+    $("#form").submit(function() {
+        if (!conn) {
+            return false;
+        }
+        if (!msg.val()) {
+            return false;
+        }
+        conn.send(msg.val());
+        msg.val("");
+        return false
+    });
+
+    if (window["WebSocket"]) {
+
+        $('#login').click(function() {
+          var username = $('#username').val();
+          var password = $('#password').val();
+
+          $('#username').val(''); 
+          $('#password').val(''); 
+
+          $.ajax({
+          type: 'POST',
+          url: 'http://127.0.0.1:8080/authenticate/',
+          data: JSON.stringify({"username" : username, "password" : password}),
+          // contentType: "application/json",
+          crossDomain: true,
+            success: function(data, textStatus, jqXHR)
+            {
+                console.log(data);
+                //data - response from server
+                conn = new WebSocket("ws://127.0.0.1:8080/chat/");
+                conn.onclose = function(evt) {
+                    appendLog($("<div><b>Connection closed.</b></div>"))
+                }
+                conn.onmessage = function(evt) {
+                    appendLog($("<div/>").text(evt.data))
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown)
+            {
+              
+            }
+          });      
+
+        });
+
+
+        $('#updateProfile').click(function() {
+          var bio = $('#bio').val();
+          var avatar_link = $('#avatar_link').val();
+
+          $('#bio').val(''); 
+          $('#avatar_link').val(''); 
+
+          $.ajax({
+          type: 'POST',
+          url: 'http://127.0.0.1:8080/profile/',
+          data: JSON.stringify({"bio" : bio, "avatar_link" : avatar_link}),
+          // contentType: "application/json",
+          crossDomain: true,
+            success: function(data, textStatus, jqXHR)
+            {
+                console.log(data);
+                //data - response from server
+     
+
+            },
+            error: function (jqXHR, textStatus, errorThrown)
+            {
+              
+            }
+          });      
+
+        });
+
+
+        $('#getProfile').click(function() {
+
+          $.ajax({
+          type: 'GET',
+          url: 'http://127.0.0.1:8080/profile/',
+          // contentType: "application/json",
+          crossDomain: true,
+            success: function(data, textStatus, jqXHR)
+            {
+                console.log(data);
+                //data - response from server
+     
+
+            },
+            error: function (jqXHR, textStatus, errorThrown)
+            {
+              
+            }
+          });      
+
+        });        
+
+
+    } else {
+        appendLog($("<div><b>Your browser does not support WebSockets.</b></div>"))
+    }
+
+    });
+</script>
+<style type="text/css">
+html {
+    overflow: hidden;
+}
+
+body {
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    background: gray;
+}
+
+#log {
+    background: white;
+    margin: 0;
+    padding: 0.5em 0.5em 0.5em 0.5em;
+    position: absolute;
+    top: 15.0em;
+    left: 0.5em;
+    right: 0.5em;
+    bottom: 3em;
+    overflow: auto;
+}
+
+#form {
+    padding: 0 0.5em 0 0.5em;
+    margin: 0;
+    position: absolute;
+    bottom: 1em;
+    left: 0px;
+    width: 100%;
+    overflow: hidden;
+}
+
+</style>
+</head>
+<body>
+
+<a href="newsignup.html">Signup</a><br>
+
+<br>
+
+Username: <input type="text" id="username" name="Username" value="Username"><br>
+Password: <input type="text" id="password" name="Password" value="Password"><br>
+<input id="login" type="submit" value="Submit"><br>
+
+<br>
+
+Bio: <input type="text" id="bio" name="bio" value="Bio"><br>
+Avatar Link: <input type="text" id="avatar_link" name="avatar_link" value="Avatar Link"><br>
+<input id="updateProfile" type="submit" value="Submit"><br>
+
+<br>
+
+<input id="getProfile" type="submit" value="Get Profile Info"><br>
+
+<br>
+
+<div id="log"></div>
+
+<form id="form">
+    <input type="submit" value="Send" />
+    <input type="text" id="msg" size="64"/>
+</form>
+
+</body>
+</html>
