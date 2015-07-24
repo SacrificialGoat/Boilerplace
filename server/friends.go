@@ -11,20 +11,6 @@ import (
   // "strconv"
 )
 
-
-  // http.HandleFunc("/addFriend", func(w http.ResponseWriter, r *http.Request) {
-  //   addFriend(w, r, db)
-  // })
-
-  // http.HandleFunc("/removeFriend", func(w http.ResponseWriter, r *http.Request) {
-  //   removeFriend(w, r, db)
-  // })
-
-  // http.HandleFunc("/friendsList", func(w http.ResponseWriter, r *http.Request) {
-  //   getFriendsList(w, r, db)
-  // })
-
-
 func getFriendData(w http.ResponseWriter, r *http.Request, db *sql.DB) (string, map[string]interface{}) {
 
   w.Header()["access-control-allow-origin"] = []string{"http://localhost:8080"} //TODO: fix this?                                                           
@@ -35,7 +21,7 @@ func getFriendData(w http.ResponseWriter, r *http.Request, db *sql.DB) (string, 
   if r.Method == "OPTIONS" {
     fmt.Println("options request received")
     w.WriteHeader(http.StatusTemporaryRedirect)
-    return "", nil
+    // return "", nil
   }
 
   //check for session to see if client is authenticated
@@ -179,8 +165,7 @@ func getFriendsList(w http.ResponseWriter, r *http.Request, db *sql.DB) {
   jsonString, err := json.Marshal(friendsList)
   if err != nil {
     panic(err)
-  }
-  // fmt.Println(string(jsonString))      
+  }    
 
   //return 200 status to indicate success
   fmt.Println("about to write 200 header")
