@@ -461,9 +461,7 @@ fmt.Println("here")
             if err != nil { //if parsed user id could not be converted into an int
               //error
             }
-
             getUserInfo(w, r, db, 0, userId, "")
-
           } else {
             //error
           }
@@ -487,9 +485,7 @@ fmt.Println("here")
       getFriendsList(w, r, db)
       break 
     case "POST":
-
       m, _ := url.ParseQuery(r.URL.RawQuery)
-
       if val, ok := m["action"]; ok {
         if val[0] == "add" {
           addFriend(w, r, db)
@@ -499,7 +495,6 @@ fmt.Println("here")
           //error
         }
       }
-
       break  
     case "PUT":
       break  
