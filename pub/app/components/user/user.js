@@ -5,6 +5,8 @@ var ProfileActions = require('../../actions/ProfileActions');
 var Bio = require('./user-bio');
 var BioThreads = require('./user-threads');
 var Chatbox = require('./user-chatbox');
+var ChatActions = require('../../actions/ChatActions');
+var ChatStore = require('../../stores/ChatStore');
 
 var User = React.createClass({
   // TODO: Incorporate Later when Auth is in.
@@ -18,7 +20,8 @@ var User = React.createClass({
       user_name: "",
       user_id: this.props.params.id,
       rep: 0,
-      chatbox: false
+      chatbox: false,
+      from: ""
     };
   },
 
@@ -41,15 +44,23 @@ var User = React.createClass({
         user_id: ProfileStore.getOtherBio().user_id,
         bio: ProfileStore.getOtherBio().bio,
         avatar_link: ProfileStore.getOtherBio().avatar_link,
-        rep: ProfileStore.getOtherBio().rep
+        rep: ProfileStore.getOtherBio().rep,
+        from: AuthStore.getUser().username
       });
   },
 
   chat: function(){
-    // Set open state
     this.setState({
       chatbox: !this.state.chatbox
     });
+  },
+
+  joinChat: function(){
+    ChatActions.connect();
+  },
+
+  sendMessage: function(msg){
+    ChatActions.send({message:msg});
   },
 
   render: function() {
@@ -58,7 +69,7 @@ var User = React.createClass({
         <Bio onChat={this.chat} item={this.state} />
         <BioThreads id={this.props.params.id}/>
         {this.state.chatbox ? (
-          <Chatbox />
+          <Chatbox user={this.state.from} onSend={this.sendMessage} onChat={this.joinChat}/>
         ) : (
           null
         )}

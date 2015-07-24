@@ -1,7 +1,8 @@
 var clientSocket = {
-  connect: function(){
+  connect: function(targetId){
+    console.log('connecting to chat server...');
     conn = new WebSocket("ws://127.0.0.1:8080/connect");
-    setTimeout(function(){conn.send('cp:'); conn.send('np:');},2000);
+    setTimeout(function(){conn.send('cp:'+ targetId); conn.send('np:');},2000);
     /*----------------
       Event Listening
     -----------------*/
@@ -52,6 +53,7 @@ var clientSocket = {
   },
   sendMessage: function(data){
     conn.send('sm:'+ data);
+
     console.log('sending message...');
   },
   /*-----------------

@@ -1,8 +1,6 @@
 var React = require('react');
-var Chat = require('../../services/ChatService');
 
 var Chatbox = React.createClass({
-
   getInitialState: function(){
     return {
       messages: []
@@ -10,8 +8,7 @@ var Chatbox = React.createClass({
   },
 
   componentDidMount: function(){
-    //TODO: Move to action -> dispatcher -> store
-    Chat.connect();
+    this.props.onChat(); // joins the chat
   },
 
   componentWillUnmount: function(){
@@ -20,16 +17,9 @@ var Chatbox = React.createClass({
 
   handleSubmit: function(e){
     e.preventDefault();
-    //TODO: Move to action -> dispatcher -> store
-
-    Chat.sendMessage(React.findDOMNode(this.refs.message).value);
-    // var msgs = this.state.messages;
-    // msgs.push(React.findDOMNode(this.refs.message).value);
-    // this.setState({
-    //   messages:msgs
-    // });
+    
+    this.props.onSend(React.findDOMNode(this.refs.message).value);
     React.findDOMNode(this.refs.message).value = '';
-
   },
 
   render: function() {
