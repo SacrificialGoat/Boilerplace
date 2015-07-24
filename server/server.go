@@ -481,6 +481,35 @@ fmt.Println("here")
     }
   })
 
+  http.HandleFunc("/friend/", func(w http.ResponseWriter, r *http.Request) {
+  switch r.Method {
+    case "GET":
+      getFriendsList(w, r, db)
+      break 
+    case "POST":
+
+      m, _ := url.ParseQuery(r.URL.RawQuery)
+
+      if val, ok := m["action"]; ok {
+        if val[0] == "add" {
+          addFriend(w, r, db)
+        } else if val[0] == "remove" {
+          removeFriend(w, r, db)
+        } else {
+          //error
+        }
+      }
+
+      break  
+    case "PUT":
+      break  
+    case "DELETE":
+      break  
+    default:
+      break
+  }
+})
+
 
 
 
@@ -605,10 +634,18 @@ fmt.Println("here")
   //routes for sockets
 
   //listen for player connection
-  http.HandleFunc("/connect", func(w http.ResponseWriter, r *http.Request) {
-    fmt.Println("trying to connect websocket")
-    connect(w, r, room, store)
-  })
+  // http.HandleFunc("/connect", func(w http.ResponseWriter, r *http.Request) {
+  //   fmt.Println("trying to connect websocket")
+  //   connect(w, r, room, store)
+  // })
+
+  // http.HandleFunc("/addFriend", func(w http.ResponseWriter, r *http.Request) {
+  //   addFriend(w, r, db)
+  // })
+
+  // http.HandleFunc("/removeFriend", func(w http.ResponseWriter, r *http.Request) {
+  //   removeFriend(w, r, db)
+  // })
 
 
 
