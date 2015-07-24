@@ -56,7 +56,7 @@ var Navbar = React.createClass({
 
   render: function(){
     return (
-    <nav className="navbar navbar-inverse">
+    <nav className="navbar">
       <div className="container-fluid">
 
         <div className="navbar-header">
