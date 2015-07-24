@@ -49,50 +49,12 @@ var FriendStore = assign({}, EventEmitter.prototype, {
 
 	addFriend: function(data){
 		var targetUser = data.targetUser;
-		var context = this;
-		console.log("add friend tirggered")
-		// send Ajax
-		$.ajax({
-			type: 'POST',
-			url: '/friend/?action=add',
-			data: JSON.stringify({
-			  // user_id: currUser,
-			  "friend_id": parseInt(targetUser)
-			}),
-			crossDomain: true,
-			success: function(resp) { // receive Friend List from Server. Set variable friendlist to resp data
-			  console.log('success',resp);
-			  context.fetchFriendList()
-
-			},
-			error: function(err){
-				console.log("error, ", err)
-			}
-		});
+		FriendService.addFriend(targetUser, this);
 	},
 
 	removeFriend: function(data){
 		var targetUser = data.targetUser;
-		var context = this;
-
-		console.log("Remove Friend triggered")
-		// send Ajax
-		$.ajax({
-			type: 'POST',
-			url: '/friend/?action=remove',
-			data: JSON.stringify({
-			  // user_id: currUser,
-			  "friend_id": parseInt(targetUser)
-			}),
-			crossDomain: true,
-			success: function(resp) { // receive Friend List from Server. Set variable friendlist to resp data
-			  console.log('success',resp);
-			  context.fetchFriendList()
-			},
-			error: function(err){
-				console.log("error, ", err)
-			}
-		});
+		FriendService.removeFriend(targetUser, this);
 	},
 
 	getFriendStatus: function(targetUser){
@@ -106,26 +68,7 @@ var FriendStore = assign({}, EventEmitter.prototype, {
 
 	fetchFriendList: function(){
 		console.log("Triggering fetchFriendList")
-
-		// send Ajax
-		$.ajax({
-			type: 'GET',
-			url: '/friend/',
-			// data: JSON.stringify({
-			//   // user_id: currUser,
-			// }),
-			crossDomain: true,
-			success: function(resp) { // receive Friend List from Server. Set variable friendlist to resp data
-			  console.log('fetchFriendList ajax success',resp);
-			  // update friendList with server resp
-			  _friendData.friendList = JSON.parse(resp).friends;
-			  console.log("fetchfriend list, set _friendData.friendList", _friendData.friendList)
-	  		FriendStore.emitChange();
-			},
-			error: function(err){
-				console.log("fetchFriendList ajax err, ", err)
-			}
-		})
+		FriendService.fetchFriendList(_friendData,this)
 
 	  return _friendData.friendList;
 	},
