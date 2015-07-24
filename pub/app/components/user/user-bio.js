@@ -29,6 +29,7 @@ var Bio = React.createClass({
 
         <i className="glyphicon glyphicon-comment chatIcon" onClick={this.chat}>&nbsp;</i>
         <i className="glyphicon glyphicon-envelope messageBox" onClick={this.message}></i>
+        <FriendButton targetuser={this.props.item}/>
 
       </div>
     );

@@ -1,5 +1,5 @@
 window.$ = window.jQuery = require('jquery');
-
+window.user_id = false;
 var React = require('react');
 var Router = require('react-router');
 
