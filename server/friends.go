@@ -11,7 +11,7 @@ import (
   "strconv"
 )
 
-func getFriendData(w http.ResponseWriter, r *http.Request, db *sql.DB) (int, map[string]interface{}) {
+func getFriendData(w http.ResponseWriter, r *http.Request, db *sql.DB) (string, map[string]interface{}) {
 
   w.Header()["access-control-allow-origin"] = []string{"http://localhost:8080"} //TODO: fix this?                                                           
   w.Header()["access-control-allow-methods"] = []string{"GET, POST, OPTIONS"}
@@ -53,7 +53,7 @@ func getFriendData(w http.ResponseWriter, r *http.Request, db *sql.DB) (int, map
     panic(err)
   }
 
-  return userId, dat
+  return strconv.Itoa(userId), dat
 }
 
 
@@ -93,6 +93,7 @@ func addFriend(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
   fmt.Println("about to write 200 header")
   w.WriteHeader(http.StatusOK)
+  return
 }
 
 func removeFriend(w http.ResponseWriter, r *http.Request, db *sql.DB) {
