@@ -79,7 +79,8 @@ var FriendStore = assign({}, EventEmitter.prototype, {
 			success: function(resp) { // receive Friend List from Server. Set variable friendlist to resp data
 			  console.log('success',resp);
 			  context.fetchFriendList(data)  // not sure if i should call this here.
-			},
+			}
+		})
 	},
 
 	getFriendStatus: function(){
