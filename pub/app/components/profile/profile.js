@@ -51,7 +51,6 @@ var Profile = React.createClass({
         avatar_link: ProfileStore.getBio().avatar_link,
         rep: ProfileStore.getBio().rep
       });
-      user_id = this.state.user_id;
 
   },
 
