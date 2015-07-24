@@ -10,7 +10,7 @@ var Sidebar = React.createClass({
 
     getInitialState: function(){
       return {
-        from: null
+        from: ""
       };
     },
 
@@ -23,7 +23,6 @@ var Sidebar = React.createClass({
     },
 
     _onChange: function(){
-      // TODO: Set by getUser()
         this.setState({
           from: AuthStore.getUser().username
         });
@@ -42,6 +41,8 @@ var Sidebar = React.createClass({
     return (
     <div id="sidebar-wrapper">
         <ul className="sidebar-nav">
+            <a href="#"><img src="/assets/logo.png"></img></a>
+
             <li className="sidebar-brand">
                 <a href="#">
                     Welcome

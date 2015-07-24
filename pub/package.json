@@ -26,6 +26,7 @@
     "karma-jasmine": "^0.3.6",
     "object-assign": "^3.0.0",
     "react-addons": "^0.9.0",
+    "react-bootstrap": "^0.24.0",
     "react-router": "^0.13.3",
     "reactify": "^0.15.2",
     "through": "^2.3.8",

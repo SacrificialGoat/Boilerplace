@@ -77,6 +77,13 @@ h1,h2,h3,p,a,td{
   list-style: none;
 }
 
+.globalChat li,span{
+  margin:0;
+  padding:0;
+  line-height: 1.2;
+}
+
+
 .globalChat input{
   width:92%;
   margin-top:auto;
@@ -263,6 +270,11 @@ h1,h2,h3,p,a,td{
   /*border: 1px solid black;*/
   background:white;
   box-shadow:-1px 1px 3px 1px lightgrey;
+}
+
+.sidebar-nav img{
+  width:230px;
+  height:180px;
 }
 
 /* Location */

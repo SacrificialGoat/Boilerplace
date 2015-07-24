@@ -19,6 +19,15 @@ var GlobalChat = React.createClass({
   handleSubmit: function(e){
     e.preventDefault();
     
+    var msgs = this.state.messages;
+    msgs.push({user:this.props.user, message: React.findDOMNode(this.refs.message).value});
+
+    console.log(this.props.user);
+    
+    this.setState({
+      messages:msgs
+    });
+
     this.props.onSend(React.findDOMNode(this.refs.message).value);
     React.findDOMNode(this.refs.message).value = '';
   },
@@ -30,7 +39,7 @@ var GlobalChat = React.createClass({
           { 
           this.state.messages.map(function(item){
             return (
-              <li>{item}</li>
+              <li>{item.user}: {item.message}</li>
             );
           },this)
           }
