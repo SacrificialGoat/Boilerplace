@@ -18,7 +18,6 @@ var _fetchFriendList = function(currUser, targetUser){
 	  _friendData.friendList = _serverOutput;  // on change should happen at this point
 }
 
-
 var FriendStore = assign({}, EventEmitter.prototype, {
 	setFriendStatus: function(data){
 		var currUser = data.targetUser;   // data.currUser, data.targetUser
@@ -100,7 +99,7 @@ var FriendStore = assign({}, EventEmitter.prototype, {
 			type: 'GET',
 			url: '/api/friendlist',
 			data: JSON.stringify({
-			  user_id: user,
+			  user_id: currUser,
 			}),
 			crossDomain: true,
 			success: function(resp) { // receive Friend List from Server. Set variable friendlist to resp data

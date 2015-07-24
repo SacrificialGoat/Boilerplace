@@ -1,4 +1,5 @@
 var React = require('react');
+var FriendButton = require('../friend/friendbutton');
 
 var Bio = React.createClass({
 
