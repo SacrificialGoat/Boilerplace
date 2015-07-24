@@ -506,6 +506,60 @@ func main() {
   }
 })
 
+//route for searching
+
+//GET:
+//search/?title=hello&sortby=rating&pagenumber=1
+http.HandleFunc("/search/", func(w http.ResponseWriter, r *http.Request) {
+  switch r.Method {
+    case "GET":
+
+      m, _ := url.ParseQuery(r.URL.RawQuery)
+
+      //look for title parameter in url
+      var title string
+      if val, ok := m["title"]; ok {
+        if len(val[0]) > 2 {
+          title = val[0]
+        } else {
+          //error
+          return
+        }
+      }
+
+      fmt.Println(title)
+
+      //look for sortby parameter in url
+      sortBy := 0
+      if val, ok := m["sortby"]; ok {
+        if val[0] == "creationtime" {
+          sortBy = 1
+        }
+      }
+
+      //look for pagenumber parameter in url
+      pageNumber := 1
+      var err error
+      if val, ok := m["pagenumber"]; ok {
+        pageNumber, err = strconv.Atoi(val[0])
+        if err != nil {
+          //error
+        }
+      }
+
+      searchForForumThreads(w, r, db, sortBy, pageNumber, title)
+
+      break 
+    case "POST":
+      break  
+    case "PUT":
+      break  
+    case "DELETE":
+      break  
+    default:
+      break
+  }
+})
 
 
 
