@@ -29,14 +29,6 @@ var FriendActions = {
 		})
 	},
 
-	setFriendStatus: function(targetUser){
-		AppDispatcher.handleAction({
-			actionType: FriendConstants.SET_FRIENDSTATUS,
-			data: {
-				targetUser: targetUser
-			}
-		})
-	}
 }
 
 module.exports = FriendActions;

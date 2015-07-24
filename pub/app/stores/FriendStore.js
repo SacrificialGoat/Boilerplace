@@ -1,38 +1,51 @@
 var React = require('react');
 var AppDispatcher = require('../dispatchers/AppDispatcher');
 var FriendConstants = require('../constants/FriendConstants');
+var FriendService = require('../services/FriendService');
 var EventEmitter = require('events').EventEmitter;
 var assign = require('object-assign');
 
 var CHANGE_EVENT = "change";
 
-			// // Change this when receive server output ajax is live
-			// var _serverOutput = [["3", "Jackson"], ["2", "Titto"]  ];
+
+/*
+set friendList:  
+	[{"id":1,"username":"bryan","first":"bryan","last":"liu"},
+	{"id":2,"username":"alex","first":"alex","last":"alex"},
+	{"id":5,"username":"eee","first":"eee","last":"eee"}]
+*/
 
 var _friendData = {
-	friendList: null,
-	isTargetFriend: "false",
+	friendList: null,  
+	isTargetFriend: false,
 }
 
+
+var _searchFriendInList = function(targetUser){
+	var targetUser = targetUser;
+	var _userFriendList = _friendData.friendList;
+	var foundFriend = false;
+	if ( _userFriendList !== null ){
+		// friendlist exist, check if target user is in list
+		for (var i = 0; i < _userFriendList.length; i++){
+			if ( _userFriendList[i].id === parseInt(targetUser) ) foundFriend = true;
+		}
+		if (foundFriend){
+			_friendData.isTargetFriend = true
+		} else {
+			_friendData.isTargetFriend = false
+		}
+	}
+};
+
+
 var FriendStore = assign({}, EventEmitter.prototype, {
-	setFriendStatus: function(data){
-		var targetUser = data.targetUser;
-		var _userFriendList = _friendData.friendList;
-		var foundFriend = false;
-		if ( _userFriendList !== null ){
-			// friendlist exist, check if target user is in list
-			for (var i = 0; i < _userFriendList.length; i++){
-				if ( _userFriendList[i][0] === targetUser ) foundFriend = true;
-			}
-			if (foundFriend){
-				_friendData.isTargetFriend = "true"
-			} else {
-				_friendData.isTargetFriend = "false"
-			}
-			// return _friendData.isTargetFriend
-			console.log("_friendData.isTargetFriend is set: ", _friendData.isTargetFriend)
-		} 
-	},
+	updateFriendStatus: function(targetUser){
+		var targetUser = targetUser;
+		_searchFriendInList(targetUser);
+
+		console.log("updateFriendStatusis set: ", _friendData.isTargetFriend)
+	}, 
 
 	addFriend: function(data){
 		var targetUser = data.targetUser;
@@ -49,13 +62,11 @@ var FriendStore = assign({}, EventEmitter.prototype, {
 			crossDomain: true,
 			success: function(resp) { // receive Friend List from Server. Set variable friendlist to resp data
 			  console.log('success',resp);
-			  // context.fetchFriendList(data)  // not sure if i should call this here.
+			  context.fetchFriendList()
+
 			},
 			error: function(err){
 				console.log("error, ", err)
-				if (err.status === 200){
-					context.fetchFriendList()
-				}
 			}
 		});
 	},
@@ -76,18 +87,16 @@ var FriendStore = assign({}, EventEmitter.prototype, {
 			crossDomain: true,
 			success: function(resp) { // receive Friend List from Server. Set variable friendlist to resp data
 			  console.log('success',resp);
-			  // context.fetchFriendList(data)  // not sure if i should call this here.
+			  context.fetchFriendList()
 			},
 			error: function(err){
 				console.log("error, ", err)
-				if (err.status === 200){
-					context.fetchFriendList()
-				}
 			}
 		});
 	},
 
-	getFriendStatus: function(){
+	getFriendStatus: function(targetUser){
+		this.updateFriendStatus(targetUser)
 		return _friendData.isTargetFriend
 	},
 
@@ -96,25 +105,25 @@ var FriendStore = assign({}, EventEmitter.prototype, {
 	},
 
 	fetchFriendList: function(){
-		// var currUser = data.currUser;   // data.currUser, data.targetUser
-		// var targetUser = data.targetUser;
+		console.log("Triggering fetchFriendList")
 
 		// send Ajax
 		$.ajax({
 			type: 'GET',
 			url: '/friend/',
-			data: JSON.stringify({
-			  // user_id: currUser,
-			}),
+			// data: JSON.stringify({
+			//   // user_id: currUser,
+			// }),
 			crossDomain: true,
 			success: function(resp) { // receive Friend List from Server. Set variable friendlist to resp data
-			  console.log('success',resp);
+			  console.log('fetchFriendList ajax success',resp);
 			  // update friendList with server resp
-			  _friendData.friendList = resp;
+			  _friendData.friendList = JSON.parse(resp).friends;
+			  console.log("fetchfriend list, set _friendData.friendList", _friendData.friendList)
 	  		FriendStore.emitChange();
 			},
 			error: function(err){
-				console.log("err, ", err)
+				console.log("fetchFriendList ajax err, ", err)
 			}
 		})
 
@@ -140,17 +149,13 @@ AppDispatcher.register(function(payload){
 
     case FriendConstants.ADD_FRIEND:
     	FriendStore.addFriend(action.data);
-    	FriendStore.emitChange();
+    	// FriendStore.emitChange();
     	break;
 
   	case FriendConstants.REMOVE_FRIEND:
     		FriendStore.removeFriend(action.data);
+    		// FriendStore.emitChange();
   		break;
-
-    case FriendConstants.SET_FRIENDSTATUS:  // 
-    	FriendStore.setFriendStatus(action.data);
-    	FriendStore.emitChange();
-    	break;
 
     case FriendConstants.FETCH_FRIENDLIST:
     	FriendStore.fetchFriendList(action.data)
@@ -161,7 +166,7 @@ AppDispatcher.register(function(payload){
 	}
 
 	// need emit chagne?
-	FriendStore.emitChange();
+	// FriendStore.emitChange();
   return true;
 });
 

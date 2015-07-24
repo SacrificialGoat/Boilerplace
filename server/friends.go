@@ -102,7 +102,7 @@ func getFriendsList(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
   userId := checkSession(w, r)
 
-  rows, err := db.Query("select users.user_id, users.user_name, users.first_name, users.last_name from friends right join users on friends.friend_id = users.user_id where friends.user_id = " + userId + ")")
+  rows, err := db.Query("select users.user_id, users.user_name, users.first_name, users.last_name from friends right join users on friends.friend_id = users.user_id where friends.user_id = " + userId)
   if err != nil {
     log.Fatal(err)
   }
