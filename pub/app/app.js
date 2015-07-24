@@ -41,12 +41,12 @@ var App = React.createClass({
   render: function(){
     return (
       <div className="container-fluid">
-        <div className="col-md-2">
+        <Navbar/>
+        <div className="col-sm-2 sidebar">
           <Sidebar />
         </div>
 
-        <div className="col-md-10">
-          <Navbar/>
+        <div className="col-sm-10">
           <RouteHandler/>
         </div>
       </div>

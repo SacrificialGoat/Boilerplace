@@ -39,7 +39,6 @@ var Sidebar = React.createClass({
     render: function(){
 
     return (
-    <div id="sidebar-wrapper">
         <ul className="sidebar-nav">
             <a href="#"><img src="/assets/logo.png"></img></a>
 
@@ -64,7 +63,6 @@ var Sidebar = React.createClass({
             <Chat user={this.state.from} onSend={this.sendMessage} onChat={this.joinChat} />
 
         </ul>
-    </div>
     );
   }
 });
