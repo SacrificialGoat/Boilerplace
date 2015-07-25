@@ -1,0 +1,23 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "1. Go to /server in terminal. 2. Start the server by running the below command (include more server files as they're added).",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SacrificialGoat/app.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SacrificialGoat/app/issues"
+  },
+  "homepage": "https://github.com/SacrificialGoat/app#readme",
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-go": "^1.1.0"
+  }
+}
