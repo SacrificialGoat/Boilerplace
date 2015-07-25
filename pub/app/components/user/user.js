@@ -1,5 +1,4 @@
 var React = require('react');
-var AuthStore = require('../../stores/AuthStore');
 var ProfileStore = require('../../stores/ProfileStore');
 var ProfileActions = require('../../actions/ProfileActions');
 var Bio = require('./user-bio');
@@ -21,7 +20,8 @@ var User = React.createClass({
       user_id: this.props.params.id,
       rep: 0,
       chatbox: false,
-      from: ""
+      directMsgs: [],
+      from_user: 0 // user id used for direct messaging
     };
   },
 
@@ -29,10 +29,12 @@ var User = React.createClass({
     // TODO: fetch by user ID
     ProfileActions.fetchById({id:this.props.params.id});
     ProfileStore.addChangeListener(this._onChange);
+    ChatStore.addChangeListener(this._onChange);
   },
 
   componentWillUnmount: function(){
     ProfileStore.removeChangeListener(this._onChange);
+    ChatStore.removeChangeListener(this._onChange);
   },
 
   _onChange: function(){
@@ -45,7 +47,8 @@ var User = React.createClass({
         bio: ProfileStore.getOtherBio().bio,
         avatar_link: ProfileStore.getOtherBio().avatar_link,
         rep: ProfileStore.getOtherBio().rep,
-        from: AuthStore.getUser().username
+        directMsgs: ChatStore.getDirectMessages(),
+        from_user: ProfileStore.getBio().user_id
       });
   },
 
@@ -56,11 +59,11 @@ var User = React.createClass({
   },
 
   joinChat: function(){
-    ChatActions.connect();
+    // ChatActions.connect();
   },
 
   sendMessage: function(msg){
-    ChatActions.send({message:msg});
+    ChatActions.sendDm({ userId:this.state.user_id, message:msg });
   },
 
   render: function() {
@@ -69,7 +72,7 @@ var User = React.createClass({
         <Bio onChat={this.chat} item={this.state} />
         <BioThreads id={this.props.params.id}/>
         {this.state.chatbox ? (
-          <Chatbox user={this.state.from} onSend={this.sendMessage} onChat={this.joinChat}/>
+          <Chatbox messages={this.state.directMsgs} onSend={this.sendMessage} onChat={this.joinChat}/>
         ) : (
           null
         )}

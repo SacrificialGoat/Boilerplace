@@ -9,6 +9,13 @@ var ChatActions = {
     });
   },
 
+  sendDm: function(data){
+    AppDispatcher.handleAction({
+      actionType: ChatConstants.SENDDM,
+      data: data
+    });
+  },
+
   receive: function(){
     AppDispatcher.handleAction({
       actionType: ChatConstants.RECEIVE
