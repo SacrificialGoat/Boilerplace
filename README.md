@@ -1,3 +1,5 @@
+![ScreenShot](http://i.imgur.com/fMIcLAc.png)
+
 ##To Develop:
 
 1. Go to /server in terminal.
