@@ -5,7 +5,7 @@
 3. Set up schema by typing 'mysql -u root < schema.sql'
 4. Start the server by running the below command (include more server files as they're added).
 
-  go run events.go room.go player.go auth.go server.go outbound.go forum_threads.go thread_posts.go users.go
+  go run auth.go forum_threads.go chatter.go chat_events.go outbound.go chat_room.go server.go thread_posts.go users.go friends.go
 
 5. Go to /pub folder
 6. npm install

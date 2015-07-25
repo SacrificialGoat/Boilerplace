@@ -1,6 +1,7 @@
 var React = require('react');
 var Chat = require('./sidebar-chat');
 var ChatActions = require('../../actions/ChatActions');
+var ChatStore = require('../../stores/ChatStore');
 var AuthStore = require('../../stores/AuthStore');
 var Map = require('./map');
 
@@ -10,21 +11,25 @@ var Sidebar = React.createClass({
 
     getInitialState: function(){
       return {
-        from: ""
+        from: "",
+        messages: []
       };
     },
 
     componentDidMount: function(){
       AuthStore.addChangeListener(this._onChange);
+      ChatStore.addChangeListener(this._onChange);
     },
 
     componentWillUnmount: function(){
       AuthStore.removeChangeListener(this._onChange);
+      ChatStore.removeChangeListener(this._onChange);
     },
 
     _onChange: function(){
         this.setState({
-          from: AuthStore.getUser().username
+          from: AuthStore.getUser().username,
+          messages: ChatStore.getMessages()
         });
     },
 
@@ -60,7 +65,7 @@ var Sidebar = React.createClass({
                 <a href="#">Chat (global)</a>
             </li>
 
-            <Chat user={this.state.from} onSend={this.sendMessage} onChat={this.joinChat} />
+            <Chat messages={this.state.messages} user={this.state.from} onSend={this.sendMessage} onChat={this.joinChat} />
 
         </ul>
     );

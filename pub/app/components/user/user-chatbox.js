@@ -27,7 +27,7 @@ var Chatbox = React.createClass({
       <div className="chatbox">
         <ul ref="chatList">
           { 
-          this.state.messages.map(function(item){
+          this.props.messages.map(function(item){
             return (
               <li>{item}</li>
             );
@@ -35,7 +35,7 @@ var Chatbox = React.createClass({
           }
         </ul>
         <form onSubmit={this.handleSubmit}>
-          <input ref="message" type="text" className="form-control" placeholder="type a message..."/>
+          <input ref="message" type="text" placeholder="type a message..."/>
         </form>
       </div>
     );
