@@ -527,8 +527,6 @@ http.HandleFunc("/search/", func(w http.ResponseWriter, r *http.Request) {
         }
       }
 
-      fmt.Println(title)
-
       //look for sortby parameter in url
       sortBy := 0
       if val, ok := m["sortby"]; ok {

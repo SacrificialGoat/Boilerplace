@@ -71,12 +71,17 @@ func createForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store
   thread_title := dat["title"].(string)
   thread_body := dat["body"].(string)
 
+  var thread_tag string
+  if _, ok := dat["tag"]; ok {
+    thread_tag = dat["tag"].(string)
+  }
+
   //insert forum thread into database
-  stmt, err := db.Prepare("insert into forum_threads (user_id, title, body) values (?, ?, ?)")
+  stmt, err := db.Prepare("insert into forum_threads (user_id, title, body, tag) values (?, ?, ?, ?)")
   if err != nil {
     log.Fatal(err)
   }
-  res, err := stmt.Exec(userid, thread_title, thread_body)
+  res, err := stmt.Exec(userid, thread_title, thread_body, thread_tag)
   if err != nil {
     log.Fatal(err)
   }

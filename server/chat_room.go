@@ -61,8 +61,8 @@ func (room *ChatRoom) run() {
       //remove chatter from chat room and close the socket
       case p := <-room.Unregister:
         if _, ok := room.Chatters[p.Id]; ok {
-            delete(room.Chatters, p.Id)
-            close(p.Send)
+          delete(room.Chatters, p.Id)
+          close(p.Send)
         }
 
       //send messages to selected clients
@@ -76,8 +76,8 @@ func (room *ChatRoom) run() {
             select {
             case p.Send <- m.Message:
             default:
-                delete(room.Chatters, p.Id)
-                close(p.Send)
+              delete(room.Chatters, p.Id)
+              close(p.Send)
             }
           }   
 

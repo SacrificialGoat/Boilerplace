@@ -28,8 +28,10 @@ CREATE TABLE forum_threads (
   body TEXT,
   post_count INT(10) DEFAULT 0,
   rating INT(10) DEFAULT 0,
+  tag VARCHAR(25) DEFAULT '',
   creation_time DATETIME DEFAULT CURRENT_TIMESTAMP,
   last_update_time DATETIME ON UPDATE CURRENT_TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  last_post_time DATETIME DEFAULT CURRENT_TIMESTAMP,
 
   PRIMARY KEY (thread_id),
   FOREIGN KEY (user_id) REFERENCES users(user_id)
