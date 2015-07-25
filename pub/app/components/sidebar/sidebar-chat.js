@@ -17,8 +17,9 @@ var GlobalChat = React.createClass({
 
   handleSubmit: function(e){
     e.preventDefault();
-    this.props.onSend(React.findDOMNode(this.refs.message).value);
+    var text = React.findDOMNode(this.refs.message).value;
     React.findDOMNode(this.refs.message).value = '';
+    this.props.onSend(text);
   },
 
   render: function() {

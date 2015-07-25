@@ -49,8 +49,7 @@ var clientSocket = {
   // Direct Message
   sendDirectMessage: function(userId,data){
     console.log('sending direct message to...',userId,data);
-    console.log('sdm:'+userId+':'+data);
-    conn.send('sdm:'+ parseInt(userId) + ':' + data);
+    conn.send('sdm:'+ userId + ':' + data);
   },
 
   /*-----------------

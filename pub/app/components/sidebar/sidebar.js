@@ -17,20 +17,26 @@ var Sidebar = React.createClass({
     },
 
     componentDidMount: function(){
-      AuthStore.addChangeListener(this._onChange);
+      AuthStore.addChangeListener(this._onAuthChange);
       ChatStore.addChangeListener(this._onChange);
     },
 
     componentWillUnmount: function(){
-      AuthStore.removeChangeListener(this._onChange);
+      AuthStore.removeChangeListener(this._onAuthChange);
       ChatStore.removeChangeListener(this._onChange);
     },
 
     _onChange: function(){
         this.setState({
-          from: AuthStore.getUser().username,
           messages: ChatStore.getMessages()
-        });
+        });  
+    },
+
+    _onAuthChange: function(){
+      this.setState({
+        from: AuthStore.getUser().username
+      });
+      this.joinChat(); // On Auth change, if user logs in then connect to chat server.
     },
 
     joinChat: function(){

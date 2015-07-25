@@ -52,7 +52,7 @@ var ProfileStore = assign({}, EventEmitter.prototype, {
     var that = this;
     Profile.fetchById(id,function(data){
       _otherUser = data;
-      that.fetch(); // fetch the user's userId while at it.
+      that.emitChange();
     });
   },
 

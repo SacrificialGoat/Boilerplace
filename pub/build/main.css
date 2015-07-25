@@ -88,6 +88,12 @@ h1,h2,h3,p,a,td{
 
 .navbar button{
   margin-top:10px;
+  margin-right:20px;
+  background-color:black;
+}
+
+.navbar-header a{
+  margin-left:20px;
 }
 
 .navbar-form .form-control{
@@ -121,7 +127,7 @@ h1,h2,h3,p,a,td{
 .navbar .container-fluid .navbar-brand{
   color:black;
   padding-left:15px;
-  margin-left:0px;
+  margin-left:10px;
 }
 
 

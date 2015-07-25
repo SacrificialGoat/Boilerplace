@@ -27,6 +27,7 @@ var User = React.createClass({
 
   componentDidMount: function(){
     // TODO: fetch by user ID
+    ProfileActions.fetch();
     ProfileActions.fetchById({id:this.props.params.id});
     ProfileStore.addChangeListener(this._onChange);
     ChatStore.addChangeListener(this._onChange);
