@@ -1,5 +1,20 @@
 ![ScreenShot](http://i.imgur.com/fMIcLAc.png)
 
+Fast, responsive boilerplate application to create your own Reddit.
+Combines a quick & reliable Go web server with React/Flux client.
+
+###[See Example](http://54.69.153.183:8080/)
+
+##Features
+* Threads / Comments
+* Searching
+* Upvotes & Downvotes
+* Direct / Global Chat System using WebSockets
+* Profile Page & Editing
+* Adding / Removing Friends
+* Signup / Login
+* Authentication
+
 ##To Develop:
 
 1. Go to /server in terminal.
@@ -25,3 +40,6 @@
 
 1. In /pub, run 'gulp test'.
 2. Spec files are inside /specs.
+
+
+[Link to original repo](https://github.com/mikemsrk/go-flux)
