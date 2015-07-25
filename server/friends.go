@@ -135,6 +135,8 @@ func GetFriendsList(w http.ResponseWriter, r *http.Request, db *sql.DB) {
   w.Write(jsonString)
 }
 
+
+// Bryan: This is for testing Ginkgo test suite.  Remove when going on production
 func Testing1 () int {
 
   return 10
