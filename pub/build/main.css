@@ -5,6 +5,7 @@
 body{
   /*background-image: url("../assets/animus-mix.gif");*/
   /*background-repeat: repeat;*/
+  margin-top:75px;
 }
 
 .container-fluid{
@@ -280,7 +281,7 @@ h1,h2,h3,p,a,td{
 
 .sidebar-nav img{
   width:230px;
-  height:180px;
+  height:140px;
 }
 
 .sidebar-nav {
