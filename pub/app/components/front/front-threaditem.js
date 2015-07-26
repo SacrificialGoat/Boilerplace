@@ -42,6 +42,10 @@ var ThreadItem = React.createClass({
     this.props.item.rating--;
   },
 
+  redirect: function(){
+    this.props.onAlert();
+  },
+
   render: function() {
     // TODO: Clicking on title takes you to individual thread page
     var created = formatDate(this.props.item.creation_time);
@@ -61,9 +65,15 @@ var ThreadItem = React.createClass({
           <p>created <FormattedRelative value={created} /> by <a href={"#/user/"+this.props.item.user_id}> {this.props.item.user_name} </a> <span className="updateInfo"> <FormattedRelative value= {updated} /> updated&nbsp;</span></p>
         </div>
         
-        <div className="votes">
-          <a href="#" ref="down" className="glyphicon glyphicon-chevron-down" aria-hidden="true" onClick={this.downVote}></a> {this.props.item.rating} <a href="#" ref="up" className="glyphicon glyphicon-chevron-up" aria-hidden="true" onClick={this.upVote}></a>
-        </div>
+        {this.props.loggedIn ? (
+          <div className="votes">
+            <a href="#" ref="down" className="glyphicon glyphicon-chevron-down" aria-hidden="true" onClick={this.downVote}></a> {this.props.item.rating} <a href="#" ref="up" className="glyphicon glyphicon-chevron-up" aria-hidden="true" onClick={this.upVote}></a>
+          </div>
+          ) : (
+          <div className="votes">
+            <a href="#" ref="down" className="glyphicon glyphicon-chevron-down" aria-hidden="true" onClick={this.redirect}></a> {this.props.item.rating} <a href="#" ref="up" className="glyphicon glyphicon-chevron-up" aria-hidden="true" onClick={this.redirect}></a>
+          </div>
+        )}
         
       </div>
     );

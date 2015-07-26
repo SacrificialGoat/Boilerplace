@@ -3,7 +3,6 @@ var React = require('react');
 var Chatbox = React.createClass({
   getInitialState: function(){
     return {
-      messages: []
     };
   },
 
@@ -29,7 +28,7 @@ var Chatbox = React.createClass({
           { 
           this.props.messages.map(function(item){
             return (
-              <li>{item}</li>
+              <li>{item.username}: {item.message}</li>
             );
           },this)
           }

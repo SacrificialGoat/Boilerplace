@@ -113,6 +113,11 @@ h1,h2,h3,p,a,td{
   border-radius:10px;
 }
 
+.navbar .container-fluid{
+  margin-right:20px;
+}
+
+
 .navbar{
   /*background-color:#1A3F42;*/
   background-color:white;
