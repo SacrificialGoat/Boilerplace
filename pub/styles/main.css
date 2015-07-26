@@ -5,6 +5,7 @@
 body{
   /*background-image: url("../assets/animus-mix.gif");*/
   /*background-repeat: repeat;*/
+  margin-top:75px;
 }
 
 .container-fluid{
@@ -88,6 +89,12 @@ h1,h2,h3,p,a,td{
 
 .navbar button{
   margin-top:10px;
+  margin-right:20px;
+  background-color:black;
+}
+
+.navbar-header a{
+  margin-left:20px;
 }
 
 .navbar-form .form-control{
@@ -106,6 +113,11 @@ h1,h2,h3,p,a,td{
   border-radius:10px;
 }
 
+.navbar .container-fluid{
+  margin-right:20px;
+}
+
+
 .navbar{
   /*background-color:#1A3F42;*/
   background-color:white;
@@ -121,7 +133,7 @@ h1,h2,h3,p,a,td{
 .navbar .container-fluid .navbar-brand{
   color:black;
   padding-left:15px;
-  margin-left:0px;
+  margin-left:10px;
 }
 
 
@@ -274,7 +286,7 @@ h1,h2,h3,p,a,td{
 
 .sidebar-nav img{
   width:230px;
-  height:180px;
+  height:140px;
 }
 
 .sidebar-nav {

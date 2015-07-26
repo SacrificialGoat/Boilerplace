@@ -8,7 +8,7 @@ var CHANGE_EVENT = 'change';
 var clientSocket = {
   connect: function(targetId){
     console.log('connecting to chat server...');
-    conn = new WebSocket("ws://127.0.0.1:8080/chat/");
+    conn = new WebSocket("ws://"+window.location.host+"/chat/");
     setTimeout(function(){conn.send('cp:'); conn.send('np:');},2000);
     /*----------------
       Event Listening
@@ -49,8 +49,7 @@ var clientSocket = {
   // Direct Message
   sendDirectMessage: function(userId,data){
     console.log('sending direct message to...',userId,data);
-    console.log('sdm:'+userId+':'+data);
-    conn.send('sdm:'+ parseInt(userId) + ':' + data);
+    conn.send('sdm:'+ userId + ':' + data);
   },
 
   /*-----------------

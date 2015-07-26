@@ -10,7 +10,8 @@ var Threads = React.createClass({
   getInitialState: function(){
     return {
       page: 1,
-      threads: []
+      threads: [],
+      alert: false
     };
   },
 
@@ -44,6 +45,10 @@ var Threads = React.createClass({
     console.log('transitioning to...thread',id);
   },
 
+  showAlert: function(){
+    this.props.onAlert();
+  },
+
   render: function() {
     return (
       <div className="threads">
@@ -52,7 +57,9 @@ var Threads = React.createClass({
             this.state.threads.map(function(item){
               return (
                 <ThreadItem 
-                  ref = "thread" 
+                  ref = "thread"
+                  onAlert = {this.showAlert}
+                  loggedIn = {this.props.loggedIn}
                   onGoThread = {this.goThread} 
                   onUpVote = {this.upVote} 
                   onDownVote = {this.downVote} 

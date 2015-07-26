@@ -3,7 +3,6 @@ var React = require('react');
 var Chatbox = React.createClass({
   getInitialState: function(){
     return {
-      messages: []
     };
   },
 
@@ -17,9 +16,9 @@ var Chatbox = React.createClass({
 
   handleSubmit: function(e){
     e.preventDefault();
-    
-    this.props.onSend(React.findDOMNode(this.refs.message).value);
+    var text = React.findDOMNode(this.refs.message).value;
     React.findDOMNode(this.refs.message).value = '';
+    this.props.onSend(text);
   },
 
   render: function() {
@@ -29,7 +28,7 @@ var Chatbox = React.createClass({
           { 
           this.props.messages.map(function(item){
             return (
-              <li>{item}</li>
+              <li>{item.username}: {item.message}</li>
             );
           },this)
           }

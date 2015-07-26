@@ -1,4 +1,4 @@
-![ScreenShot](http://i.imgur.com/fMIcLAc.png)
+![ScreenShot](http://i.imgur.com/F0m8twX.png)
 
 Fast, responsive boilerplate application to create your own Reddit.
 Combines a quick & reliable Go web server with React/Flux client.
