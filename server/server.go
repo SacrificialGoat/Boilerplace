@@ -483,7 +483,7 @@ func main() {
   http.HandleFunc("/friend/", func(w http.ResponseWriter, r *http.Request) {
   switch r.Method {
     case "GET":
-      getFriendsList(w, r, db)
+      GetFriendsList(w, r, db)
       break 
     case "POST":
       m, _ := url.ParseQuery(r.URL.RawQuery)
@@ -772,6 +772,8 @@ func connect(w http.ResponseWriter, r *http.Request, room *GameRoom, store *sess
 
   playerHandler.createPlayer(w, r)
 }
+
 */
+
 
 

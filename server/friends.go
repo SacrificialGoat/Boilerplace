@@ -12,7 +12,7 @@ import (
 )
 
 
-func checkSession(w http.ResponseWriter, r *http.Request) (string) {
+func CheckSession(w http.ResponseWriter, r *http.Request) (string) {
 
   //check for session to see if client is authenticated
   session, err := store.Get(r, "flash-session")
@@ -52,7 +52,7 @@ func parseRequest(r *http.Request) (map[string]interface{}) {
 
 func addFriend(w http.ResponseWriter, r *http.Request, db *sql.DB) {
   
-  userId := checkSession(w, r)
+  userId := CheckSession(w, r)
   dat := parseRequest(r)
 
   friend_id := int(dat["friend_id"].(float64))
@@ -75,7 +75,7 @@ func addFriend(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 func removeFriend(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
-  userId := checkSession(w, r)
+  userId := CheckSession(w, r)
   dat := parseRequest(r)
 
   
@@ -98,9 +98,9 @@ func removeFriend(w http.ResponseWriter, r *http.Request, db *sql.DB) {
   w.WriteHeader(http.StatusOK)
 }
 
-func getFriendsList(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+func GetFriendsList(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
-  userId := checkSession(w, r)
+  userId := CheckSession(w, r)
 
   rows, err := db.Query("select users.user_id, users.user_name, users.first_name, users.last_name from friends right join users on friends.friend_id = users.user_id where friends.user_id = " + userId)
   if err != nil {
@@ -136,5 +136,10 @@ func getFriendsList(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 }
 
 
+// Bryan: This is for testing Ginkgo test suite.  Remove when going on production
+func Testing1 () int {
+
+  return 10
+}
 
 
