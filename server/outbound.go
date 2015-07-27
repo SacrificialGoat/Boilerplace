@@ -84,11 +84,14 @@ type ForumThreadInfoOutbound struct {
   User_id int `json:"user_id"`
   User_name string `json:"user_name"`
   Title string `json:"title"`
-  Body string `json:"body"`  
+  Body string `json:"body"` 
+  Link string `json:"link"` 
+  Tag string `json:"tag"` 
   Post_count int `json:"post_count"`
   Rating int `json:"rating"`
   Creation_time time.Time `json:"creation_time"`
   Last_update_time time.Time `json:"last_update_time"`
+  Last_post_time time.Time `json:"last_post_time"`
 }
 
 //struct containing an array of forum threads
