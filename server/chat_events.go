@@ -99,8 +99,8 @@ func evt_sendGlobalMessage(message string, chatter *Chatter) {
 }
 
 //function that will send a chat message to all other clients
-//inbound message example - sgm:test
-//outbound message example - sgm:{"id":1,"username":"user1","message":"test"}
+//inbound message example - sdm:1:test
+//outbound message example - sdm:{"id":1,"username":"user1","message":"test"}
 func evt_sendDirectMessage(message string, chatter *Chatter) {
 
   //split the message to get the recipient and message contents

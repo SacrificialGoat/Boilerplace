@@ -1,0 +1,267 @@
+<html>
+<head>
+<title>Chat Example</title>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script type="text/javascript">
+  $(function() {
+
+    $('#createForumThread').click(function() {
+
+      var title = $('#title').val();
+      var body = $('#body').val();
+
+      $('#title').val(''); 
+      $('#body').val(''); 
+
+      $.ajax({
+        type: 'POST',
+        url: 'http://127.0.0.1:8080/threads/',
+        data: JSON.stringify({"title" : title, "body" : body}),
+        // contentType: "application/json",
+        // crossDomain: true,
+          success: function(data, textStatus, jqXHR) {
+            console.log(data);
+            // console.log('success');
+            //data - response from server
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            console.log(errorThrown);
+          }
+      });
+
+    });
+
+    $('#getForumThreadsByLoggedInUserIdByRating').click(function() {
+
+      var pageNumber = parseInt($('#pageNumber').val());
+
+      $('#pageNumber').val(''); 
+
+      $.ajax({
+        type: 'GET',
+        url: 'http://127.0.0.1:8080/profilethreads/?sortby=rating&pagenumber=' + pageNumber,
+        // contentType: "application/json",
+        // crossDomain: true,
+          success: function(data, textStatus, jqXHR) {
+            console.log(data);
+            // console.log('success');
+            //data - response from server
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            console.log(errorThrown);
+          }
+      });
+
+    });
+
+    $('#getForumThreadsByLoggedInUserIdByTime').click(function() {
+
+      var pageNumber = parseInt($('#pageNumber').val());
+
+      $('#pageNumber').val(''); 
+
+      $.ajax({
+        type: 'GET',
+        url: 'http://127.0.0.1:8080/profilethreads/?sortby=creationtime&pagenumber=' + pageNumber,
+        // contentType: "application/json",
+        // crossDomain: true,
+          success: function(data, textStatus, jqXHR) {
+            console.log(data);
+            // console.log('success');
+            //data - response from server
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            console.log(errorThrown);
+          }
+      });
+
+    });
+
+    $('#upvoteThreadScore').click(function() {
+
+      var threadId = parseInt($('#threadId').val());
+
+      $('#threadId').val('');
+
+      $.ajax({
+        type: 'POST',
+        url: 'http://127.0.0.1:8080/thread/' + threadId + '/?upvote=true',
+        data: JSON.stringify({"thread_id" : threadId}),
+        // contentType: "application/json",
+        // crossDomain: true,
+          success: function(data, textStatus, jqXHR) {
+            console.log(data);
+            // console.log('success');
+            //data - response from server
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            console.log(errorThrown);
+          }
+      });
+
+    });
+
+    $('#downvoteThreadScore').click(function() {
+
+      var threadId = parseInt($('#threadId').val());
+
+      $('#threadId').val('');
+
+      $.ajax({
+        type: 'POST',
+        url: 'http://127.0.0.1:8080/thread/' + threadId + '/?downvote=true',
+        data: JSON.stringify({"thread_id" : threadId}),
+        // contentType: "application/json",
+        // crossDomain: true,
+          success: function(data, textStatus, jqXHR) {
+            console.log(data);
+            // console.log('success');
+            //data - response from server
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            console.log(errorThrown);
+          }
+      });
+
+    });    
+ 
+    $('#createThreadPost').click(function() {
+
+      var threadId = parseInt($('#threadId0').val());
+      var contents = $('#postContents').val();
+
+      $('#threadId0').val(''); 
+      $('#postContents').val(''); 
+
+      $.ajax({
+        type: 'POST',
+        url: 'http://127.0.0.1:8080/posts/',
+        data: JSON.stringify({"thread_id" : threadId, "contents" : contents}),
+        // contentType: "application/json",
+        // crossDomain: true,
+          success: function(data, textStatus, jqXHR) {
+            console.log(data);
+            // console.log('success');
+            //data - response from server
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            console.log(errorThrown);
+          }
+      });
+
+    }); 
+
+    $('#upvotePostScore').click(function() {
+
+      var postId = parseInt($('#postId').val());
+
+      $('#postId').val('');
+
+      $.ajax({
+        type: 'POST',
+        url: 'http://127.0.0.1:8080/post/' + postId + '/?upvote=true',
+        // contentType: "application/json",
+        // crossDomain: true,
+          success: function(data, textStatus, jqXHR) {
+            console.log(data);
+            // console.log('success');
+            //data - response from server
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            console.log(errorThrown);
+          }
+      });
+
+    });
+
+    $('#downvotePostScore').click(function() {
+
+      var postId = $('#postId').val();
+
+      $('#postId').val('');
+
+      $.ajax({
+        type: 'POST',
+        url: 'http://127.0.0.1:8080/post/' + postId + '/?downvote=true',
+        // contentType: "application/json",
+        // crossDomain: true,
+          success: function(data, textStatus, jqXHR) {
+            console.log(data);
+            // console.log('success');
+            //data - response from server
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            console.log(errorThrown);
+          }
+      });
+
+    });           
+
+
+
+  });
+</script>
+<style type="text/css">
+
+body {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    background: gray;
+}
+
+#form {
+    padding: 0 0.5em 0 0.5em;
+    margin: 0;
+    position: absolute;
+    bottom: 1em;
+    left: 0px;
+    width: 100%;
+}
+
+</style>
+</head>
+<body>
+    
+<a href="newhome.html">Home</a><br>
+
+<br>
+
+Title: <input type="text" id="title" name="title" placeholder="Title"><br>
+Body: <input type="text" id="body" name="body" placeholder="Body"><br>
+<input id="createForumThread" type="submit" value="Create Forum Thread"><br>
+
+<br>
+
+User Id: <input type="text" id="userIdX" name="userIdX" placeholder="User IdX"><br>
+Page Number: <input type="text" id="pageNumber" name="pageNumber" placeholder="Page Number"><br>
+<input id="getForumThreadsByLoggedInUserIdByRating" type="submit" value="Get Forum Threads By Logged in User By Rating"><br>
+<input id="getForumThreadsByLoggedInUserIdByTime" type="submit" value="Get Forum Threads By Logged in User By Datetime"><br>
+
+<br>
+
+Thread Id: <input type="text" id="threadId" name="threadId" placeholder="Thread Id"><br>
+<input id="upvoteThreadScore" type="submit" value="Upvote Thread Score"><br>
+<input id="downvoteThreadScore" type="submit" value="Downvote Thread Score"><br>
+
+<br>
+
+Thread Id: <input type="text" id="threadId0" name="threadId0" placeholder="Thread Id0"><br>
+Post Contents: <input type="text" id="postContents" name="postContents" placeholder="Post Contents"><br>
+<input id="createThreadPost" type="submit" value="Create Thread Post"><br>
+
+<br>
+
+Post Id: <input type="text" id="postId" name="postId" placeholder="Post Id"><br>
+<input id="upvotePostScore" type="submit" value="Upvote Post Score"><br>
+<input id="downvotePostScore" type="submit" value="Downvote Post Score"><br>
+
+<br>
+
+
+
+<br>
+
+</body>
+</html>

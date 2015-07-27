@@ -90,6 +90,21 @@ func createThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store 
   }
   fmt.Printf("Inserted forum post into forum thread " + strconv.Itoa(thread_id) + ". Last inserted ID = %d, rows affected = %d\n", lastId, rowCnt)
 
+  //update user's bio and avatar_link
+  stmt, err = db.Prepare("update forum_threads set post_count = post_count + 1, last_post_time = NOW() where thread_id = ?")
+  if err != nil {
+    log.Fatal(err)
+  }
+  res, err = stmt.Exec(thread_id)
+  if err != nil {
+    log.Fatal(err)
+  }
+  rowCnt, err = res.RowsAffected()
+  if err != nil {
+    log.Fatal(err)
+  }
+  fmt.Printf("Updated thread " + strconv.Itoa(thread_id) + " in forum_threads table. Rows affected = %d\n", rowCnt)
+
   //return 200 status to indicate success
   fmt.Println("about to write 200 header")
   w.Write([]byte("{\"post_id\" : " + strconv.FormatInt(lastId, 10) + "}"))
