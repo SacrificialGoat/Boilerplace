@@ -130,19 +130,6 @@ func getThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, option in
     return
   }
 
-  //check for session to see if client is authenticated
-  session, err := store.Get(r, "flash-session")
-  if err != nil {
-    http.Error(w, err.Error(), http.StatusInternalServerError)
-  }
-  fm := session.Flashes("message")
-  if fm == nil {
-    fmt.Println("Trying to get forum thread info as an invalid user")
-    fmt.Fprint(w, "No flash messages")
-    return
-  }
-  //session.Save(r, w)
-
   //variable(s) to hold the returned values from the query
   var (
     queried_post_id int
@@ -380,6 +367,76 @@ func scoreThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *
       
       break
   }
+
+}
+
+//TODO: Return correct status and message if session is invalid
+//TODO: Return correct status and message if query failed
+func editThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore) {
+
+  fmt.Println("Edit thread post...")
+
+  //add headers to response
+  w.Header()["access-control-allow-origin"] = []string{"http://localhost:8080"} //TODO: fix this?                                                           
+  w.Header()["access-control-allow-methods"] = []string{"GET, POST, OPTIONS"}
+  w.Header()["Content-Type"] = []string{"application/json"}
+
+  //ignore options requests
+  if r.Method == "OPTIONS" {
+    fmt.Println("options request received")
+    w.WriteHeader(http.StatusTemporaryRedirect)
+    return
+  }
+
+  //check for session to see if client is authenticated
+  session, err := store.Get(r, "flash-session")
+  if err != nil {
+    http.Error(w, err.Error(), http.StatusInternalServerError)
+  }
+  fm := session.Flashes("message")
+  if fm == nil {
+    fmt.Println("Trying to vote on forum thread post as an invalid user")
+    fmt.Fprint(w, "No flash messages")
+    return
+  }
+  //session.Save(r, w)
+
+  //parse the body of the request into a string
+  body, err := ioutil.ReadAll(r.Body)
+  if err != nil {
+    panic(err)
+  }
+  //fmt.Println(string(body))
+  
+  //parse the JSON string body to get the forum thread info
+  byt := body
+  var dat map[string]interface{}
+  if err := json.Unmarshal(byt, &dat); err != nil {
+    panic(err)
+  }
+  post_id := int(dat["post_id"].(float64))
+  post_contents := dat["contents"].(string)
+
+  //TODO: return error if post id is blank/nan, return if neither post id nor post contents exist in message of body
+
+  //update the forum thread post
+  stmt, err = db.Prepare("update thread_posts set contents = ? where post_id = ?")
+  if err != nil {
+    log.Fatal(err)
+  }
+  res, err = stmt.Exec(post_contents, post_id)
+  if err != nil {
+    log.Fatal(err)
+  }
+  rowCnt, err := res.RowsAffected()
+  if err != nil {
+    log.Fatal(err)
+  }
+  fmt.Printf("Updated contents of thread post " + strconv.Itoa(post_id) + ". Rows affected = %d\n", rowCnt)      
+
+  //return 200 status to indicate success
+  fmt.Println("about to write 200 header")
+  w.WriteHeader(http.StatusOK)
 
 }
 
