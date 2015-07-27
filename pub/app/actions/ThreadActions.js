@@ -8,6 +8,14 @@ var ThreadActions = {
       data: data
     });
   },
+
+  search: function(data){
+    AppDispatcher.handleAction({
+      actionType: ThreadConstants.SEARCH,
+      data: data
+    });
+  },
+
   // Fetches a page of threads
   fetchPage: function(data){
     AppDispatcher.handleAction({

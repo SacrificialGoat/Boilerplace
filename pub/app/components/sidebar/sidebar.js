@@ -60,12 +60,6 @@ var Sidebar = React.createClass({
             <a href="#"><img src="/assets/logo.png"></img></a>
             <li>
                 <a href="#">Trending</a>
-                <PieChart
-                  data={this.state.data}
-                  width={230}
-                  height={230}
-                  radius={70}
-                  innerRadius={10}/>
             </li>
             <li>
                 <a href="#">Chat (global)</a>
@@ -82,4 +76,11 @@ var Sidebar = React.createClass({
 });
 
 module.exports = Sidebar;
-    
+
+
+// <PieChart
+//   data={this.state.data}
+//   width={230}
+//   height={230}
+//   radius={70}
+//   innerRadius={10}/> 
