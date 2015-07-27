@@ -131,6 +131,8 @@ func main() {
 //POST:
 //upvoteForumThread                            thread/XidX/?upvote=true       //id in url so don't need body
 //downvoteForumThread                          thread/XidX/?downvote=true     //id in url so don't need body
+//PUT:
+//editForumThread                              thread                         body: {"title" : title, "body" : body, "link" : link, "tag" : tag}
   http.HandleFunc("/thread/", func(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
       case "GET":
@@ -185,6 +187,9 @@ func main() {
 
         break  
       case "PUT":
+
+        editForumThread(w, r, db, store)
+
         break  
       case "DELETE":
         break  
@@ -240,7 +245,7 @@ func main() {
 //getForumThreadsByRating                      threads/ ? sortby = XXX & pagenumber = XXX
 //getForumThreadsByTime                        threads/ ? sortby = XXX & pagenumber = XXX
 //POST:
-//createForumThread                            threads                        body: {"title" : title, "body" : body}
+//createForumThread                            threads                        body: {"title" : title, "body" : body, "link" : link, "tag" : tag}
   http.HandleFunc("/threads/", func(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
       case "GET":
@@ -303,6 +308,8 @@ func main() {
 //POST:
 //upvoteThreadPost                             post/XidX/?upvote=true         //id in url so don't need body
 //downvoteThreadPost                           post/XidX/?downvote=true       //id in url so don't need body
+//PUT:
+//editThreadPost                               post                           body: {"thread_id" : threadId, "contents" : contents}
   http.HandleFunc("/post/", func(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
       case "GET":
@@ -358,6 +365,9 @@ func main() {
 
         break  
       case "PUT":
+
+        editThreadPost(w, r, db, store)
+
         break  
       case "DELETE":
         break  

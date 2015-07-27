@@ -9,14 +9,18 @@
 
       var title = $('#title').val();
       var body = $('#body').val();
+      var link = $('#link').val();
+      var tag = $('#tag').val();      
 
       $('#title').val(''); 
       $('#body').val(''); 
+      $('#link').val(''); 
+      $('#tag').val(''); 
 
       $.ajax({
         type: 'POST',
         url: 'http://127.0.0.1:8080/threads/',
-        data: JSON.stringify({"title" : title, "body" : body}),
+        data: JSON.stringify({"title" : title, "body" : body, "link" : link, "tag" : tag}),
         // contentType: "application/json",
         // crossDomain: true,
           success: function(data, textStatus, jqXHR) {
@@ -30,6 +34,38 @@
       });
 
     });
+
+    $('#editForumThread').click(function() {
+
+      var threadId = parseInt($('#threadId').val());
+      var title = $('#title').val();
+      var body = $('#body').val();
+      var link = $('#link').val();
+      var tag = $('#tag').val();    
+
+      $('#threadId').val('');
+      $('#title').val(''); 
+      $('#body').val(''); 
+      $('#link').val(''); 
+      $('#tag').val(''); 
+
+      $.ajax({
+        type: 'PUT',
+        url: 'http://127.0.0.1:8080/thread/',
+        data: JSON.stringify({"thread_id" : threadId, "title" : title, "body" : body, "link" : link, "tag" : tag}),
+        // contentType: "application/json",
+        // crossDomain: true,
+          success: function(data, textStatus, jqXHR) {
+            console.log(data);
+            // console.log('success');
+            //data - response from server
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            console.log(errorThrown);
+          }
+      });
+
+    });   
 
     $('#getForumThreadsByLoggedInUserIdByRating').click(function() {
 
@@ -151,6 +187,33 @@
 
     }); 
 
+    $('#editThreadPost').click(function() {
+
+      var postId = parseInt($('#postId').val());
+      var contents = $('#postContents').val();
+
+
+      $('#postId').val('');
+      $('#postContents').val(''); 
+
+      $.ajax({
+        type: 'PUT',
+        url: 'http://127.0.0.1:8080/post/',
+        data: JSON.stringify({"post_id" : postId, "contents" : contents}),
+        // contentType: "application/json",
+        // crossDomain: true,
+          success: function(data, textStatus, jqXHR) {
+            console.log(data);
+            // console.log('success');
+            //data - response from server
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            console.log(errorThrown);
+          }
+      });
+
+    });     
+
     $('#upvotePostScore').click(function() {
 
       var postId = parseInt($('#postId').val());
@@ -230,7 +293,10 @@ body {
 
 Title: <input type="text" id="title" name="title" placeholder="Title"><br>
 Body: <input type="text" id="body" name="body" placeholder="Body"><br>
+Link: <input type="text" id="link" name="link" placeholder="Link"><br>
+Tag: <input type="text" id="tag" name="tag" placeholder="Tag"><br>
 <input id="createForumThread" type="submit" value="Create Forum Thread"><br>
+<input id="editForumThread" type="submit" value="Edit Forum Thread"><br>
 
 <br>
 
@@ -250,6 +316,7 @@ Thread Id: <input type="text" id="threadId" name="threadId" placeholder="Thread 
 Thread Id: <input type="text" id="threadId0" name="threadId0" placeholder="Thread Id0"><br>
 Post Contents: <input type="text" id="postContents" name="postContents" placeholder="Post Contents"><br>
 <input id="createThreadPost" type="submit" value="Create Thread Post"><br>
+<input id="editThreadPost" type="submit" value="Edit Thread Post"><br>
 
 <br>
 

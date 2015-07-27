@@ -420,11 +420,11 @@ func editThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *s
   //TODO: return error if post id is blank/nan, return if neither post id nor post contents exist in message of body
 
   //update the forum thread post
-  stmt, err = db.Prepare("update thread_posts set contents = ? where post_id = ?")
+  stmt, err := db.Prepare("update thread_posts set contents = ? where post_id = ?")
   if err != nil {
     log.Fatal(err)
   }
-  res, err = stmt.Exec(post_contents, post_id)
+  res, err := stmt.Exec(post_contents, post_id)
   if err != nil {
     log.Fatal(err)
   }

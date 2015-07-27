@@ -132,12 +132,13 @@ func getForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, option i
     queried_user_name string
     queried_title string
     queried_body string    
-
-
+    queried_link string
+    queried_tag string
     queried_post_count int
     queried_rating int
     queried_creation_time time.Time
     queried_last_update_time time.Time
+    queried_last_post_time time.Time
   )
 
   //change query based on option
@@ -510,11 +511,11 @@ func editForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store *
   //TODO: return error if thread id is blank/nan
 
   //update the forum thread post
-  stmt, err = db.Prepare("update thread_posts set title = ?, body = ?, link = ?, tag = ? where thread_id = ?")
+  stmt, err := db.Prepare("update forum_threads set title = ?, body = ?, link = ?, tag = ? where thread_id = ?")
   if err != nil {
     log.Fatal(err)
   }
-  res, err = stmt.Exec()
+  res, err := stmt.Exec(thread_title, thread_body, thread_link, thread_tag, thread_id)
   if err != nil {
     log.Fatal(err)
   }
