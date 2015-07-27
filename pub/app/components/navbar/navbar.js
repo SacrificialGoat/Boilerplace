@@ -2,6 +2,7 @@ var React = require('react');
 var Router = require('react-router');
 var AuthActions = require('../../actions/AuthActions');
 var AuthStore = require('../../stores/AuthStore');
+var ThreadActions = require('../../actions/ThreadActions');
 var Link = Router.Link;
 
 // TODO - factor out navbar login form
@@ -34,6 +35,13 @@ var Navbar = React.createClass({
 
   navlogout: function(){
     AuthActions.logout();
+  },
+
+  handleSearch: function(e){
+    e.preventDefault();
+    var query = React.findDOMNode(this.refs.searchQ).value.trim();
+    ThreadActions.search({query:query});
+    React.findDOMNode(this.refs.searchQ).value = '';
   },
 
   handleSubmit: function(e){
@@ -72,8 +80,8 @@ var Navbar = React.createClass({
         <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
           <ul className="nav navbar-nav navbar-right">
 
-          <form className="navbar-form navbar-left">
-            <input type="text" className="form-control" placeholder="Search"/>
+          <form className="navbar-form navbar-left" onSubmit={this.handleSearch}>
+            <input type="text" ref="searchQ" className="form-control" placeholder="Search"/>
             <i className="glyphicon glyphicon-search search-submit" required=""></i>
           </form>
 

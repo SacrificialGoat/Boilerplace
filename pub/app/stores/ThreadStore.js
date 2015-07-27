@@ -100,6 +100,14 @@ var ThreadStore = assign({}, EventEmitter.prototype, {
 
   },
 
+  search: function(query){
+    var that = this;
+    Thread.search(query,function(data){
+      _threads = data;
+      that.emitChange();
+    });
+  },
+
   addChangeListener: function(cb) {
     this.on(CHANGE_EVENT, cb)
   },
@@ -114,6 +122,10 @@ AppDispatcher.register(function(payload){
   var action = payload.action;
 
   switch(action.actionType){
+    case ThreadConstants.SEARCH:
+      ThreadStore.search(action.data.query);
+      ThreadStore.emitChange();
+      break;
     case ThreadConstants.FETCHPAGE:
       ThreadStore.fetchPage(action.data.page);
       ThreadStore.emitChange();
@@ -135,11 +147,9 @@ AppDispatcher.register(function(payload){
       break;
     case ThreadConstants.UPDATE:
       // TODO: Updating a thread
-
       break;
     case ThreadConstants.DELETE:
       // TODO: Deleting a thread
-
       break;
     case ThreadConstants.UPVOTE:
       ThreadStore.upVote(action.data.thread_id);

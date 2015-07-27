@@ -24,6 +24,28 @@ var addThread = function(title,body,callback) {
   });
 };
 
+var search = function(query,callback){
+  $.ajax({
+    type: 'GET',
+    url: '/search/?title='+query+'&sortby=rating&pagenumber=1',
+    crossDomain: true,
+    success: function(resp) {
+      console.log('success',resp);
+      return callback(resp);
+    },
+    error: function(resp) {
+      // TODO: Fix this, this always goes to error - not sure.
+      // Found out - jQuery 1.4.2 works with current go server, but breaks with newer ver.
+      console.log('error',resp);
+      if(resp.responseText === ""){ // if no error msg
+        callback(resp);
+      }else{         // if error msg
+        callback(null);
+      }
+    }
+  });
+}
+
 
 var fetchThread = function(id,callback) {
   $.ajax({
@@ -185,6 +207,16 @@ var Thread = {
   fetchPage: function(page,callback) {
     var that = this;
     fetchPage(page,function(res) {
+        if (callback) {
+          callback(res);
+        }
+        that.onChange(res);
+    });
+  },
+
+  search: function(query,callback) {
+    var that = this;
+    search(query,function(res) {
         if (callback) {
           callback(res);
         }
