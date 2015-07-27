@@ -2,6 +2,12 @@ var React = require('react');
 var Router = require('react-router');
 var AuthActions = require('../../actions/AuthActions');
 var AuthStore = require('../../stores/AuthStore');
+// Placing direct chat listeners on nav bar
+// Ideally it would be inside App component
+var ChatStore = require('../../stores/ChatStore');
+var ChatActions = require('../../actions/ChatActions');
+var ChatBox = require('./navbar-chatbox');
+
 var ThreadActions = require('../../actions/ThreadActions');
 var Link = Router.Link;
 
@@ -11,17 +17,22 @@ var Navbar = React.createClass({
 
   getInitialState: function(){
     return {
-      loggedIn: AuthStore.loggedIn()
+      loggedIn: AuthStore.loggedIn(),
+      chatWindow: false,
+      directMsgs: [],
+      dmFrom: 0
     };
   },
 
   componentWillMount: function(){
     // _onChange is cb function.
     AuthStore.addChangeListener(this._onChange);
+    ChatStore.addChangeListener(this._onMsgChange);
   },
 
   componentWillUnmount: function(){
     AuthStore.removeChangeListener(this._onChange);
+    ChatStore.removeChangeListener(this._onMsgChange);
   },
 
   _onChange: function(){
@@ -30,6 +41,20 @@ var Navbar = React.createClass({
     });
     if(this.state.loggedIn){
       location.hash = '/';
+    }
+  },
+
+  _onMsgChange: function(){
+    this.setState({
+      directMsgs: ChatStore.getDirectMessages(),
+      dmFrom: ChatStore.getReceived().from
+    });
+
+    if(!this.state.chatWindow && ChatStore.getReceived().msgReceived){
+      // Open chat window
+      this.setState({
+        chatWindow: true
+      });
     }
   },
 
@@ -62,10 +87,20 @@ var Navbar = React.createClass({
     AuthActions.login({username:user.username,pass:user.password});
   },
 
+  sendMessage: function(msg){
+    ChatActions.sendDm({ userId:this.state.dmFrom, message:msg });
+  },
+
   render: function(){
     return (
     <nav className="navbar navbar-fixed-top">
       <div className="container-fluid">
+
+      {this.state.chatWindow? (
+        <ChatBox messages={this.state.directMsgs} onSend={this.sendMessage}/>
+        ):(
+        null
+      )}
 
         <div className="navbar-header">
           <button type="button" className="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">

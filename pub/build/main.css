@@ -27,6 +27,10 @@ h1,h2,h3,p,a,td{
   font-family:'century gothic';
 }
 
+h2{
+  margin:0;
+}
+
 /* Profile Page */
 
 .profile img{
@@ -59,11 +63,12 @@ h1,h2,h3,p,a,td{
 .chatbox{
   width:200px;
   height:200px;
-  position:absolute;
-  left:80%;
-  top:90%;
+  position:fixed;
+  left:82%;
+  top:10%;
   padding:5px;
   box-shadow:-1px 1px 3px 1px lightgrey;
+  background-color:white;
 }
 
 .chatbox input{
@@ -235,8 +240,8 @@ h1,h2,h3,p,a,td{
 
 .frontPage img{
   float:left;
-  width:100px;
-  height:100px;
+  width:50px;
+  height:50px;
   margin-right:20px;
 }
 
@@ -254,6 +259,8 @@ h1,h2,h3,p,a,td{
 
 .frontPage .votes{
   float:left;
+  display:inline-block;
+  margin-right:27px;
 }
 
 .glyphicon-chevron-down{

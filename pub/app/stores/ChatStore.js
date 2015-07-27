@@ -88,10 +88,9 @@ var clientSocket = {
 };
 
 
-
-
 var _messages = [];
 var _directMsgs = [];
+var _dmStatus = {};
 var _error = null;
 
 var ChatStore = assign({}, EventEmitter.prototype, {
@@ -106,6 +105,10 @@ var ChatStore = assign({}, EventEmitter.prototype, {
 
   getDirectMessages: function(){
     return _directMsgs;
+  },
+
+  getReceived: function(){
+    return _dmStatus;
   },
 
   error: function(){
@@ -141,7 +144,8 @@ var ChatStore = assign({}, EventEmitter.prototype, {
     if(_directMsgs.length > 9){
       _directMsgs.shift();
     }
-
+    _dmStatus.msgReceived = true;
+    _dmStatus.from = data.id;
     this.emitChange();
   },
 
