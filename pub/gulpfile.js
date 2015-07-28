@@ -11,8 +11,10 @@ var concat = require('gulp-concat');
 var cssmin = require('gulp-cssmin');
 var gutil = require('gulp-util');
 var shell = require('gulp-shell');
+var jest = require('gulp-jest');
 var glob = require('glob');
 var livereload = require('gulp-livereload');
+var runSequence = require('run-sequence');
 
 var Server = require('karma').Server;
 
@@ -179,9 +181,21 @@ gulp.task('deploy', function () {
 
 });
 
+gulp.task('jest', function () {
+    gulp.src('./specs/**/__tests__/**/*-test.js')
+    .pipe(jest());
+});
+
+// gulp.task('jest', shell.task(['cd specs', 'npm test']));
+
 gulp.task('test', function () {
-  new Server({
-     configFile: __dirname + '/karma.conf.js',
-     singleRun: true
-   }).start();
+
+  runSequence('jest');
+  gulp.watch(['app/**/*.js','.specs/**/__tests__/*.js'], ['jest'])
+
+  // new Server({
+  //    configFile: __dirname + '/karma.conf.js',
+  //    singleRun: true
+  // }).start();
+
 });
