@@ -133,6 +133,8 @@ func main() {
 //downvoteForumThread                          thread/XidX/?downvote=true     //id in url so don't need body
 //PUT:
 //editForumThread                              thread/                        body: {"title" : title, "body" : body, "link" : link, "tag" : tag}
+//DELETE:
+//deleteForumThread                            thread/ id
   http.HandleFunc("/thread/", func(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
       case "GET":
