@@ -473,8 +473,9 @@ func deleteThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store 
 
   //TODO: return error if post id is blank/nan
 
-  //delete the forum thread post
-  stmt, err := db.Prepare("delete from thread_posts where post_id = ?")
+  //delete all votes related to the thread post
+  stmt, err := db.Prepare("delete from post_votes where post_id = ?")
+
   if err != nil {
     log.Fatal(err)
   }
@@ -483,6 +484,21 @@ func deleteThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store 
     log.Fatal(err)
   }
   rowCnt, err := res.RowsAffected()
+  if err != nil {
+    log.Fatal(err)
+  }
+  fmt.Printf("Deleted votes for forum thread post with id " + strconv.Itoa(id) + ". Rows affected = %d\n", rowCnt)   
+
+  //delete the forum thread post
+  stmt, err = db.Prepare("delete from thread_posts where post_id = ?")
+  if err != nil {
+    log.Fatal(err)
+  }
+  res, err = stmt.Exec(id)
+  if err != nil {
+    log.Fatal(err)
+  }
+  rowCnt, err = res.RowsAffected()
   if err != nil {
     log.Fatal(err)
   }

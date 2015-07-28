@@ -564,8 +564,9 @@ func deleteForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store
 
   //TODO: return error if thread id is blank/nan
 
-  //delete the forum thread
-  stmt, err := db.Prepare("delete from forum_threads where thread_id = ?")
+  //delete all votes related to forum posts
+  stmt, err := db.Prepare("delete post_votes from post_votes inner join thread_posts on post_votes.post_id = thread_posts.post_id where thread_posts.thread_id = ?")
+
   if err != nil {
     log.Fatal(err)
   }
@@ -574,6 +575,52 @@ func deleteForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store
     log.Fatal(err)
   }
   rowCnt, err := res.RowsAffected()
+  if err != nil {
+    log.Fatal(err)
+  }
+  fmt.Printf("Deleted votes for forum posts with forum thread id " + strconv.Itoa(id) + ". Rows affected = %d\n", rowCnt)    
+
+  //delete all forum posts related to the forum thread
+  stmt, err = db.Prepare("delete from thread_posts where thread_id = ?")
+  if err != nil {
+    log.Fatal(err)
+  }
+  res, err = stmt.Exec(id)
+  if err != nil {
+    log.Fatal(err)
+  }
+  rowCnt, err = res.RowsAffected()
+  if err != nil {
+    log.Fatal(err)
+  }
+  fmt.Printf("Deleted forum posts with forum thread id " + strconv.Itoa(id) + ". Rows affected = %d\n", rowCnt)  
+
+  //delete all votes related to the forum thread
+  stmt, err = db.Prepare("delete from thread_votes where thread_id = ?")
+
+  if err != nil {
+    log.Fatal(err)
+  }
+  res, err = stmt.Exec(id)
+  if err != nil {
+    log.Fatal(err)
+  }
+  rowCnt, err = res.RowsAffected()
+  if err != nil {
+    log.Fatal(err)
+  }
+  fmt.Printf("Deleted votes for forum thread with id " + strconv.Itoa(id) + ". Rows affected = %d\n", rowCnt)      
+
+  //delete the forum thread
+  stmt, err = db.Prepare("delete from forum_threads where thread_id = ?")
+  if err != nil {
+    log.Fatal(err)
+  }
+  res, err = stmt.Exec(id)
+  if err != nil {
+    log.Fatal(err)
+  }
+  rowCnt, err = res.RowsAffected()
   if err != nil {
     log.Fatal(err)
   }
