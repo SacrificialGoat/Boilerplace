@@ -15,7 +15,14 @@ var Bio = React.createClass({
       // replace it with a form.
     this.setState({
       editing: true
-    })
+    });
+
+    var that = this;
+    setTimeout(function(){
+      React.findDOMNode(that.refs.avatar).value = that.props.item.avatar_link;
+      React.findDOMNode(that.refs.bio).value = that.props.item.bio;
+    },100);
+
   },
 
   cancelEdit: function(){
@@ -23,7 +30,7 @@ var Bio = React.createClass({
       // replace it with a form.
     this.setState({
       editing: false
-    })
+    });
   },
 
   saveEdit: function(){

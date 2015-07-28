@@ -1,5 +1,7 @@
 var ThreadConstants = {
   ADD: 'ADD',
+  EDIT: 'EDIT',
+  DELETE: 'DELETE',
   SEARCH: 'SEARCH',
   FETCHTHREAD: 'FETCHTHREAD',
   FETCHPAGE: 'FETCHPAGE',

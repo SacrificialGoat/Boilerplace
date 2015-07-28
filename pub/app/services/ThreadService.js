@@ -1,10 +1,12 @@
-var addThread = function(title,body,callback) {
+var addThread = function(title,body,link,tag,callback) {
   return $.ajax({
     type: 'POST',
     url: '/threads/',
     data: JSON.stringify({
       "title": title,
-      "body": body
+      "body": body,
+      "link": link,
+      "tag": tag
     }),
     crossDomain: true,
     success: function(resp) {
@@ -127,14 +129,46 @@ var fetchOtherPage = function(id, page, callback) {
   });
 };
 
-var updateThread = function(bio,avatar,callback) {
+var editThread = function(threadId,title,body,link,tag,callback) {
+  console.log(JSON.stringify({
+      "thread_id": parseInt(threadId),
+      "title":title,
+      "body":body,
+      "link":link,
+      "tag":tag
+    }));
   return $.ajax({
-    type: 'POST',
-    url: '/profile/',
+    type: 'PUT',
+    url: '/thread/',
     data: JSON.stringify({
-      "bio": bio,
-      "avatar_link": avatar
+      "thread_id": parseInt(threadId),
+      "title":title,
+      "body":body,
+      "link":link,
+      "tag":tag
     }),
+    crossDomain: true,
+    success: function(resp) {
+      console.log('success',resp);
+      return callback(resp);
+    },
+    error: function(resp) {
+      // TODO: Fix this, this always goes to error - not sure.
+      // Found out - jQuery 1.4.2 works with current go server, but breaks with newer ver.
+      console.log('error',resp);
+      if(resp.responseText === ""){ // if no error msg
+        callback(resp);
+      }else{         // if error msg
+        callback(null);
+      }
+    }
+  });
+};
+
+var deleteThread = function(threadId,callback) {
+  return $.ajax({
+    type: 'DELETE',
+    url: '/thread/'+ threadId,
     crossDomain: true,
     success: function(resp) {
       console.log('success',resp);
@@ -244,10 +278,10 @@ var Thread = {
     });
   },
 
-  add: function(title, body, callback) {
+  add: function(title, body, link, tag, callback) {
     var that = this;
 
-    addThread(title, body, function(res) {
+    addThread(title, body, link, tag, function(res) {
       if (callback) {
         callback(res);
       }
@@ -256,9 +290,9 @@ var Thread = {
 
   },
   
-  update: function(bio, avatar, callback) {
+  edit: function(threadId,title,body,link,tag,callback) {
     var that = this;
-    updateThread(bio, avatar, function(res) {
+    editThread(threadId,title,body,link,tag, function(res) {
       if (callback) {
         callback(res);
       }
@@ -266,16 +300,18 @@ var Thread = {
     });
   },
 
-  delete: function(callback) {
-    if (callback) {
-      callback();
-    }
-    this.onChange(false);
+  delete: function(threadId,callback) {
+    var that = this;
+    deleteThread(threadId,function(res) {
+      if (callback) {
+        callback(res);
+      }
+      that.onChange(res);
+    });
   },
 
   upVote: function(thread_id,callback){
     var that = this;
-
     upVote(thread_id, function(res) {
       if (callback) {
         callback(res);

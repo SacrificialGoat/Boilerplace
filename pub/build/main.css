@@ -378,3 +378,35 @@ h2{
   margin-left:10px
 }
 
+/* Thread (single) */
+
+.thread input{
+  width:100%;
+
+}
+
+.edit-icon{
+  float:right;
+  margin-right:5px;
+  margin-left:5px;
+}
+
+.delete-icon{
+  float:right;
+  margin-right:5px;
+  margin-left:5px;
+}
+
+.meta-info{
+  float:right;
+  text-align:right;
+  margin-top:-70px;
+
+}
+
+.meta-info p{
+  font-size:12px;
+  margin:0;
+  padding:0;
+}
+

@@ -9,6 +9,20 @@ var ThreadActions = {
     });
   },
 
+  edit: function(data){
+    AppDispatcher.handleAction({
+      actionType: ThreadConstants.EDIT,
+      data: data
+    });
+  },
+
+  delete: function(data){
+    AppDispatcher.handleAction({
+      actionType: ThreadConstants.DELETE,
+      data: data
+    });
+  },
+
   search: function(data){
     AppDispatcher.handleAction({
       actionType: ThreadConstants.SEARCH,

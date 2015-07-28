@@ -25,6 +25,8 @@ var NewThread = React.createClass({
     // Send action to update user information
     var title = React.findDOMNode(this.refs.title).value.trim();
     var body = React.findDOMNode(this.refs.body).value.trim();
+    var link = React.findDOMNode(this.refs.link).value.trim();
+    var tag = React.findDOMNode(this.refs.tag).value.trim();
 
     if(!title || !body){
       return;
@@ -32,7 +34,9 @@ var NewThread = React.createClass({
 
     ThreadActions.add({
       title: title,
-      body: body
+      body: body,
+      link: link,
+      tag: tag
     });
 
   },
@@ -49,7 +53,9 @@ var NewThread = React.createClass({
         <div className="newThread center-block">
             <form onSubmit={this.addThread}>
               <input type="text" className="form-control" placeholder="Title" ref="title" />
+              <input type="text" className="form-control" placeholder="Link" ref="link" />
               <input type="textarea" className="form-control" placeholder="Body" ref="body" />
+              <input type="text" className="form-control" placeholder="Tag" ref="tag" />
               <button type="submit" className="btn btn-success" value="Submit">Submit</button>
             </form>
         </div>
