@@ -395,7 +395,7 @@ func editThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *s
   }
   fm := session.Flashes("message")
   if fm == nil {
-    fmt.Println("Trying to vote on forum thread post as an invalid user")
+    fmt.Println("Trying to edit forum thread post as an invalid user")
     fmt.Fprint(w, "No flash messages")
     return
   }
@@ -433,6 +433,60 @@ func editThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *s
     log.Fatal(err)
   }
   fmt.Printf("Updated contents of thread post " + strconv.Itoa(post_id) + ". Rows affected = %d\n", rowCnt)      
+
+  //return 200 status to indicate success
+  fmt.Println("about to write 200 header")
+  w.WriteHeader(http.StatusOK)
+
+}
+
+//TODO: Return correct status and message if session is invalid
+//TODO: Return correct status and message if query failed
+func deleteThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore, id int) {
+
+  fmt.Println("Delete thread post...")
+
+  //add headers to response
+  w.Header()["access-control-allow-origin"] = []string{"http://localhost:8080"} //TODO: fix this?                                                           
+  w.Header()["access-control-allow-methods"] = []string{"GET, POST, OPTIONS"}
+  w.Header()["Content-Type"] = []string{"application/json"}
+
+  //ignore options requests
+  if r.Method == "OPTIONS" {
+    fmt.Println("options request received")
+    w.WriteHeader(http.StatusTemporaryRedirect)
+    return
+  }
+
+  //check for session to see if client is authenticated
+  session, err := store.Get(r, "flash-session")
+  if err != nil {
+    http.Error(w, err.Error(), http.StatusInternalServerError)
+  }
+  fm := session.Flashes("message")
+  if fm == nil {
+    fmt.Println("Trying to delete forum thread post as an invalid user")
+    fmt.Fprint(w, "No flash messages")
+    return
+  }
+  //session.Save(r, w)
+
+  //TODO: return error if post id is blank/nan
+
+  //delete the forum thread post
+  stmt, err := db.Prepare("delete from thread_posts where post_id = ?")
+  if err != nil {
+    log.Fatal(err)
+  }
+  res, err := stmt.Exec(id)
+  if err != nil {
+    log.Fatal(err)
+  }
+  rowCnt, err := res.RowsAffected()
+  if err != nil {
+    log.Fatal(err)
+  }
+  fmt.Printf("Deleted thread post " + strconv.Itoa(id) + ". Rows affected = %d\n", rowCnt)      
 
   //return 200 status to indicate success
   fmt.Println("about to write 200 header")

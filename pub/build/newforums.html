@@ -35,6 +35,29 @@
 
     });
 
+    $('#deleteForumThread').click(function() {
+
+      var threadId = parseInt($('#threadId').val());
+
+      $('#threadId').val(''); 
+
+      $.ajax({
+        type: 'DELETE',
+        url: 'http://127.0.0.1:8080/thread/' + threadId,
+        // contentType: "application/json",
+        // crossDomain: true,
+          success: function(data, textStatus, jqXHR) {
+            console.log(data);
+            // console.log('success');
+            //data - response from server
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            console.log(errorThrown);
+          }
+      });
+
+    });     
+
     $('#editForumThread').click(function() {
 
       var threadId = parseInt($('#threadId').val());
@@ -187,6 +210,29 @@
 
     }); 
 
+    $('#deleteThreadPost').click(function() {
+
+      var postId = parseInt($('#postId').val());
+
+      $('#postId').val(''); 
+
+      $.ajax({
+        type: 'DELETE',
+        url: 'http://127.0.0.1:8080/post/' + postId,
+        // contentType: "application/json",
+        // crossDomain: true,
+          success: function(data, textStatus, jqXHR) {
+            console.log(data);
+            // console.log('success');
+            //data - response from server
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            console.log(errorThrown);
+          }
+      });
+
+    }); 
+
     $('#editThreadPost').click(function() {
 
       var postId = parseInt($('#postId').val());
@@ -213,6 +259,11 @@
       });
 
     });     
+
+
+
+
+
 
     $('#upvotePostScore').click(function() {
 
@@ -296,6 +347,7 @@ Body: <input type="text" id="body" name="body" placeholder="Body"><br>
 Link: <input type="text" id="link" name="link" placeholder="Link"><br>
 Tag: <input type="text" id="tag" name="tag" placeholder="Tag"><br>
 <input id="createForumThread" type="submit" value="Create Forum Thread"><br>
+<input id="deleteForumThread" type="submit" value="Delete Forum Thread"><br>
 <input id="editForumThread" type="submit" value="Edit Forum Thread"><br>
 
 <br>
@@ -316,6 +368,7 @@ Thread Id: <input type="text" id="threadId" name="threadId" placeholder="Thread 
 Thread Id: <input type="text" id="threadId0" name="threadId0" placeholder="Thread Id0"><br>
 Post Contents: <input type="text" id="postContents" name="postContents" placeholder="Post Contents"><br>
 <input id="createThreadPost" type="submit" value="Create Thread Post"><br>
+<input id="deleteThreadPost" type="submit" value="Delete Thread Post"><br>
 <input id="editThreadPost" type="submit" value="Edit Thread Post"><br>
 
 <br>
