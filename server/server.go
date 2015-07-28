@@ -61,7 +61,7 @@ func main() {
 //GET:
 //getUserInfo                                 profile/
 //POST:
-//updateUserInfo                              profile                        body: {"bio" : bio, "avatar_link" : avatar_link}
+//updateUserInfo                              profile/                       body: {"bio" : bio, "avatar_link" : avatar_link}
   http.HandleFunc("/profile/", func(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
       case "GET":
@@ -84,7 +84,7 @@ func main() {
   })
 
 //POST:
-//createUser                                   users                          body: {"username" : username, "password" : password, "firstname" : firstname, "lastname" : lastname}
+//createUser                                   users/                         body: {"username" : username, "password" : password, "firstname" : firstname, "lastname" : lastname}
   http.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
       case "GET":
@@ -104,7 +104,7 @@ func main() {
   })
 
 //POST:
-//authenticate                                 authenticate                   body: {"username" : username, "password" : password}  
+//authenticate                                 authenticate/                  body: {"username" : username, "password" : password}  
   http.HandleFunc("/authenticate/", func(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
       case "GET":
@@ -132,7 +132,9 @@ func main() {
 //upvoteForumThread                            thread/XidX/?upvote=true       //id in url so don't need body
 //downvoteForumThread                          thread/XidX/?downvote=true     //id in url so don't need body
 //PUT:
-//editForumThread                              thread                         body: {"title" : title, "body" : body, "link" : link, "tag" : tag}
+//editForumThread                              thread/                        body: {"title" : title, "body" : body, "link" : link, "tag" : tag}
+//DELETE:
+//deleteForumThread                            thread/ id
   http.HandleFunc("/thread/", func(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
       case "GET":
@@ -192,6 +194,21 @@ func main() {
 
         break  
       case "DELETE":
+
+        s := strings.Split(r.URL.Path, "/")
+        if len(s) == 3 {
+          threadId, err := strconv.Atoi(s[2])
+
+          if err != nil {
+            //error
+          }
+
+          deleteForumThread(w, r, db, store, threadId)
+
+        } else {
+          //error
+        }
+
         break  
       default:
         break
@@ -245,7 +262,7 @@ func main() {
 //getForumThreadsByRating                      threads/ ? sortby = XXX & pagenumber = XXX
 //getForumThreadsByTime                        threads/ ? sortby = XXX & pagenumber = XXX
 //POST:
-//createForumThread                            threads                        body: {"title" : title, "body" : body, "link" : link, "tag" : tag}
+//createForumThread                            threads/                       body: {"title" : title, "body" : body, "link" : link, "tag" : tag}
   http.HandleFunc("/threads/", func(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
       case "GET":
@@ -309,7 +326,9 @@ func main() {
 //upvoteThreadPost                             post/XidX/?upvote=true         //id in url so don't need body
 //downvoteThreadPost                           post/XidX/?downvote=true       //id in url so don't need body
 //PUT:
-//editThreadPost                               post                           body: {"thread_id" : threadId, "contents" : contents}
+//editThreadPost                               post/                          body: {"thread_id" : threadId, "contents" : contents}
+//DELETE:
+//deleteThreadPost                             post/ id
   http.HandleFunc("/post/", func(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
       case "GET":
@@ -370,6 +389,21 @@ func main() {
 
         break  
       case "DELETE":
+
+        s := strings.Split(r.URL.Path, "/")
+        if len(s) == 3 {
+          postId, err := strconv.Atoi(s[2])
+
+          if err != nil {
+            //error
+          }
+
+          deleteThreadPost(w, r, db, store, postId)
+
+        } else {
+          //error
+        }
+
         break  
       default:
         break
@@ -384,7 +418,7 @@ func main() {
 //getThreadPostsByRating                       posts / ? sortby = rating & pagenumber = XXX
 //getThreadPostsByTime                         posts / ? sortby = creationtime & pagenumber = XXX
 //POST:
-//createThreadPost                             posts                          body: {"thread_id" : threadId, "contents" : contents}
+//createThreadPost                             posts/                         body: {"thread_id" : threadId, "contents" : contents}
   http.HandleFunc("/posts/", func(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
       case "GET":

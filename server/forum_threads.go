@@ -483,7 +483,7 @@ func editForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store *
   }
   fm := session.Flashes("message")
   if fm == nil {
-    fmt.Println("Trying to vote on forum thread post as an invalid user")
+    fmt.Println("Trying to edit forum thread as an invalid user")
     fmt.Fprint(w, "No flash messages")
     return
   }
@@ -531,3 +531,103 @@ func editForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store *
 
 }
 
+//TODO: Return correct status and message if session is invalid
+//TODO: Return correct status and message if query failed
+func deleteForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore, id int) {
+
+  fmt.Println("Delete forum thread...")
+
+  //add headers to response
+  w.Header()["access-control-allow-origin"] = []string{"http://localhost:8080"} //TODO: fix this?                                                           
+  w.Header()["access-control-allow-methods"] = []string{"GET, POST, OPTIONS"}
+  w.Header()["Content-Type"] = []string{"application/json"}
+
+  //ignore options requests
+  if r.Method == "OPTIONS" {
+    fmt.Println("options request received")
+    w.WriteHeader(http.StatusTemporaryRedirect)
+    return
+  }
+
+  //check for session to see if client is authenticated
+  session, err := store.Get(r, "flash-session")
+  if err != nil {
+    http.Error(w, err.Error(), http.StatusInternalServerError)
+  }
+  fm := session.Flashes("message")
+  if fm == nil {
+    fmt.Println("Trying to delete forum thread as an invalid user")
+    fmt.Fprint(w, "No flash messages")
+    return
+  }
+  //session.Save(r, w)
+
+  //TODO: return error if thread id is blank/nan
+
+  //delete all votes related to forum posts
+  stmt, err := db.Prepare("delete post_votes from post_votes inner join thread_posts on post_votes.post_id = thread_posts.post_id where thread_posts.thread_id = ?")
+
+  if err != nil {
+    log.Fatal(err)
+  }
+  res, err := stmt.Exec(id)
+  if err != nil {
+    log.Fatal(err)
+  }
+  rowCnt, err := res.RowsAffected()
+  if err != nil {
+    log.Fatal(err)
+  }
+  fmt.Printf("Deleted votes for forum posts with forum thread id " + strconv.Itoa(id) + ". Rows affected = %d\n", rowCnt)    
+
+  //delete all forum posts related to the forum thread
+  stmt, err = db.Prepare("delete from thread_posts where thread_id = ?")
+  if err != nil {
+    log.Fatal(err)
+  }
+  res, err = stmt.Exec(id)
+  if err != nil {
+    log.Fatal(err)
+  }
+  rowCnt, err = res.RowsAffected()
+  if err != nil {
+    log.Fatal(err)
+  }
+  fmt.Printf("Deleted forum posts with forum thread id " + strconv.Itoa(id) + ". Rows affected = %d\n", rowCnt)  
+
+  //delete all votes related to the forum thread
+  stmt, err = db.Prepare("delete from thread_votes where thread_id = ?")
+
+  if err != nil {
+    log.Fatal(err)
+  }
+  res, err = stmt.Exec(id)
+  if err != nil {
+    log.Fatal(err)
+  }
+  rowCnt, err = res.RowsAffected()
+  if err != nil {
+    log.Fatal(err)
+  }
+  fmt.Printf("Deleted votes for forum thread with id " + strconv.Itoa(id) + ". Rows affected = %d\n", rowCnt)      
+
+  //delete the forum thread
+  stmt, err = db.Prepare("delete from forum_threads where thread_id = ?")
+  if err != nil {
+    log.Fatal(err)
+  }
+  res, err = stmt.Exec(id)
+  if err != nil {
+    log.Fatal(err)
+  }
+  rowCnt, err = res.RowsAffected()
+  if err != nil {
+    log.Fatal(err)
+  }
+  fmt.Printf("Deleted forum thread " + strconv.Itoa(id) + ". Rows affected = %d\n", rowCnt)      
+
+  //return 200 status to indicate success
+  fmt.Println("about to write 200 header")
+  w.WriteHeader(http.StatusOK)
+
+}
