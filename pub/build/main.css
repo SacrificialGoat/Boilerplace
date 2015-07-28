@@ -378,3 +378,22 @@ h2{
   margin-left:10px
 }
 
+/* Thread (single) */
+
+.thread input{
+  width:100%;
+
+}
+
+.edit-icon{
+  float:right;
+  margin-right:5px;
+  margin-left:5px;
+}
+
+.delete-icon{
+  float:right;
+  margin-right:5px;
+  margin-left:5px;
+}
+
