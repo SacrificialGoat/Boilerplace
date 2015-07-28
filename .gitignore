@@ -2,3 +2,5 @@ node_modules
 .DS_Store
 /pub/build/app.js
 /pub/build/vendors.js
+cert.pem
+key.pem
