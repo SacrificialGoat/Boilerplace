@@ -7,6 +7,8 @@ import (
 	"time"
 	"fmt"
 	"encoding/json"
+    // "database/sql"
+
 )
 
 const (
@@ -32,75 +34,77 @@ type friend_connection struct {
 	sendUsers chan map[*friend_connection]string
 }
 
-// reads message from websocket to hub
-func (c *friend_connection) readPump(){
-	// fmt.Println("Executing readPump..: Pongwait, ", pongWait)
-	// this "defer" is for closing at unregister signal.  ?? Defer?
-	defer func() {
-		h.unregister <- c
-		c.ws.Close()
-	}()
+// // reads message from websocket to hub
+// func (c *friend_connection) readPump(){
+// 	// fmt.Println("Executing readPump..: Pongwait, ", pongWait)
+// 	// this "defer" is for closing at unregister signal.  ?? Defer?
+// 	defer func() {
+// 		h.unregister <- c
+// 		c.ws.Close()
+// 	}()
 
-	c.ws.SetReadLimit(maxMessageSize) // set maxsize.
-	c.ws.SetReadDeadline(time.Now().Add(pongWait))  // reading deadline. Pongwait
+// 	c.ws.SetReadLimit(maxMessageSize) // set maxsize.
+// 	c.ws.SetReadDeadline(time.Now().Add(pongWait))  // reading deadline. Pongwait
 
-		// ?? no idea what htis does
-	c.ws.SetPongHandler(func(string) error {
-			c.ws.SetReadDeadline(time.Now().Add(pongWait));
-			return nil
-		})
+// 		// ?? no idea what htis does
+// 	c.ws.SetPongHandler(func(string) error {
+// 			c.ws.SetReadDeadline(time.Now().Add(pongWait));
+// 			return nil
+// 		})
 
-	// readmessage here
-	for {
-		_, message, err := c.ws.ReadMessage()  // if maxize reached, err out
-		if err != nil {
-			fmt.Println("exceeded Readmessage maxsize. Exiting current user:", c)
-			break
-		}
-		fmt.Println("Reading message from client... ", message)
-		h.broadcast <- message  // read message, pass to broadcast
-	}
-}
+// 	// readmessage here
+// 	for {
+// 		_, message, err := c.ws.ReadMessage()  // if maxize reached, err out
+// 		if err != nil {
+// 			fmt.Println("exceeded Readmessage maxsize. Exiting current user:", c)
+// 			break
+// 		}
+// 		fmt.Println("Reading message from client... ", message)
+// 		h.broadcast <- message  // read message, pass to broadcast
+// 	}
+// }
 
 
-// 
-func (c *friend_connection) write(mt int, payload []byte) error {
-	c.ws.SetWriteDeadline(time.Now().Add(writeWait))
-	return c.ws.WriteMessage(mt, payload)
-}
+// // 
+// func (c *friend_connection) write(mt int, payload []byte) error {
+// 	c.ws.SetWriteDeadline(time.Now().Add(writeWait))
+// 	return c.ws.WriteMessage(mt, payload)
+// }
 
-// pumps message from hub to websocket friend_connection.  Send to friend_connections?
-func (c *friend_connection) writePump() {
-	ticker := time.NewTicker(pingPeriod)  // NewTicker has channel
-	// ?? not sure about this
-	defer func() {
-		ticker.Stop()
-		c.ws.Close()
-	}()
+// // pumps message from hub to websocket friend_connection.  Send to friend_connections?
+// func (c *friend_connection) writePump() {
+// 	ticker := time.NewTicker(pingPeriod)  // NewTicker has channel
+// 	// ?? not sure about this
+// 	defer func() {
+// 		ticker.Stop()
+// 		c.ws.Close()
+// 	}()
 
-	for {
-		select {
-		case message, ok := <- c.send:  // receive message from hub. 
-			// close message if error reading
-			if !ok {
-				c.write(websocket.CloseMessage, []byte{})
-				return
-			}
-			// write to user friend_connection
-			fmt.Println("writing to C with Message", c, message)
-			if err := c.write(websocket.TextMessage, message); err!=nil { 
-				return
-			}
+// 	for {
+// 		select {
+// 		case message, ok := <- c.send:  // receive message from hub. 
+// 			// close message if error reading
+// 			if !ok {
+// 				c.write(websocket.CloseMessage, []byte{})
+// 				return
+// 			}
+// 			// write to user friend_connection
+// 			fmt.Println("writing to C with Message", c, message)
+// 			if err := c.write(websocket.TextMessage, message); err!=nil { 
+// 				return
+// 			}
 
-		case <- ticker.C:  //ticker.C is channel. So when Receiving something from ticker.C...
-			if err := c.write(websocket.PingMessage, []byte{}); err != nil {
-				return
-			}
+// 		case <- ticker.C:  //ticker.C is channel. So when Receiving something from ticker.C...
+// 			if err := c.write(websocket.PingMessage, []byte{}); err != nil {
+// 				return
+// 			}
 
-		}
+// 		}
 
-	}
-}
+// 	}
+// }
+
+
 
 
 // ======= Write pump for Friend List =========
@@ -113,6 +117,7 @@ func (c *friend_connection) writeFL(mt int, payload []byte) error {
 
 // pumps message from hub to websocket friend_connection.  Send to friend_connections?
 func (c *friend_connection) writePumpFL() {
+
 	ticker := time.NewTicker(pingPeriod)  // NewTicker has channel
 	// ?? not sure about this
 	defer func() {
@@ -135,8 +140,16 @@ func (c *friend_connection) writePumpFL() {
 				currConn = append(currConn, h[conn])
 			}
 			fmt.Println("Connected users: ", currConn)
+			fmt.Println("Current users: ", c.userId)
+
+			// TODO: Here x-reference with curr User friendlist
+
+			// userFriendList := GetFriendsListInternal(c.userId, db)
+			// fmt.Println("userFriendList: ", userFriendList)
 
 
+
+			// === write to ws connection == 
 			j, _ := json.Marshal(currConn)
 			fmt.Println("JSON string: ", j)
 
@@ -154,6 +167,8 @@ func (c *friend_connection) writePumpFL() {
 
 	}
 }
+
+
 
 
 
@@ -177,13 +192,14 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 	c := &friend_connection{send: make(chan []byte, 256), ws:ws, userId:userId, sendUsers: make(chan map[*friend_connection]string, 256)}
 
 	h.register <- c
+
 	// test := []string{"Trial1"}
 	// test := "Helloworld"
 	// h.broadcastUsers <- test
-	go c.writePump() // Write from hub to friend_connection. Goroutine. Any new message read from pump will be updated trhough here
+	// go c.writePump() // Write from hub to friend_connection. Goroutine. Any new message read from pump will be updated trhough here
 	go c.writePumpFL()
 
-	c.readPump()  //read data from friend_connection to hub
+	// c.readPump()  //read data from friend_connection to hub
 }
 
 

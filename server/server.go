@@ -757,7 +757,7 @@ http.HandleFunc("/search/", func(w http.ResponseWriter, r *http.Request) {
 
   // route for friend_list
   // http.HandleFunc("/friendlist", serveWs)  // 
-  http.HandleFunc("/friendlist/", func(w http.ResponseWriter, r *http.Request) {
+  http.HandleFunc("/friendlist/", func(w http.ResponseWriter, r *http.Request ) {
     serveWs(w, r)
   })
 

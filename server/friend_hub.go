@@ -55,13 +55,12 @@ func (h *hub) run(){
 				close(c.sendUsers)
 			}
 
-		case x := <- h.broadcastUsers:
+		case <- h.broadcastUsers:
 			// when new users registers, send new "userId connection list" to all members
-			fmt.Println("BroadcastUsers: ", x)
 			for c := range h.connections {
 				fmt.Println("range of h.connectionsId, ", c.userId)
 				select {
-				case c.sendUsers <- h.connectionsId:  // should send list of current users
+				case c.sendUsers <- h.connectionsId:  // for each of connection, send in connectionId map
 				default:
 					// close(c.sendUsers)
 					// delete(h.connectionsId, c)
