@@ -1,4 +1,4 @@
-var React = require('react');
+var React = require('react'); // Addons needed for input field changes
 var ThreadStore = require('../../stores/ThreadStore');
 var ThreadActions = require('../../actions/ThreadActions');
 
@@ -28,6 +28,7 @@ var formatDate = function(str){
 
 
 var Thread = React.createClass({
+  // mixins: [React.addons.LinkedStateMixin],
 
   getInitialState: function(){
     return {
@@ -85,6 +86,7 @@ var Thread = React.createClass({
         editable: true
       });
     }
+
   },
 
   _onProfileChange: function(){
@@ -106,6 +108,16 @@ var Thread = React.createClass({
     this.setState({
       editMode:true
     });
+    // Set the input fields to the fetched values
+
+    var that = this;
+    setTimeout(function(){
+      React.findDOMNode(that.refs.title).value = that.state.title;
+      React.findDOMNode(that.refs.body).value = that.state.body;
+      React.findDOMNode(that.refs.link).value = that.state.link;
+      React.findDOMNode(that.refs.tag).value = that.state.tag;
+    },100);
+
   },
 
   saveEdit: function(e){
@@ -116,11 +128,20 @@ var Thread = React.createClass({
     // TODO: Send PUT request with all info.
     ThreadActions.edit({
       threadId: this.state.id,
-      title: this.state.title,
-      body: this.state.body,
-      link: this.state.link,
-      tag: this.state.tag
+      title: React.findDOMNode(this.refs.title).value.trim(),
+      body: React.findDOMNode(this.refs.body).value.trim(),
+      link: React.findDOMNode(this.refs.link).value.trim(),
+      tag: React.findDOMNode(this.refs.tag).value.trim()
     });
+
+    this.setState({
+      title: React.findDOMNode(this.refs.title).value.trim(),
+      body: React.findDOMNode(this.refs.body).value.trim(),
+      link: React.findDOMNode(this.refs.link).value.trim(),
+      tag: React.findDOMNode(this.refs.tag).value.trim()
+    });
+
+    ThreadActions.fetchThread({id:this.state.id});
   },
 
   deleteThread: function(e){
@@ -134,6 +155,7 @@ var Thread = React.createClass({
   },
 
   render: function() {
+
     return (
       <div className="col-md-12 thread">
         { this.state.editable ? (
@@ -149,23 +171,23 @@ var Thread = React.createClass({
           )
         }
         { this.state.editMode ? (
-          <p>Title: <input type="text" ref="title" ></input></p>
+          <p>Title: <input type="text" ref="title"></input></p>
           ):(
           <h3> {this.state.title} </h3>
         ) }
         { this.state.editMode ? (
-          <p>Link: <input type="text" ref="link" value={this.state.link}></input></p>
+          <p>Link: <input type="text" ref="link"></input></p>
           ):(
           <a href={this.state.link}> {this.state.link} </a>
         ) }
         { this.state.editMode ? (
-          <p>Body: <input type="text" ref="body" value={this.state.body}></input></p>
+          <p>Body: <input type="text" ref="body"></input></p>
           ):(
           <p> {this.state.body} </p>
         ) }
         <p> Rating: {this.state.rating} </p>
         { this.state.editMode ? (
-          <p>Tag: <input type="text" ref="tag" value={this.state.tag}></input></p>
+          <p>Tag: <input type="text" ref="tag"></input></p>
           ):(
           <p>Tag: {this.state.tag} </p>
         ) }
@@ -178,7 +200,7 @@ var Thread = React.createClass({
             <p>Last comment: <FormattedRelative value={this.state.last_post_time} /></p>
             <p>Posts: {this.state.post_count}</p>
           </div>
-          )}
+        )}
         { this.state.editMode ? (
           <a href="#" className="btn btn-info" onClick={this.saveEdit}> Save </a>
           ):(

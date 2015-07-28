@@ -16,6 +16,13 @@ var Bio = React.createClass({
     this.setState({
       editing: true
     });
+
+    var that = this;
+    setTimeout(function(){
+      React.findDOMNode(that.refs.avatar).value = that.props.item.avatar_link;
+      React.findDOMNode(that.refs.bio).value = that.props.item.bio;
+    },100);
+
   },
 
   cancelEdit: function(){
@@ -51,7 +58,7 @@ var Bio = React.createClass({
         {!this.state.editing ? (
           <img src={this.props.item.avatar_link} className="img-thumbnail"></img>
         ) : (
-          <p>Avatar Link: <input type="text" ref="avatar" value={this.props.item.avatar_link}></input></p>
+          <p>Avatar Link: <input type="text" ref="avatar"></input></p>
         )}
 
         <p>Rep: {this.props.item.rep}</p>
@@ -60,7 +67,7 @@ var Bio = React.createClass({
         {!this.state.editing ? (
           <p>Bio: {this.props.item.bio}</p>
         ) : (
-          <p>Bio: <input type="text" ref="bio" value={this.props.item.bio}></input></p>
+          <p>Bio: <input type="text" ref="bio"></input></p>
         )}
         
         {!this.state.editing ? (
