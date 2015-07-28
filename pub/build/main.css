@@ -397,3 +397,16 @@ h2{
   margin-left:5px;
 }
 
+.meta-info{
+  float:right;
+  text-align:right;
+  margin-top:-70px;
+
+}
+
+.meta-info p{
+  font-size:12px;
+  margin:0;
+  padding:0;
+}
+

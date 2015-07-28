@@ -66,9 +66,9 @@ var ThreadStore = assign({}, EventEmitter.prototype, {
     });
   },
 
-  add: function(title,body){
+  add: function(title,body,link,tag){
     var that = this;
-    Thread.add(title,body,function(data){
+    Thread.add(title,body,link,tag,function(data){
       that.emitChange();
     });
   },
@@ -87,17 +87,19 @@ var ThreadStore = assign({}, EventEmitter.prototype, {
     });
   },
 
-  update: function(bio,avatar){
-    // var that = this;
-    // Thread.update(bio,avatar,function(data){
-    //   console.log('update successful');
-    //   that.fetch();
-    // });
+  edit: function(threadId,title,body,link,tag){
+    var that = this;
+    Thread.edit(threadId,title,body,link,tag,function(data){
+      console.log('edit complete');
+      that.emitChange();
+    });
   },
 
-  delete: function(){
-
-
+  delete: function(threadId){
+    var that = this;
+    Thread.delete(threadId,function(data){
+      that.emitChange();
+    });
   },
 
   search: function(query){
@@ -124,32 +126,29 @@ AppDispatcher.register(function(payload){
   switch(action.actionType){
     case ThreadConstants.SEARCH:
       ThreadStore.search(action.data.query);
-      ThreadStore.emitChange();
       break;
-    case ThreadConstants.FETCHPAGE:
+    case ThreadConstants.FETCHPAGE: // Front page threads
       ThreadStore.fetchPage(action.data.page);
-      ThreadStore.emitChange();
       break;
-    case ThreadConstants.FETCHUSERPAGE:
+    case ThreadConstants.FETCHUSERPAGE: // User profile threads
       ThreadStore.fetchUserPage(action.data.page);
-      ThreadStore.emitChange();
       break;
-    case ThreadConstants.FETCHOTHERPAGE:
+    case ThreadConstants.FETCHOTHERPAGE: // Other user profile threads
       ThreadStore.fetchOtherPage(action.data.id, action.data.page);
-      ThreadStore.emitChange();
       break;
-    case ThreadConstants.FETCHTHREAD:
+    case ThreadConstants.FETCHTHREAD: // Fetch individual thread
       ThreadStore.fetchThread(action.data.id);
-      ThreadStore.emitChange();
       break;
     case ThreadConstants.ADD:
-      ThreadStore.add(action.data.title,action.data.body);
+      ThreadStore.add(action.data.title,action.data.body,action.data.link,action.data.tag);
       break;
-    case ThreadConstants.UPDATE:
+    case ThreadConstants.EDIT:
       // TODO: Updating a thread
+      ThreadStore.edit(action.data.threadId,action.data.title,action.data.body,action.data.link,action.data.tag);
       break;
     case ThreadConstants.DELETE:
       // TODO: Deleting a thread
+      ThreadStore.delete(action.data.threadId);
       break;
     case ThreadConstants.UPVOTE:
       ThreadStore.upVote(action.data.thread_id);
