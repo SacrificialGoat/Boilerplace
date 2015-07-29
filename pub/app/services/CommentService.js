@@ -82,14 +82,36 @@ var fetchUserPage = function(page, callback) {
   });
 };
 
-var updateComment = function(bio,avatar,callback) {
+var editComment = function(post_id,body,callback) {
   return $.ajax({
-    type: 'POST',
-    url: '/profile/',
+    type: 'PUT',
+    url: '/post/',
     data: JSON.stringify({
-      "bio": bio,
-      "avatar_link": avatar
+      "post_id": parseInt(post_id),
+      "contents": body
     }),
+    crossDomain: true,
+    success: function(resp) {
+      console.log('success',resp);
+      return callback(resp);
+    },
+    error: function(resp) {
+      // TODO: Fix this, this always goes to error - not sure.
+      // Found out - jQuery 1.4.2 works with current go server, but breaks with newer ver.
+      console.log('error',resp);
+      if(resp.responseText === ""){ // if no error msg
+        callback(resp);
+      }else{         // if error msg
+        callback(null);
+      }
+    }
+  });
+};
+
+var deleteComment = function(post_id,callback) {
+  return $.ajax({
+    type: 'DELETE',
+    url: '/post/'+post_id,
     crossDomain: true,
     success: function(resp) {
       console.log('success',resp);
@@ -182,9 +204,9 @@ var Comment = {
 
   },
   
-  update: function(bio, avatar, callback) {
+  edit: function(post_id, body, callback) {
     var that = this;
-    updateComment(bio, avatar, function(res) {
+    editComment(post_id, body, function(res) {
       if (callback) {
         callback(res);
       }
@@ -192,11 +214,14 @@ var Comment = {
     });
   },
 
-  delete: function(callback) {
-    if (callback) {
-      callback();
-    }
-    this.onChange(false);
+  delete: function(post_id, callback) {
+    var that = this;
+    deleteComment(post_id, function(res) {
+      if (callback) {
+        callback(res);
+      }
+      that.onChange(res);
+    });
   },
 
   upVote: function(post_id,callback){

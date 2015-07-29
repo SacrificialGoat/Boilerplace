@@ -8,6 +8,9 @@ var ChatStore = require('../../stores/ChatStore');
 var ChatActions = require('../../actions/ChatActions');
 var ChatBox = require('./navbar-chatbox');
 
+// Profile fetching
+var ProfileActions = require('../../actions/ProfileActions');
+
 var ThreadActions = require('../../actions/ThreadActions');
 var Link = Router.Link;
 
@@ -40,6 +43,7 @@ var Navbar = React.createClass({
       loggedIn: AuthStore.loggedIn()
     });
     if(this.state.loggedIn){
+      ProfileActions.fetch();
       location.hash = '/';
     }
   },

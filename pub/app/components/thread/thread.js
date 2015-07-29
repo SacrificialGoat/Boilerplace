@@ -6,9 +6,11 @@ var CommentList = require('../comment/comment-list');
 var CommentInput = require('../comment/comment-input');
 
 // User profile is needed to fetch user id to make thread edit/deletable
-// TODO: Profile fetching should be in main app
 var ProfileStore = require('../../stores/ProfileStore');
 var ProfileActions = require('../../actions/ProfileActions');
+
+// Auth for login/logout change
+var AuthStore = require('../../stores/AuthStore');
 
 // Relative Time
 var ReactIntl = require('react-intl');
@@ -51,20 +53,32 @@ var Thread = React.createClass({
   },
 
   componentDidMount: function(){
-    ThreadActions.fetchThread({id:this.state.id});
     ProfileActions.fetch();
 
-    ProfileStore.addChangeListener(this._onProfileChange);
+    ThreadActions.fetchThread({id:this.state.id});
+
     ThreadStore.addChangeListener(this._onChange);
+    ProfileStore.addChangeListener(this._onChange);
+    AuthStore.addChangeListener(this._onChange);
+
+    if(ProfileStore.getBio()){
+      this.setState({
+        profileId: ProfileStore.getBio().user_id
+      });
+    }else{
+      this.setState({
+        profileId: null
+      });
+    }
   },
 
   componentWillUnmount: function(){
-    ProfileStore.removeChangeListener(this._onProfileChange);
     ThreadStore.removeChangeListener(this._onChange);
+    ProfileStore.removeChangeListener(this._onChange);
+    AuthStore.removeChangeListener(this._onChange);
   },
 
   _onChange: function(){
-    // ThreadActions.fetchThread({id:this.state.id}); // Fetch so the edited data shows up.
 
     this.setState({
       title: ThreadStore.getThread().forumThreads[0].title,
@@ -79,28 +93,27 @@ var Thread = React.createClass({
       last_post_time: formatDate(ThreadStore.getThread().forumThreads[0].last_post_time),
       post_count: ThreadStore.getThread().forumThreads[0].post_count
     });
-    // Run this twice because we don't know which fetch will complete first
-    // TODO: Profile fetching should be in main app
+
+    if(ProfileStore.getBio()){
+      this.setState({
+        profileId: ProfileStore.getBio().user_id
+      });
+    }else{
+      this.setState({
+        profileId: null
+      });
+    }
+
     if(this.state.userId === this.state.profileId){
       this.setState({
         editable: true
       });
-    }
-
-  },
-
-  _onProfileChange: function(){
-    this.setState({
-      profileId: ProfileStore.getBio().user_id
-    });
-
-    // Run this twice because we don't know which fetch will complete first
-    // TODO: Profile fetching should be in main app
-    if(this.state.userId === this.state.profileId){
+    }else{
       this.setState({
-        editable: true
+        editable: false
       });
     }
+
   },
 
   editThread: function(e){
@@ -116,7 +129,7 @@ var Thread = React.createClass({
       React.findDOMNode(that.refs.body).value = that.state.body;
       React.findDOMNode(that.refs.link).value = that.state.link;
       React.findDOMNode(that.refs.tag).value = that.state.tag;
-    },100);
+    },0);
 
   },
 
@@ -189,7 +202,7 @@ var Thread = React.createClass({
         { this.state.editMode ? (
           <p>Tag: <input type="text" ref="tag"></input></p>
           ):(
-          <p>Tag: {this.state.tag} </p>
+          <p className="tag">{this.state.tag} </p>
         ) }
         { this.state.editMode ? (
             null
@@ -206,7 +219,8 @@ var Thread = React.createClass({
           ):(
           null
         ) }
-        <CommentList threadId={this.state.id}/>
+          <br></br>
+        <CommentList profileId={this.state.profileId} threadId={this.state.id}/>
       </div>
     );
   }
