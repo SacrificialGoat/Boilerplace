@@ -116,6 +116,18 @@ type ThreadPostCollectionOutbound struct {
   ThreadPosts []*ThreadPostInfoOutbound `json:"threadPosts"`
 }
 
+//struct containing popular topics
+type PopularTopicCollectionOutbound struct {
+  PopularTopics []*PopularTopicOutbound `json:"topics"`
+}
+
+//struct containing a popular tag and its count
+type PopularTopicOutbound struct {
+  Tag string `json:"tag"`
+  Count int `json:"count"`
+}
+
+
 type FriendInfoOutbound struct {
   User_id int `json:"id"`
   User_name string `json:"username"`
