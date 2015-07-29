@@ -33,12 +33,13 @@ var _searchFriendInList = function(targetUser){
 	}
 };
 
+var conn;
 
 var _clientSocket = {
   connect: function(){
     console.log('connecting to Friend Online Status...');
     conn = new WebSocket("ws://"+window.location.host+"/friendlist/");
-
+    _ws =  conn
     conn.onclose = function(evt) {
         console.log("WS closing")
     }
@@ -48,6 +49,10 @@ var _clientSocket = {
         _friendData.onlineFriendList = JSON.parse(evt.data).friends
         FriendStore.emitChangeOnline()
     }
+  },
+
+  disconnect: function(){
+    conn.close()
   }
 }
 
@@ -56,9 +61,13 @@ var _clientSocket = {
 
 
 var FriendStore = assign({}, EventEmitter.prototype, {
-	connectFriendOnline: function(){
+	connectWs: function(){
 		_clientSocket.connect()
 	},
+
+    disconnectWs: function(){
+        _clientSocket.disconnect()
+    },
 
 	updateFriendOnline: function(){
 

@@ -41,9 +41,34 @@ type friendStatus struct {
 
 
 
-// ======= Write pump for Friend List =========
+// ======= Pumps for Friend List =========
 
-// 
+
+// reads message from websocket to hub.
+// the c.ws.ReadMessage is blocking, thats why function doesn't jump to "defer" automatically
+func (c *friend_connection) readPumpFL(){
+	defer func() {
+		h.unregister <- c
+		c.ws.Close()
+	}()
+
+	// c.ws.SetReadDeadline(time.Now().Add(pongWait))
+	// c.ws.SetPongHandler(func(string) error { c.ws.SetReadDeadline(time.Now().Add(pongWait)); return nil })
+	for {
+		fmt.Println("Blocking at reading...")
+		_, message, err := c.ws.ReadMessage()
+		fmt.Println("After reading...")
+
+		if err != nil {
+			break
+		}
+
+		h.broadcast <- message
+	}
+
+}
+
+
 func (c *friend_connection) writeFL(mt int, payload []byte) error {
 	c.ws.SetWriteDeadline(time.Now().Add(writeWait))
 	return c.ws.WriteMessage(mt, payload)
@@ -56,6 +81,7 @@ func (c *friend_connection) writePumpFL(db *sql.DB) {
 	// ?? not sure about this
 	defer func() {
 		ticker.Stop()
+		h.unregister <- c
 		c.ws.Close()
 	}()
 
@@ -134,8 +160,6 @@ func (c *friend_connection) writePumpFL(db *sql.DB) {
 
 
 func GetFriendsListInternal(userId string, db *sql.DB) FriendsListOutbound {
-
-
   rows, err := db.Query("select users.user_id, users.user_name, users.first_name, users.last_name from friends right join users on friends.friend_id = users.user_id where friends.user_id = " + userId)
   if err != nil {
     log.Fatal(err)
@@ -162,11 +186,6 @@ func GetFriendsListInternal(userId string, db *sql.DB) FriendsListOutbound {
 }
 
 
-
-
-
-
-
 // handles websocket request from peer.
 // a friend_connection will be re routed here. Then "ws" gets pointer to that websocket friend_connection. 
 // Then "c" is instantiated with &friend_connection struct (a user's friend_connection). Then pass to h.register.
@@ -175,9 +194,14 @@ func GetFriendsListInternal(userId string, db *sql.DB) FriendsListOutbound {
 func serveWs(w http.ResponseWriter, r *http.Request, db *sql.DB ) {
 	// TODO: register connection when sign in and out, not when openning page
 
-	go h.run()  // place this here because we took out friend_list
+	// go h.run()  // place this here because we took out friend_list
 
 	userId := CheckSession(w, r)  // This is in Pete's friend.go
+
+	if userId == "" {
+		fmt.Println("User Not logged in", userId)		
+		return
+	}
 
 	// ? Upgrade gets pointer to Websocket "ws".  Ws is pointer to friend_connection
 	ws, err := friend_upgrader.Upgrade(w, r, nil)
@@ -189,9 +213,8 @@ func serveWs(w http.ResponseWriter, r *http.Request, db *sql.DB ) {
 	c := &friend_connection{send: make(chan []byte, 256), ws:ws, userId:userId, sendUsers: make(chan map[*friend_connection]string, 256)}
 
 	h.register <- c
-
 	go c.writePumpFL(db)
-
+    c.readPumpFL()
 }
 
 

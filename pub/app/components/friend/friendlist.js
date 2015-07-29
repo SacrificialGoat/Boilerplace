@@ -14,19 +14,26 @@ var FriendList = React.createClass({
 	},
 
 	componentWillMount: function(){
-		console.log("Mounting FriendStore.connectFriendOnline")
-		FriendStore.connectFriendOnline();
-	},
-
-	componentDidMount: function(){
 		FriendStore.addChangeListenerOnline(this._onChange)
+		FriendStore.connectWs();
+		AuthStore.addChangeListener(this._onChange);
 	},
 
 	componentWillUnmount: function(){
 		FriendStore.removeChangeListenerOnline(this._onChange)
+		AuthStore.removeChangeListener(this._onChange);
+
 	},	
 
 	_onChange: function(){ 
+		if (this.state.loggedIn === true && AuthStore.loggedIn() === false){
+			FriendStore.disconnectWs()
+		}
+		if (this.state.loggedIn === false && AuthStore.loggedIn() === true){
+
+			FriendStore.connectWs()
+		}
+
 	  this.setState({
 	  	loggedIn: AuthStore.loggedIn(),
 	    friendOnline: FriendStore.getFriendOnline(),   
