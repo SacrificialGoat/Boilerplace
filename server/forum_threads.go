@@ -652,52 +652,45 @@ func popularThreads(w http.ResponseWriter, r *http.Request, db *sql.DB) {
   //variable(s) to hold the returned values from the query
   var (
     queried_tag string
+    queried_count int
   )  
 
   //get the 5 most popular tags within the past 2 hours
   //perform query and check for errors
-  rows, err := db.Query("select tag from forum_threads where creation_time > DATE_SUB( NOW(), INTERVAL 2 HOUR) group by tag order by count(tag) desc limit 5")
+  rows, err := db.Query("select tag, count(tag) from forum_threads where creation_time > DATE_SUB( NOW(), INTERVAL 2 HOUR) group by tag order by count(tag) desc limit 5")
   if err != nil {
     panic(err)
   } 
 
-  //create the json string to return
-  jsonString := "{\"tags\" : ["
+  //outbound object containing a collection of outbound objects for each forum thread
+  popularTopicCollectionOutbound := PopularTopicCollectionOutbound{PopularTopics: make([]*PopularTopicOutbound, 0)}
 
-  //rows.Next()
-  //err = rows.Scan(&queried_tag)
-  //if err != nil {
-  //  panic(err)
- // }
-  //jsonString += "\"" + queried_tag + "\""
-
-  first := true
   //iterate through results of query
   for rows.Next() {
     //get the relevant information from the query results
-    err = rows.Scan(&queried_tag)
+    err = rows.Scan(&queried_tag, &queried_count)
     if err != nil {
       panic(err)
     }
 
-    if queried_tag != "" && first == true {
-      first = false
-    } else if queried_tag != "" {
-      jsonString += ", "
-    }
+    //create outbound object for each row
+    popularTopicOutbound := PopularTopicOutbound{Tag: queried_tag, Count: queried_count}
 
-    if queried_tag != "" {
-      jsonString += "\"" + queried_tag + "\""
-    }
+    //add each outbound object to the collection outbound object
+    popularTopicCollectionOutbound.PopularTopics = append(popularTopicCollectionOutbound.PopularTopics, &popularTopicOutbound)
   }
 
-  jsonString += "]}"
-
-  fmt.Println(jsonString)      
+  //json stringify the data
+  jsonString, err := json.Marshal(popularTopicCollectionOutbound)
+  if err != nil {
+    panic(err)
+  }
+  fmt.Println(string(jsonString))      
 
   //return 200 status to indicate success
   fmt.Println("about to write 200 header")
-  w.Write([]byte(jsonString))
+  w.Write(jsonString)
+
 
 }
 
