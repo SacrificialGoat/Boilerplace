@@ -2,10 +2,13 @@ var React = require('react');
 
 var FriendStore = require("../../stores/FriendStore");
 var FriendAction = require("../../actions/FriendActions");
+var AuthStore = require('../../stores/AuthStore');
+
 
 var FriendList = React.createClass({
 	getInitialState: function(){
 		return {
+			loggedIn: AuthStore.loggedIn(),
 			friendOnline: []
 		}
 	},
@@ -25,6 +28,7 @@ var FriendList = React.createClass({
 
 	_onChange: function(){ 
 	  this.setState({
+	  	loggedIn: AuthStore.loggedIn(),
 	    friendOnline: FriendStore.getFriendOnline(),   
 	  })
 
@@ -42,15 +46,12 @@ var FriendList = React.createClass({
 		    </li>
 		  )
 		}.bind(this));
-
-
 		return (
-			<div className="friend-list">
-				<ul>
-				  {listItems}
-				</ul>
+			<div className="friend-list" >
+				{this.state.loggedIn ? <ul>{listItems}</ul> : "not logged in"}
 			</div>
 		)
+
 	},
 
 });

@@ -39,77 +39,6 @@ type friendStatus struct {
 	UserName string
 }
 
-// // reads message from websocket to hub
-// func (c *friend_connection) readPump(){
-// 	// fmt.Println("Executing readPump..: Pongwait, ", pongWait)
-// 	// this "defer" is for closing at unregister signal.  ?? Defer?
-// 	defer func() {
-// 		h.unregister <- c
-// 		c.ws.Close()
-// 	}()
-
-// 	c.ws.SetReadLimit(maxMessageSize) // set maxsize.
-// 	c.ws.SetReadDeadline(time.Now().Add(pongWait))  // reading deadline. Pongwait
-
-// 		// ?? no idea what htis does
-// 	c.ws.SetPongHandler(func(string) error {
-// 			c.ws.SetReadDeadline(time.Now().Add(pongWait));
-// 			return nil
-// 		})
-
-// 	// readmessage here
-// 	for {
-// 		_, message, err := c.ws.ReadMessage()  // if maxize reached, err out
-// 		if err != nil {
-// 			fmt.Println("exceeded Readmessage maxsize. Exiting current user:", c)
-// 			break
-// 		}
-// 		fmt.Println("Reading message from client... ", message)
-// 		h.broadcast <- message  // read message, pass to broadcast
-// 	}
-// }
-
-
-// // 
-// func (c *friend_connection) write(mt int, payload []byte) error {
-// 	c.ws.SetWriteDeadline(time.Now().Add(writeWait))
-// 	return c.ws.WriteMessage(mt, payload)
-// }
-
-// // pumps message from hub to websocket friend_connection.  Send to friend_connections?
-// func (c *friend_connection) writePump() {
-// 	ticker := time.NewTicker(pingPeriod)  // NewTicker has channel
-// 	// ?? not sure about this
-// 	defer func() {
-// 		ticker.Stop()
-// 		c.ws.Close()
-// 	}()
-
-// 	for {
-// 		select {
-// 		case message, ok := <- c.send:  // receive message from hub. 
-// 			// close message if error reading
-// 			if !ok {
-// 				c.write(websocket.CloseMessage, []byte{})
-// 				return
-// 			}
-// 			// write to user friend_connection
-// 			fmt.Println("writing to C with Message", c, message)
-// 			if err := c.write(websocket.TextMessage, message); err!=nil { 
-// 				return
-// 			}
-
-// 		case <- ticker.C:  //ticker.C is channel. So when Receiving something from ticker.C...
-// 			if err := c.write(websocket.PingMessage, []byte{}); err != nil {
-// 				return
-// 			}
-
-// 		}
-
-// 	}
-// }
-
-
 
 
 // ======= Write pump for Friend List =========
@@ -192,9 +121,9 @@ func (c *friend_connection) writePumpFL(db *sql.DB) {
 			}
 
 		case <- ticker.C:  //ticker.C is channel. So when Receiving something from ticker.C...
-			// if err := c.writeFL(websocket.PingMessage, []byte{}); err != nil {
-			// 	return
-			// }
+			if err := c.writeFL(websocket.PingMessage, []byte{}); err != nil {
+				return
+			}
 
 		}
 
