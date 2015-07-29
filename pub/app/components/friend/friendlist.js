@@ -14,29 +14,23 @@ var FriendList = React.createClass({
 	},
 
 	componentWillMount: function(){
+		AuthStore.addChangeListenerStatus(this._onChange);
 		FriendStore.addChangeListenerOnline(this._onChange)
 		FriendStore.connectWs();
-		AuthStore.addChangeListener(this._onChange);
-	},
-
-	componentDidMount: function(){
-		AuthStore.addChangeListener(this._onChange);
 	},
 
 	componentWillUnmount: function(){
 		FriendStore.removeChangeListenerOnline(this._onChange)
-		AuthStore.removeChangeListener(this._onChange);
+		AuthStore.removeChangeListenerStatus(this._onChange);
 
 	},	
 
 	_onChange: function(){ 
 		console.log("triggering onChange FriendList. state.loggedin / Auth.loggedin", this.state.loggedIn, AuthStore.loggedIn())
 		if (this.state.loggedIn === true && AuthStore.loggedIn() === false){
-			console.log("onChange User Loggedout")
 			FriendStore.disconnectWs()
 		}
 		if (this.state.loggedIn === false && AuthStore.loggedIn() === true){
-			console.log("onChange User Loggedin")
 			FriendStore.connectWs()
 		}
 

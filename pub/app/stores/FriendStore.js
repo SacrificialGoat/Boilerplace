@@ -45,7 +45,6 @@ var _clientSocket = {
     }
 
     conn.onmessage = function(evt) {   // listen to broadcast
-        console.log("Receive friendlist data", JSON.parse(evt.data));
         _friendData.onlineFriendList = JSON.parse(evt.data).friends
         FriendStore.emitChangeOnline()
     }
@@ -77,8 +76,6 @@ var FriendStore = assign({}, EventEmitter.prototype, {
 	updateFriendStatus: function(targetUser){
 		var targetUser = targetUser;
 		_searchFriendInList(targetUser);
-
-		console.log("updateFriendStatusis set: ", _friendData.isTargetFriend)
 	}, 
 
 	addFriend: function(data){
@@ -101,7 +98,6 @@ var FriendStore = assign({}, EventEmitter.prototype, {
 	},
 
 	fetchFriendList: function(){
-		console.log("Triggering fetchFriendList")
 		FriendService.fetchFriendList(_friendData,this)
 
 	  return _friendData.friendList;
