@@ -76,14 +76,16 @@ CREATE TABLE post_votes (
   FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
-CREATE TABLE friends (
-user_id INT(10),
-friend_id INT(10),
-creation_time DATETIME DEFAULT CURRENT_TIMESTAMP,
 
-PRIMARY KEY (user_id, friend_id),
-FOREIGN KEY (user_id) REFERENCES users(user_id),
-FOREIGN KEY (friend_id) REFERENCES users(user_id)
+
+CREATE TABLE friends (
+  user_id INT(10),
+  friend_id INT(10),
+  creation_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+  PRIMARY KEY (user_id, friend_id),
+  FOREIGN KEY (user_id) REFERENCES users(user_id),
+  FOREIGN KEY (friend_id) REFERENCES users(user_id)
 );
 
 

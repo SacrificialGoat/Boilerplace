@@ -631,3 +631,74 @@ func deleteForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store
   w.WriteHeader(http.StatusOK)
 
 }
+
+//TODO: Return correct status and message if query failed
+func popularThreads(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+
+  fmt.Println("Getting popular forum threads...")
+
+  //add headers to response
+  w.Header()["access-control-allow-origin"] = []string{"http://localhost:8080"} //TODO: fix this?                                                           
+  w.Header()["access-control-allow-methods"] = []string{"GET, POST, OPTIONS"}
+  w.Header()["Content-Type"] = []string{"application/json"}
+
+  //ignore options requests
+  if r.Method == "OPTIONS" {
+    fmt.Println("options request received")
+    w.WriteHeader(http.StatusTemporaryRedirect)
+    return
+  }
+
+  //variable(s) to hold the returned values from the query
+  var (
+    queried_tag string
+  )  
+
+  //get the 5 most popular tags within the past 2 hours
+  //perform query and check for errors
+  rows, err := db.Query("select tag from forum_threads where creation_time > DATE_SUB( NOW(), INTERVAL 2 HOUR) group by tag order by count(tag) desc limit 5")
+  if err != nil {
+    panic(err)
+  } 
+
+  //create the json string to return
+  jsonString := "{\"tags\" : ["
+
+  //rows.Next()
+  //err = rows.Scan(&queried_tag)
+  //if err != nil {
+  //  panic(err)
+ // }
+  //jsonString += "\"" + queried_tag + "\""
+
+  first := true
+  //iterate through results of query
+  for rows.Next() {
+    //get the relevant information from the query results
+    err = rows.Scan(&queried_tag)
+    if err != nil {
+      panic(err)
+    }
+
+    if queried_tag != "" && first == true {
+      first = false
+    } else if queried_tag != "" {
+      jsonString += ", "
+    }
+
+    if queried_tag != "" {
+      jsonString += "\"" + queried_tag + "\""
+    }
+  }
+
+  jsonString += "]}"
+
+  fmt.Println(jsonString)      
+
+  //return 200 status to indicate success
+  fmt.Println("about to write 200 header")
+  w.Write([]byte(jsonString))
+
+}
+
+
