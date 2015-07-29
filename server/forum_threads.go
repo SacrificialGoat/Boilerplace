@@ -396,7 +396,22 @@ func scoreForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store 
       if err != nil {
         log.Fatal(err)
       }
-      fmt.Printf("Updated score of thread " + strconv.Itoa(thread_id) + ". Rows affected = %d\n", rowCnt)      
+      fmt.Printf("Updated score of thread " + strconv.Itoa(thread_id) + ". Rows affected = %d\n", rowCnt)     
+
+      //update rep of user who created forum thread
+      stmt, err = db.Prepare("update users inner join forum_threads on users.user_id = forum_threads.user_id set rep = rep + 2 * ? where forum_threads.thread_id = ?")
+      if err != nil {
+        log.Fatal(err)
+      }
+      res, err = stmt.Exec(option, thread_id)
+      if err != nil {
+        log.Fatal(err)
+      }
+      rowCnt, err = res.RowsAffected()
+      if err != nil {
+        log.Fatal(err)
+      }
+      fmt.Printf("Updated rep of forum thread creator. Rows affected = %d\n", rowCnt)              
 
       //return 200 status to indicate success
       fmt.Println("about to write 200 header")
@@ -449,6 +464,21 @@ func scoreForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store 
       }
       fmt.Printf("Updated score of thread " + strconv.Itoa(thread_id) + ". Rows affected = %d\n", rowCnt)
 
+      //update rep of user who created forum thread
+      stmt, err = db.Prepare("update users inner join forum_threads on users.user_id = forum_threads.user_id set rep = rep + 2 * ? where forum_threads.thread_id = ?")
+      if err != nil {
+        log.Fatal(err)
+      }
+      res, err = stmt.Exec(option, thread_id)
+      if err != nil {
+        log.Fatal(err)
+      }
+      rowCnt, err = res.RowsAffected()
+      if err != nil {
+        log.Fatal(err)
+      }
+      fmt.Printf("Updated rep of forum thread creator. Rows affected = %d\n", rowCnt)               
+
       //return 200 status to indicate success
       fmt.Println("about to write 200 header")
       w.WriteHeader(http.StatusOK)
@@ -489,13 +519,16 @@ func editForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store *
   }
   //session.Save(r, w)
 
+  //get the user id and username from the cookie
+  userid := session.Values["userid"].(int)    
+
   //parse the body of the request into a string
   body, err := ioutil.ReadAll(r.Body)
   if err != nil {
     panic(err)
   }
   //fmt.Println(string(body))
-  
+
   //parse the JSON string body to get the forum thread info
   byt := body
   var dat map[string]interface{}
@@ -507,6 +540,44 @@ func editForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store *
   thread_body := dat["body"].(string)
   thread_link := dat["link"].(string)
   thread_tag := dat["tag"].(string)
+
+  var (
+    queried_user_id int
+  )  
+
+  //don't edit the thread if the user was not the one who created it
+  err = db.QueryRow("select user_id from forum_threads where thread_id = ?", thread_id).Scan(&queried_user_id)
+  switch {
+
+    //if thread doesn't exist 
+    case err == sql.ErrNoRows:
+      //return 400 status to indicate error
+      fmt.Println("about to write 400 header")
+      fmt.Println("Thread cannot be found")     
+      w.Write([]byte(fmt.Sprintf("Thread cannot be found"))) 
+      return
+      //break
+
+    //if error querying database  
+    case err != nil:
+      log.Fatal(err)
+      //return 400 status to indicate error
+      fmt.Println("about to write 400 header")
+      w.Write([]byte(fmt.Sprintf("Error querying database")))  
+      return
+      //break
+
+    //if thread exists
+    default:
+      if queried_user_id != userid {
+        fmt.Println("about to write 400 header")
+        fmt.Println("Cannot edit another user's thread") 
+        w.Write([]byte(fmt.Sprintf("Cannot edit another user's thread")))  
+        return
+      }
+      break
+
+  }    
 
   //TODO: return error if thread id is blank/nan
 
@@ -561,6 +632,47 @@ func deleteForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store
     return
   }
   //session.Save(r, w)
+
+  //get the user id and username from the cookie
+  userid := session.Values["userid"].(int)
+
+  var (
+    queried_user_id int
+  )  
+
+  //don't delete the thread if the user was not the one who created it
+  err = db.QueryRow("select user_id from forum_threads where thread_id = ?", id).Scan(&queried_user_id)
+  switch {
+
+    //if thread doesn't exist 
+    case err == sql.ErrNoRows:
+      //return 400 status to indicate error
+      fmt.Println("about to write 400 header")
+      fmt.Println("Thread cannot be found")     
+      w.Write([]byte(fmt.Sprintf("Thread cannot be found"))) 
+      return
+      //break
+
+    //if error querying database  
+    case err != nil:
+      log.Fatal(err)
+      //return 400 status to indicate error
+      fmt.Println("about to write 400 header")
+      w.Write([]byte(fmt.Sprintf("Error querying database")))  
+      return
+      //break
+
+    //if thread exists
+    default:
+      if queried_user_id != userid {
+        fmt.Println("about to write 400 header")
+        fmt.Println("Cannot delete another user's thread") 
+        w.Write([]byte(fmt.Sprintf("Cannot delete another user's thread")))  
+        return
+      }
+      break
+
+  }  
 
   //TODO: return error if thread id is blank/nan
 

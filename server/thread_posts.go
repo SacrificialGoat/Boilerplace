@@ -90,7 +90,7 @@ func createThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store 
   }
   fmt.Printf("Inserted forum post into forum thread " + strconv.Itoa(thread_id) + ". Last inserted ID = %d, rows affected = %d\n", lastId, rowCnt)
 
-  //update user's bio and avatar_link
+  //update post count and last post time for the forum thread
   stmt, err = db.Prepare("update forum_threads set post_count = post_count + 1, last_post_time = NOW() where thread_id = ?")
   if err != nil {
     log.Fatal(err)
@@ -308,7 +308,22 @@ func scoreThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *
       if err != nil {
         log.Fatal(err)
       }
-      fmt.Printf("Updated score of thread post " + strconv.Itoa(post_id) + ". Rows affected = %d\n", rowCnt)      
+      fmt.Printf("Updated score of thread post " + strconv.Itoa(post_id) + ". Rows affected = %d\n", rowCnt)     
+
+      //update rep of user who created post
+      stmt, err = db.Prepare("update users inner join thread_posts on users.user_id = thread_posts.user_id set rep = rep + ? where thread_posts.post_id = ?")
+      if err != nil {
+        log.Fatal(err)
+      }
+      res, err = stmt.Exec(option, post_id)
+      if err != nil {
+        log.Fatal(err)
+      }
+      rowCnt, err = res.RowsAffected()
+      if err != nil {
+        log.Fatal(err)
+      }
+      fmt.Printf("Updated rep of thread post creator. Rows affected = %d\n", rowCnt)       
 
       //return 200 status to indicate success
       fmt.Println("about to write 200 header")
@@ -361,6 +376,21 @@ func scoreThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *
       }
       fmt.Printf("Updated score of thread post " + strconv.Itoa(post_id) + ". Rows affected = %d\n", rowCnt)
 
+      //update rep of user who created post
+      stmt, err = db.Prepare("update users inner join thread_posts on users.user_id = thread_posts.user_id set rep = rep + ? where thread_posts.post_id = ?")
+      if err != nil {
+        log.Fatal(err)
+      }
+      res, err = stmt.Exec(option, post_id)
+      if err != nil {
+        log.Fatal(err)
+      }
+      rowCnt, err = res.RowsAffected()
+      if err != nil {
+        log.Fatal(err)
+      }
+      fmt.Printf("Updated rep of thread post creator. Rows affected = %d\n", rowCnt)  
+
       //return 200 status to indicate success
       fmt.Println("about to write 200 header")
       w.WriteHeader(http.StatusOK)
@@ -372,6 +402,7 @@ func scoreThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *
 
 //TODO: Return correct status and message if session is invalid
 //TODO: Return correct status and message if query failed
+//TODO: don't allow users to modify/delete other users' posts
 func editThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore) {
 
   fmt.Println("Edit thread post...")
@@ -401,6 +432,9 @@ func editThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *s
   }
   //session.Save(r, w)
 
+  //get the user id and username from the cookie
+  userid := session.Values["userid"].(int)     
+
   //parse the body of the request into a string
   body, err := ioutil.ReadAll(r.Body)
   if err != nil {
@@ -416,6 +450,44 @@ func editThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *s
   }
   post_id := int(dat["post_id"].(float64))
   post_contents := dat["contents"].(string)
+
+  var (
+    queried_user_id int
+  )  
+
+  //don't edit the post if the user was not the one who created it
+  err = db.QueryRow("select user_id from thread_posts where post_id = ?", post_id).Scan(&queried_user_id)
+  switch {
+
+    //if post doesn't exist 
+    case err == sql.ErrNoRows:
+      //return 400 status to indicate error
+      fmt.Println("about to write 400 header")
+      fmt.Println("Post cannot be found")     
+      w.Write([]byte(fmt.Sprintf("Post cannot be found"))) 
+      return
+      //break
+
+    //if error querying database  
+    case err != nil:
+      log.Fatal(err)
+      //return 400 status to indicate error
+      fmt.Println("about to write 400 header")
+      w.Write([]byte(fmt.Sprintf("Error querying database")))  
+      return
+      //break
+
+    //if post exists
+    default:
+      if queried_user_id != userid {
+        fmt.Println("about to write 400 header")
+        fmt.Println("Cannot edit another user's post")  
+        w.Write([]byte(fmt.Sprintf("Cannot edit another user's post")))  
+        return
+      }
+      break
+
+  }     
 
   //TODO: return error if post id is blank/nan, return if neither post id nor post contents exist in message of body
 
@@ -471,6 +543,47 @@ func deleteThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store 
   }
   //session.Save(r, w)
 
+  //get the user id and username from the cookie
+  userid := session.Values["userid"].(int)   
+
+  var (
+    queried_user_id int
+  )  
+
+  //don't delete the post if the user was not the one who created it
+  err = db.QueryRow("select user_id from thread_posts where post_id = ?", id).Scan(&queried_user_id)
+  switch {
+
+    //if post doesn't exist 
+    case err == sql.ErrNoRows:
+      //return 400 status to indicate error
+      fmt.Println("about to write 400 header")
+      fmt.Println("Post cannot be found")     
+      w.Write([]byte(fmt.Sprintf("Post cannot be found"))) 
+      return
+      //break
+
+    //if error querying database  
+    case err != nil:
+      log.Fatal(err)
+      //return 400 status to indicate error
+      fmt.Println("about to write 400 header")
+      w.Write([]byte(fmt.Sprintf("Error querying database")))  
+      return
+      //break
+
+    //if post exists
+    default:
+      if queried_user_id != userid {
+        fmt.Println("about to write 400 header")
+        fmt.Println("Cannot delete another user's post")  
+        w.Write([]byte(fmt.Sprintf("Cannot delete another user's post")))  
+        return
+      }
+      break
+
+  }       
+
   //TODO: return error if post id is blank/nan
 
   //delete all votes related to the thread post
@@ -489,6 +602,21 @@ func deleteThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store 
   }
   fmt.Printf("Deleted votes for forum thread post with id " + strconv.Itoa(id) + ". Rows affected = %d\n", rowCnt)   
 
+  //update post count for the forum thread
+  stmt, err = db.Prepare("update forum_threads inner join thread_posts on forum_threads.thread_id = thread_posts.thread_id set post_count = post_count - 1 where thread_posts.post_id = ?")
+  if err != nil {
+    log.Fatal(err)
+  }
+  res, err = stmt.Exec(id)
+  if err != nil {
+    log.Fatal(err)
+  }
+  rowCnt, err = res.RowsAffected()
+  if err != nil {
+    log.Fatal(err)
+  }
+  fmt.Printf("Decremented post count in forum_threads table. Rows affected = %d\n", rowCnt)  
+
   //delete the forum thread post
   stmt, err = db.Prepare("delete from thread_posts where post_id = ?")
   if err != nil {
@@ -502,7 +630,7 @@ func deleteThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store 
   if err != nil {
     log.Fatal(err)
   }
-  fmt.Printf("Deleted thread post " + strconv.Itoa(id) + ". Rows affected = %d\n", rowCnt)      
+  fmt.Printf("Deleted thread post " + strconv.Itoa(id) + ". Rows affected = %d\n", rowCnt)  
 
   //return 200 status to indicate success
   fmt.Println("about to write 200 header")
