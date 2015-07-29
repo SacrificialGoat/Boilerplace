@@ -181,12 +181,12 @@ gulp.task('deploy', function () {
 
 });
 
-gulp.task('jest', function () {
-    gulp.src('./specs/**/__tests__/**/*-test.js')
-    .pipe(jest());
-});
+// gulp.task('jest', function () {
+//     gulp.src('./specs/**/__tests__/**/*-test.js')
+//     .pipe(jest());
+// });
 
-// gulp.task('jest', shell.task(['cd specs', 'npm test']));
+gulp.task('jest', shell.task(['npm test']));
 
 gulp.task('test', function () {
 
