@@ -52,6 +52,13 @@ var CommentStore = assign({}, EventEmitter.prototype, {
     });
   },
 
+  delete: function(post_id){
+    var that = this;
+    Comment.delete(post_id,function(data){
+      that.emitChange();
+    });
+  },
+
   upVote: function(post_id){
     var that = this;
     Comment.upVote(post_id,function(data){
@@ -66,17 +73,11 @@ var CommentStore = assign({}, EventEmitter.prototype, {
     });
   },
 
-  update: function(bio,avatar){
-    // var that = this;
-    // Comment.update(bio,avatar,function(data){
-    //   console.log('update successful');
-    //   that.fetch();
-    // });
-  },
-
-  delete: function(){
-
-
+  edit: function(post_id,body){
+    var that = this;
+    Comment.edit(post_id,body,function(data){
+      that.emitChange();
+    });
   },
 
   addChangeListener: function(cb) {
@@ -104,12 +105,13 @@ AppDispatcher.register(function(payload){
     case CommentConstants.POST_ADD:
       CommentStore.add(action.data.threadId,action.data.body);
       break;
-    case CommentConstants.POST_UPDATE:
+    case CommentConstants.POST_EDIT:
       // TODO: Updating a Comment
-
+      CommentStore.edit(action.data.post_id,action.data.body);
       break;
     case CommentConstants.POST_DELETE:
       // TODO: Deleting a Comment
+      CommentStore.delete(action.data.post_id);
       break;
     case CommentConstants.POST_UPVOTE:
       CommentStore.upVote(action.data.post_id);

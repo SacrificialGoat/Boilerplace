@@ -12,6 +12,7 @@ var CommentList = React.createClass({
   getInitialState: function(){
     return {
       page: 1,
+      profileId: null,
       comments: [{
         body: 'fake body',
         rating: 5,
@@ -29,17 +30,27 @@ var CommentList = React.createClass({
     CommentActions.fetchPage({threadId: this.props.threadId, page:this.state.page});
     CommentStore.addChangeListener(this._onChange);
     AuthStore.addChangeListener(this._onChange);
+
+    this.setState({
+      profileId: this.props.profileId
+    });
   },
 
   componentWillUnmount: function(){
     CommentStore.removeChangeListener(this._onChange);
     AuthStore.removeChangeListener(this._onChange);
+
+    this.setState({
+      profileId: null
+    });
   },
 
   _onChange: function(){
+    console.log('changed, changing comment list vars...',this.props.profileId);
     this.setState({
       comments: CommentStore.getComments().threadPosts,
-      loggedIn: AuthStore.loggedIn()
+      loggedIn: AuthStore.loggedIn(),
+      profileId: this.props.profileId
     });
   },
 
@@ -57,6 +68,36 @@ var CommentList = React.createClass({
   downVote: function(id){
     // TODO: call Comment action to downvote
     CommentActions.downVote({post_id:id});
+  },
+
+  edit: function(id,body){
+    console.log('editing comment',id,body);
+    // TODO: Send Edit message.
+    CommentActions.edit({
+      post_id:id,
+      body:body
+    });
+  },
+
+  delete: function(id){
+    CommentActions.delete({
+      post_id: id
+    });
+
+    var comments = this.state.comments;
+
+    var comment;
+    for (var i = 0; i < comments.length; i++) {
+      // find matching id
+      comment = comments[i];
+      if(comment.post_id === id){
+        comments.splice(i,1);
+        this.setState({
+          comments: comments
+        });
+        return;
+      }
+    };
   },
 
   render: function() {
@@ -77,6 +118,7 @@ var CommentList = React.createClass({
                 <th>Submitted</th>
                 <th>Created</th>
                 <th>Updated</th>
+                <th></th>
               </tr>
             </thead>
 
@@ -86,10 +128,13 @@ var CommentList = React.createClass({
                   return (
                     <CommentItem 
                       ref = "comment" 
+                      profileId = {this.state.profileId}
                       onGoThread = {this.goThread} 
                       onUpVote = {this.upVote} 
                       onDownVote = {this.downVote} 
-                      key = {item.post_id} 
+                      key = {item.post_id}
+                      onDelete = {this.delete}
+                      onEdit = {this.edit}
                       item = {item} />
                   );
                 },this)

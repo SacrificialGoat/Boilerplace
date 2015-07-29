@@ -26,6 +26,31 @@ var formatBody = function(str){
 //  Thread comment item
 var CommentItem = React.createClass({
 
+  getInitialState: function(){
+    return {
+      editable: false,
+      editMode: false
+    };
+  },
+
+  componentDidMount: function(){
+    if(this.props.item.user_id === this.props.profileId){
+      this.setState({
+        editable: true
+      });
+    }else{
+      this.setState({
+        editable: false
+      });
+    }
+  },
+
+  componentWillUnmount: function(){
+    this.setState({
+      editable: false
+    });
+  },
+
   upVote: function(e){
     e.preventDefault();
     this.props.onUpVote(this.props.item.post_id);
@@ -42,15 +67,51 @@ var CommentItem = React.createClass({
     this.props.item.rating--;
   },
 
+  deletePost: function(e){
+    e.preventDefault(); 
+    this.props.onDelete(this.props.item.post_id);
+  },
+
+  editPost: function(e){
+    e.preventDefault();
+    this.setState({
+      editMode:true
+    });
+    // Set the input fields to the fetched values
+
+    var that = this;
+    setTimeout(function(){
+      React.findDOMNode(that.refs.body).value = that.props.item.contents;
+    },10);
+
+  },
+
+  saveEdit: function(e){
+    e.preventDefault();
+    this.props.onEdit(this.props.item.post_id , React.findDOMNode(this.refs.body).value);
+    this.props.item.contents = React.findDOMNode(this.refs.body).value;
+    this.setState({
+      editMode:false
+    });
+  },
+
   render: function() {
     var created = formatDate(this.props.item.creation_time);
     var updated = formatDate(this.props.item.last_update_time);
-
+    var contents = this.props.item.contents;
     return (
       <tr>
         <td>
           <a href="#" ref="down" className="glyphicon glyphicon-chevron-down" aria-hidden="true" onClick={this.downVote}></a> {this.props.item.rating} <a href="#" ref="up" className="glyphicon glyphicon-chevron-up" aria-hidden="true" onClick={this.upVote}></a></td>
-        <td>{this.props.item.contents}</td>
+        <td>
+        { this.state.editMode ? (
+          <form onSubmit={this.saveEdit}>
+            <input type="text" ref="body"></input>
+          </form>
+          ):(
+          contents
+        )}
+        </td>
         <td><a href={"#/user/"+this.props.item.user_id}> {this.props.item.user_name} </a> </td>
 
         <td>
@@ -64,6 +125,21 @@ var CommentItem = React.createClass({
         <td>
         <FormattedRelative 
             value= {updated} />
+        </td>
+
+        <td>
+        { this.state.editable ? (
+          <a href="#" onClick={this.deletePost}><i className="glyphicon glyphicon-remove delete-icon"></i></a>
+          ):(
+            null
+          )
+        }
+        { this.state.editable ? (
+          <a href="#" onClick={this.editPost}><i className="glyphicon glyphicon-pencil edit-icon"></i></a>
+          ):(
+            null
+          )
+        }
         </td>
 
       </tr>

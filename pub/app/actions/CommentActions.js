@@ -8,6 +8,21 @@ var CommentActions = {
       data: data
     });
   },
+
+  delete: function(data){
+    AppDispatcher.handleAction({
+      actionType: CommentConstants.POST_DELETE,
+      data: data
+    });
+  },
+
+  edit: function(data){
+    AppDispatcher.handleAction({
+      actionType: CommentConstants.POST_EDIT,
+      data: data
+    });
+  },
+
   // Fetches a page of Comments
   fetchPage: function(data){
     AppDispatcher.handleAction({

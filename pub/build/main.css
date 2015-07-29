@@ -31,6 +31,8 @@ h2{
   margin:0;
 }
 
+
+
 /* Profile Page */
 
 .profile img{
@@ -245,8 +247,19 @@ h2{
   margin-right:20px;
 }
 
+.frontPage .created{
+  font-size:12px;
+}
+
 .frontPage .info{
   font-size:12px;
+  float:right;
+  margin-top:-70px;
+}
+
+.frontPage .info p{
+  margin: 0;
+  padding: 0;
 }
 
 .frontPage .title{
@@ -261,6 +274,17 @@ h2{
   float:left;
   display:inline-block;
   margin-right:27px;
+}
+
+.frontPage .tag{
+  background-color:#D4D4D4;
+  font-size:12px;
+  width:80px;
+  float:right;
+  display:inline-block;
+  margin-left:auto;
+  border-radius:20px;
+  text-align:center;
 }
 
 .glyphicon-chevron-down{
@@ -344,7 +368,7 @@ h2{
 }
 
 .globalChat{
-  width:100%;
+  width:90%;
   height:200px;
   left:80%;
   top:100%;
@@ -408,5 +432,15 @@ h2{
   font-size:12px;
   margin:0;
   padding:0;
+}
+
+.thread .tag{
+  background-color:#D4D4D4;
+  font-size:12px;
+  width:80px;
+  display:inline-block;
+  margin-left:auto;
+  border-radius:20px;
+  text-align:center;
 }
 

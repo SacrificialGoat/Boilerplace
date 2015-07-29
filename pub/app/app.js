@@ -42,11 +42,11 @@ var App = React.createClass({
     return (
       <div className="container-fluid">
         <Navbar/>
-        <div className="col-sm-2 sidebar">
+        <div className="col-sm-3 sidebar">
           <Sidebar />
         </div>
 
-        <div className="col-sm-10">
+        <div className="col-sm-9">
           <RouteHandler/>
         </div>
       </div>
