@@ -774,6 +774,11 @@ http.HandleFunc("/search/", func(w http.ResponseWriter, r *http.Request) {
   if err != nil {
     log.Fatal("ListenAndServe:", err)
   }
+
+  // err := http.ListenAndServeTLS(*addr, "cert.pem", "key.pem", nil)
+  // if err != nil {
+  //   log.Fatal("ListenAndServeTLS: ", err)
+  // }
 }
 
 //function to open connection with database

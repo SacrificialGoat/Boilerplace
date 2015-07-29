@@ -1,4 +1,4 @@
-var jasmine = require('jasmine');
+var jasmine = require('jasmine-core');
 
 module.exports = function(karma) {
   karma.set({
