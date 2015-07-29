@@ -98,7 +98,7 @@ var Sidebar = React.createClass({
         <ul className="sidebar-nav">
             <a href="#"><img src="/assets/logo.png"></img></a>
             <li>
-                <a href="#">Trending (past 2 hours)</a>
+                <a href="#">Trending (past 24 hours)</a>
                 <Treemap
                   data={this.state.data}
                   width={225}

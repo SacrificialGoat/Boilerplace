@@ -15,18 +15,18 @@ var Map = React.createClass({
 
     getInitialState: function(){
       return {
-        data: fakeData
+        
       };
     },
 
-    loadMarkers: function(map){
-      for (var i = 0; i < fakeData.length; i++) {
+    loadMarkers: function(data,map){
+      for (var i = 0; i < data.length; i++) {
         // Add a click handler to each marker to take it to the thread
-        fakeData[i].infoWindow = {
-          content: '<p>'+ fakeData[i].title +'</p>'
+        data[i].infoWindow = {
+          content: '<div class="geoThread"><a href="#/thread/'+ data[i].thread_id +'">'+ data[i].title +'</a>' + '<p class="body">' + data[i].body + '</p>' + '<p>Rating: ' + data[i].rating + '</p>' + '<p>Posts: ' + data[i].post_count + '</p>' +'<p class="tag">'+ data[i].tag  + '</p></div>'
         }
-        console.log('adding marker...',fakeData[i]);
-        map.addMarker(fakeData[i]);
+        console.log('adding marker...',data[i]);
+        map.addMarker(data[i]);
       };
     },
 
@@ -45,7 +45,7 @@ var Map = React.createClass({
                 console.log(position.coords.latitude,position.coords.longitude);
 
                 // Load the current location marker
-                map.addMarker({title:'current', infoWindow: {content: '<p>Current Location</p>'}, lat:position.coords.latitude,lng: position.coords.longitude});
+                // map.addMarker({title:'current', infoWindow: {content: '<p>Current Location</p>'}, lat:position.coords.latitude,lng: position.coords.longitude});
               },
               error: function(error) {
                 alert('Geolocation failed: '+error.message);
@@ -59,7 +59,7 @@ var Map = React.createClass({
             });
 
             // Load the markers
-            that.loadMarkers(map);
+            that.loadMarkers(that.props.threads,map);
 
         },1000);
     },
