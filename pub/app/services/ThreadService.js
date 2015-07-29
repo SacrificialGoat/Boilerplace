@@ -7,8 +7,8 @@ var addThread = function(title,body,link,tag,lat,lng,callback) {
       "body": body,
       "link": link,
       "tag": tag,
-      "lat": lat,
-      "lng": lng
+      "lat": parseFloat(lat),
+      "lng": parseFloat(lng)
     }),
     crossDomain: true,
     success: function(resp) {
