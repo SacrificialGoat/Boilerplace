@@ -573,7 +573,6 @@ func main() {
   }
 })
 
-
 //routes in search.go
 
 //GET:
@@ -626,7 +625,6 @@ http.HandleFunc("/search/", func(w http.ResponseWriter, r *http.Request) {
       break
   }
 })
-
 
 
 /*
@@ -756,6 +754,12 @@ http.HandleFunc("/search/", func(w http.ResponseWriter, r *http.Request) {
   })
 */
 
+
+  // route for friend_list
+  // http.HandleFunc("/friendlist", serveWs)  // 
+  http.HandleFunc("/friendlist/", func(w http.ResponseWriter, r *http.Request) {
+    serveWs(w, r)
+  })
 
   var room = createChatRoom(1)
   go room.run()

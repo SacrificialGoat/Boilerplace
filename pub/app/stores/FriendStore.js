@@ -7,19 +7,13 @@ var assign = require('object-assign');
 
 var CHANGE_EVENT = "change";
 
-
-/*
-set friendList:  
-	[{"id":1,"username":"bryan","first":"bryan","last":"liu"},
-	{"id":2,"username":"alex","first":"alex","last":"alex"},
-	{"id":5,"username":"eee","first":"eee","last":"eee"}]
-*/
-
 var _friendData = {
 	friendList: null,  
 	isTargetFriend: false,
+	onlineFriendList: null
 }
 
+// ========= Private Methods =========
 
 var _searchFriendInList = function(targetUser){
 	var targetUser = targetUser;
@@ -39,7 +33,34 @@ var _searchFriendInList = function(targetUser){
 };
 
 
+var _clientSocket = {
+  connect: function(){
+    console.log('connecting to Friend Online Status...');
+    conn = new WebSocket("ws://"+window.location.host+"/friendlist/");
+
+    conn.onclose = function(evt) {
+        console.log("WS closing")
+    }
+
+    conn.onmessage = function(evt) {   // listen to broadcast
+        console.log("Receive friendlist data", evt.data)
+    }
+  }
+}
+
+
+// ============= Friend Store ===============
+
+
 var FriendStore = assign({}, EventEmitter.prototype, {
+	connectFriendOnline: function(){
+		_clientSocket.connect()
+	},
+
+	updateFriendOnline: function(){
+
+	},
+
 	updateFriendStatus: function(targetUser){
 		var targetUser = targetUser;
 		_searchFriendInList(targetUser);
@@ -90,14 +111,16 @@ AppDispatcher.register(function(payload){
   var action = payload.action;
   switch(action.actionType){   // action.actionType, action.data
 
+  	// For Add, Remove, Fetch, emitting change oocurs in AJAX calls fetch (FriendService.fetchFriendList(_friendData,this))
+
     case FriendConstants.ADD_FRIEND:
     	FriendStore.addFriend(action.data);
-    	// FriendStore.emitChange();
+
     	break;
 
   	case FriendConstants.REMOVE_FRIEND:
     		FriendStore.removeFriend(action.data);
-    		// FriendStore.emitChange();
+
   		break;
 
     case FriendConstants.FETCH_FRIENDLIST:
@@ -114,3 +137,14 @@ AppDispatcher.register(function(payload){
 });
 
 module.exports = FriendStore;
+
+
+/*
+TODO:
+Websocket friend status:
+	Frontend: receive websocket push of friends who are online.  Once receive latest update, change state for rendering
+	Backend: check target user's friendlist. Build "connect" map to track all users who are connected to service. 
+	 Check user friendlist against current connections.  Push results to user
+
+*/
+
