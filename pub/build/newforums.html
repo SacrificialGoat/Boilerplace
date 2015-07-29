@@ -11,16 +11,20 @@
       var body = $('#body').val();
       var link = $('#link').val();
       var tag = $('#tag').val();      
+      var lng = parseFloat($('#longitude').val());
+      var lat = parseFloat($('#latitude').val());            
 
       $('#title').val(''); 
       $('#body').val(''); 
       $('#link').val(''); 
       $('#tag').val(''); 
+      $('#longitude').val(''); 
+      $('#latitude').val('');       
 
       $.ajax({
         type: 'POST',
         url: 'http://127.0.0.1:8080/threads/',
-        data: JSON.stringify({"title" : title, "body" : body, "link" : link, "tag" : tag}),
+        data: JSON.stringify({"title" : title, "body" : body, "link" : link, "tag" : tag, "lng" : lng, "lat" : lat}),
         // contentType: "application/json",
         // crossDomain: true,
           success: function(data, textStatus, jqXHR) {
@@ -346,6 +350,8 @@ Title: <input type="text" id="title" name="title" placeholder="Title"><br>
 Body: <input type="text" id="body" name="body" placeholder="Body"><br>
 Link: <input type="text" id="link" name="link" placeholder="Link"><br>
 Tag: <input type="text" id="tag" name="tag" placeholder="Tag"><br>
+Longitude: <input type="text" id="longitude" name="longitude" placeholder="Longitude"><br>
+Latitude: <input type="text" id="latitude" name="latitude" placeholder="Latitude"><br>
 <input id="createForumThread" type="submit" value="Create Forum Thread"><br>
 <input id="deleteForumThread" type="submit" value="Delete Forum Thread"><br>
 <input id="editForumThread" type="submit" value="Edit Forum Thread"><br>
