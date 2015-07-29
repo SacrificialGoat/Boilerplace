@@ -35,6 +35,8 @@ var Thread = React.createClass({
   getInitialState: function(){
     return {
       id:this.props.params.id,
+      voted: 0,
+      loggedIn: true,
       title: '',
       body: '',
       userId: null,
@@ -167,6 +169,31 @@ var Thread = React.createClass({
     location.hash = '/';
   },
 
+  upVote: function(e){
+    e.preventDefault();
+    // TODO: call thread action to upvote
+    if(this.state.voted <= 0){
+      ThreadActions.upVote({thread_id:this.props.params.id});
+      this.setState({
+        voted: this.state.voted+1,
+        rating: this.state.rating+1
+      });
+    }
+  },
+
+  downVote: function(e){
+    e.preventDefault();
+    // TODO: call thread action to downvote
+    // Disable voting when already voted
+    if(this.state.voted >= 0){
+      ThreadActions.downVote({thread_id:this.props.params.id});
+      this.setState({
+        voted: this.state.voted-1,
+        rating: this.state.rating-1
+      });
+    }
+  },
+
   render: function() {
 
     return (
@@ -199,11 +226,23 @@ var Thread = React.createClass({
           <p> {this.state.body} </p>
         ) }
         <p> Rating: {this.state.rating} </p>
+
+        {this.state.loggedIn ? (
+          <div className="votes">
+            <a href="#" ref="down" className="glyphicon glyphicon-chevron-down" aria-hidden="true" onClick={this.downVote}></a> {this.state.rating} <a href="#" ref="up" className="glyphicon glyphicon-chevron-up" aria-hidden="true" onClick={this.upVote}></a>
+          </div>
+          ) : (
+          <div className="votes">
+            <a href="#" ref="down" className="glyphicon glyphicon-chevron-down" aria-hidden="true" onClick={this.redirect}></a> {this.state.rating} <a href="#" ref="up" className="glyphicon glyphicon-chevron-up" aria-hidden="true" onClick={this.redirect}></a>
+          </div>
+        )}
+
         { this.state.editMode ? (
           <p>Tag: <input type="text" ref="tag"></input></p>
           ):(
           <p className="tag">{this.state.tag} </p>
         ) }
+
         { this.state.editMode ? (
             null
           ) : (
