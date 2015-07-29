@@ -26,7 +26,6 @@ var FriendList = React.createClass({
 	},	
 
 	_onChange: function(){ 
-		console.log("triggering onChange FriendList. state.loggedin / Auth.loggedin", this.state.loggedIn, AuthStore.loggedIn())
 		if (this.state.loggedIn === true && AuthStore.loggedIn() === false){
 			FriendStore.disconnectWs()
 		}
