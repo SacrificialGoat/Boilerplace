@@ -308,7 +308,22 @@ func scoreThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *
       if err != nil {
         log.Fatal(err)
       }
-      fmt.Printf("Updated score of thread post " + strconv.Itoa(post_id) + ". Rows affected = %d\n", rowCnt)      
+      fmt.Printf("Updated score of thread post " + strconv.Itoa(post_id) + ". Rows affected = %d\n", rowCnt)     
+
+      //update rep of user who created post
+      stmt, err = db.Prepare("update users inner join thread_posts on users.user_id = thread_posts.user_id set rep = rep + ? where thread_posts.post_id = ?")
+      if err != nil {
+        log.Fatal(err)
+      }
+      res, err = stmt.Exec(option, post_id)
+      if err != nil {
+        log.Fatal(err)
+      }
+      rowCnt, err = res.RowsAffected()
+      if err != nil {
+        log.Fatal(err)
+      }
+      fmt.Printf("Updated rep of thread post creator. Rows affected = %d\n", rowCnt)       
 
       //return 200 status to indicate success
       fmt.Println("about to write 200 header")
@@ -361,6 +376,21 @@ func scoreThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *
       }
       fmt.Printf("Updated score of thread post " + strconv.Itoa(post_id) + ". Rows affected = %d\n", rowCnt)
 
+      //update rep of user who created post
+      stmt, err = db.Prepare("update users inner join thread_posts on users.user_id = thread_posts.user_id set rep = rep + ? where thread_posts.post_id = ?")
+      if err != nil {
+        log.Fatal(err)
+      }
+      res, err = stmt.Exec(option, post_id)
+      if err != nil {
+        log.Fatal(err)
+      }
+      rowCnt, err = res.RowsAffected()
+      if err != nil {
+        log.Fatal(err)
+      }
+      fmt.Printf("Updated rep of thread post creator. Rows affected = %d\n", rowCnt)  
+
       //return 200 status to indicate success
       fmt.Println("about to write 200 header")
       w.WriteHeader(http.StatusOK)
@@ -372,6 +402,7 @@ func scoreThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *
 
 //TODO: Return correct status and message if session is invalid
 //TODO: Return correct status and message if query failed
+//TODO: don't allow users to modify/delete other users' posts
 func editThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore) {
 
   fmt.Println("Edit thread post...")

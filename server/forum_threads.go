@@ -396,7 +396,22 @@ func scoreForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store 
       if err != nil {
         log.Fatal(err)
       }
-      fmt.Printf("Updated score of thread " + strconv.Itoa(thread_id) + ". Rows affected = %d\n", rowCnt)      
+      fmt.Printf("Updated score of thread " + strconv.Itoa(thread_id) + ". Rows affected = %d\n", rowCnt)     
+
+      //update rep of user who created forum thread
+      stmt, err = db.Prepare("update users inner join forum_threads on users.user_id = forum_threads.user_id set rep = rep + 2 * ? where forum_threads.thread_id = ?")
+      if err != nil {
+        log.Fatal(err)
+      }
+      res, err = stmt.Exec(option, thread_id)
+      if err != nil {
+        log.Fatal(err)
+      }
+      rowCnt, err = res.RowsAffected()
+      if err != nil {
+        log.Fatal(err)
+      }
+      fmt.Printf("Updated rep of forum thread creator. Rows affected = %d\n", rowCnt)              
 
       //return 200 status to indicate success
       fmt.Println("about to write 200 header")
@@ -448,6 +463,21 @@ func scoreForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store 
         log.Fatal(err)
       }
       fmt.Printf("Updated score of thread " + strconv.Itoa(thread_id) + ". Rows affected = %d\n", rowCnt)
+
+      //update rep of user who created forum thread
+      stmt, err = db.Prepare("update users inner join forum_threads on users.user_id = forum_threads.user_id set rep = rep + 2 * ? where forum_threads.thread_id = ?")
+      if err != nil {
+        log.Fatal(err)
+      }
+      res, err = stmt.Exec(option, thread_id)
+      if err != nil {
+        log.Fatal(err)
+      }
+      rowCnt, err = res.RowsAffected()
+      if err != nil {
+        log.Fatal(err)
+      }
+      fmt.Printf("Updated rep of forum thread creator. Rows affected = %d\n", rowCnt)               
 
       //return 200 status to indicate success
       fmt.Println("about to write 200 header")
