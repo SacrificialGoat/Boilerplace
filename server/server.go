@@ -317,6 +317,26 @@ func main() {
     }
   })
 
+//GET:
+//trending       trending/
+  http.HandleFunc("/trending/", func(w http.ResponseWriter, r *http.Request) {
+  switch r.Method {
+    case "GET":
+
+      popularThreads(w, r, db)
+
+      break 
+    case "POST":
+      break  
+    case "PUT":
+      break  
+    case "DELETE":
+      break  
+    default:
+      break
+  }
+})
+
 
   //routes in thread_posts.go
 
@@ -524,6 +544,9 @@ func main() {
     }
   })
 
+
+  //routes in friend.go
+
   http.HandleFunc("/friend/", func(w http.ResponseWriter, r *http.Request) {
   switch r.Method {
     case "GET":
@@ -550,10 +573,11 @@ func main() {
   }
 })
 
-//route for searching
+
+//routes in search.go
 
 //GET:
-//search/?title=hello&sortby=rating&pagenumber=1
+//search      search/?title=hello&sortby=rating&pagenumber=1
 http.HandleFunc("/search/", func(w http.ResponseWriter, r *http.Request) {
   switch r.Method {
     case "GET":
