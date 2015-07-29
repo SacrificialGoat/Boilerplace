@@ -397,9 +397,10 @@ h2{
 /* Location */
 
 #map {
-  width: 210px;
-  height: 230px;
-  margin-left:10px
+  width: 100%;
+  height: 650px;
+  font-size:28px;
+  font-family:'century gothic';
 }
 
 /* Thread (single) */

@@ -66,9 +66,9 @@ var ThreadStore = assign({}, EventEmitter.prototype, {
     });
   },
 
-  add: function(title,body,link,tag){
+  add: function(title,body,link,tag,lat,lng){
     var that = this;
-    Thread.add(title,body,link,tag,function(data){
+    Thread.add(title,body,link,tag,lat,lng,function(data){
       that.emitChange();
     });
   },
@@ -140,7 +140,7 @@ AppDispatcher.register(function(payload){
       ThreadStore.fetchThread(action.data.id);
       break;
     case ThreadConstants.ADD:
-      ThreadStore.add(action.data.title,action.data.body,action.data.link,action.data.tag);
+      ThreadStore.add(action.data.title,action.data.body,action.data.link,action.data.tag,action.data.lat,action.data.lng);
       break;
     case ThreadConstants.EDIT:
       // TODO: Updating a thread
