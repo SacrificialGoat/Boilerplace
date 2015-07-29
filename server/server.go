@@ -550,7 +550,7 @@ func main() {
   http.HandleFunc("/friend/", func(w http.ResponseWriter, r *http.Request) {
   switch r.Method {
     case "GET":
-      getFriendsList(w, r, db)
+      GetFriendsList(w, r, db)
       break 
     case "POST":
       m, _ := url.ParseQuery(r.URL.RawQuery)
@@ -572,7 +572,6 @@ func main() {
       break
   }
 })
-
 
 //routes in search.go
 
@@ -626,7 +625,6 @@ http.HandleFunc("/search/", func(w http.ResponseWriter, r *http.Request) {
       break
   }
 })
-
 
 
 /*
@@ -757,6 +755,14 @@ http.HandleFunc("/search/", func(w http.ResponseWriter, r *http.Request) {
 */
 
 
+  // route for friend_list
+  // http.HandleFunc("/friendlist", serveWs)  // 
+  go h.run()  // place this here because we took out friend_list
+  http.HandleFunc("/friendlist/", func(w http.ResponseWriter, r *http.Request ) {
+    serveWs(w, r, db)
+  })
+
+
   var room = createChatRoom(1)
   go room.run()
 
@@ -845,6 +851,8 @@ func connect(w http.ResponseWriter, r *http.Request, room *GameRoom, store *sess
 
   playerHandler.createPlayer(w, r)
 }
+
 */
+
 
 

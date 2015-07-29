@@ -5,6 +5,7 @@ var EventEmitter = require('events').EventEmitter;
 var assign = require('object-assign');
 
 var CHANGE_EVENT = 'change';
+var STATUS_EVENT = 'friendstatus'
 
 var _user = {username:'user'};
 var _loggedIn = null;
@@ -13,6 +14,7 @@ var _error = null;
 var AuthStore = assign({}, EventEmitter.prototype, {
 
   emitChange: function() {
+     this.emit(STATUS_EVENT)
      this.emit(CHANGE_EVENT);
    },
 
@@ -46,6 +48,7 @@ var AuthStore = assign({}, EventEmitter.prototype, {
     Auth.logout(function(){
       _loggedIn = false;
       that.emitChange();
+
     });
   },
 
@@ -75,7 +78,18 @@ var AuthStore = assign({}, EventEmitter.prototype, {
 
   removeChangeListener: function(cb) {
     this.removeListener(CHANGE_EVENT, cb);
+  },
+
+
+  addChangeListenerStatus: function(cb) {
+    this.on(STATUS_EVENT, cb)
+  },
+
+  removeChangeListenerStatus: function(cb) {
+    this.removeListener(STATUS_EVENT, cb);
   }
+
+
 });
 
 
