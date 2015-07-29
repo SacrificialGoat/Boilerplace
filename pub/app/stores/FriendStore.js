@@ -6,6 +6,7 @@ var EventEmitter = require('events').EventEmitter;
 var assign = require('object-assign');
 
 var CHANGE_EVENT = "change";
+var ONLINE_STATUS = 'friendonlinestatus'
 
 var _friendData = {
 	friendList: null,  
@@ -43,7 +44,9 @@ var _clientSocket = {
     }
 
     conn.onmessage = function(evt) {   // listen to broadcast
-        console.log("Receive friendlist data", evt.data)
+        console.log("Receive friendlist data", JSON.parse(evt.data));
+        _friendData.onlineFriendList = JSON.parse(evt.data).friends
+        FriendStore.emitChangeOnline()
     }
   }
 }
@@ -98,13 +101,31 @@ var FriendStore = assign({}, EventEmitter.prototype, {
 		this.emit(CHANGE_EVENT);
 	}, 
 
-	addChangeListener: function(cb){
-		this.on(CHANGE_EVENT, cb);
-	}, 
 
-	removeChangeListener: function(cb){
-		this.removeListener(CHANGE_EVENT, cb)
-	},
+    addChangeListener: function(cb){
+        this.on(CHANGE_EVENT, cb);
+    }, 
+
+    removeChangeListener: function(cb){
+        this.removeListener(CHANGE_EVENT, cb)
+    },
+
+    getFriendOnline: function(){
+        return _friendData.onlineFriendList;
+    },
+
+    emitChangeOnline: function(){
+        this.emit(ONLINE_STATUS);
+    }, 
+
+    addChangeListenerOnline: function(cb){
+        this.on(ONLINE_STATUS, cb);
+    }, 
+
+    removeChangeListenerOnline: function(cb){
+        this.removeListener(ONLINE_STATUS, cb)
+    },
+
 });
 
 AppDispatcher.register(function(payload){

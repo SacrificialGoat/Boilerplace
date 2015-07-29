@@ -244,6 +244,8 @@ func GetFriendsListInternal(userId string, db *sql.DB) FriendsListOutbound {
 // Then call c.writePump goroutine to 1) async write stuff from hub to friend_connection.
 // Sync call c.readPump
 func serveWs(w http.ResponseWriter, r *http.Request, db *sql.DB ) {
+	// TODO: register connection when sign in and out, not when openning page
+
 	go h.run()  // place this here because we took out friend_list
 
 	userId := CheckSession(w, r)  // This is in Pete's friend.go
@@ -259,13 +261,8 @@ func serveWs(w http.ResponseWriter, r *http.Request, db *sql.DB ) {
 
 	h.register <- c
 
-	// test := []string{"Trial1"}
-	// test := "Helloworld"
-	// h.broadcastUsers <- test
-	// go c.writePump() // Write from hub to friend_connection. Goroutine. Any new message read from pump will be updated trhough here
 	go c.writePumpFL(db)
 
-	// c.readPump()  //read data from friend_connection to hub
 }
 
 

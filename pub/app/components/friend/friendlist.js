@@ -6,7 +6,7 @@ var FriendAction = require("../../actions/FriendActions");
 var FriendList = React.createClass({
 	getInitialState: function(){
 		return {
-			friendList: 123
+			friendOnline: []
 		}
 	},
 
@@ -16,15 +16,42 @@ var FriendList = React.createClass({
 	},
 
 	componentDidMount: function(){
+		FriendStore.addChangeListenerOnline(this._onChange)
+	},
+
+	componentWillUnmount: function(){
+		FriendStore.removeChangeListenerOnline(this._onChange)
+	},	
+
+	_onChange: function(){ 
+	  this.setState({
+	    friendOnline: FriendStore.getFriendOnline(),   
+	  })
 
 	},
 
 	render: function(){
+		console.log()
+
+		var listItems = this.state.friendOnline.map(function(item, index){
+		  return (
+		    <li key={index}  >
+		      <span>
+		        {item.username}
+		      </span>
+		    </li>
+		  )
+		}.bind(this));
+
+
 		return (
-			<div className="friend-list">{this.state.friendList}
+			<div className="friend-list">
+				<ul>
+				  {listItems}
+				</ul>
 			</div>
 		)
-	}
+	},
 
 });
 
