@@ -81,12 +81,22 @@ func createForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store
     thread_tag = dat["tag"].(string)
   }
 
+  var thread_longitude float32
+  if _, ok := dat["lng"]; ok {
+    thread_longitude = dat["lng"].(float32)
+  }
+
+  var thread_latitude float32
+  if _, ok := dat["lat"]; ok {
+    thread_latitude = dat["lat"].(float32)
+  }    
+
   //insert forum thread into database
-  stmt, err := db.Prepare("insert into forum_threads (user_id, title, body, link, tag) values (?, ?, ?, ?, ?)")
+  stmt, err := db.Prepare("insert into forum_threads (user_id, title, body, link, tag, longitude, latitude) values (?, ?, ?, ?, ?, ?, ?)")
   if err != nil {
     log.Fatal(err)
   }
-  res, err := stmt.Exec(userid, thread_title, thread_body, thread_link, thread_tag)
+  res, err := stmt.Exec(userid, thread_title, thread_body, thread_link, thread_tag, thread_longitude, thread_latitude)
   if err != nil {
     log.Fatal(err)
   }
@@ -136,6 +146,8 @@ func getForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, option i
     queried_tag string
     queried_post_count int
     queried_rating int
+    queried_longitude float32
+    queried_latitude float32
     queried_creation_time time.Time
     queried_last_update_time time.Time
     queried_last_post_time time.Time
@@ -145,38 +157,46 @@ func getForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, option i
   var dbQuery string 
 
   if option == 0 { //query by thread id
-    dbQuery = "select thread_id, forum_threads.user_id, title, body, link, tag, post_count, rating, forum_threads.creation_time, forum_threads.last_update_time, last_post_time, user_name from forum_threads inner join users on forum_threads.user_id = users.user_id where thread_id = " + strconv.Itoa(id)   
+    dbQuery = "select thread_id, forum_threads.user_id, title, body, link, tag, post_count, rating, longitude, latitude, forum_threads.creation_time, forum_threads.last_update_time, last_post_time, user_name from forum_threads inner join users on forum_threads.user_id = users.user_id where thread_id = " + strconv.Itoa(id)   
   } else if option == 1 { //query by user id
-    //only get 25 threads per query, and get records based on page number
-    limit := 25
-    offset := (pageNumber - 1) * limit   
 
     if sortBy == 0 { //get by rating
 
-      dbQuery = "select thread_id, forum_threads.user_id, title, body, link, tag, post_count, rating, forum_threads.creation_time, forum_threads.last_update_time, last_post_time, user_name from forum_threads inner join users on forum_threads.user_id = users.user_id where forum_threads.user_id = " + strconv.Itoa(id) + " order by rating desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+      dbQuery = "select thread_id, forum_threads.user_id, title, body, link, tag, post_count, rating, longitude, latitude, forum_threads.creation_time, forum_threads.last_update_time, last_post_time, user_name from forum_threads inner join users on forum_threads.user_id = users.user_id where forum_threads.user_id = " + strconv.Itoa(id) + " order by rating desc"
 
     } else { //get by creation time
 
-      dbQuery = "select thread_id, forum_threads.user_id, title, body, link, tag, post_count, rating, forum_threads.creation_time, forum_threads.last_update_time, last_post_time, user_name from forum_threads inner join users on forum_threads.user_id = users.user_id where forum_threads.user_id = " + strconv.Itoa(id) + " order by creation_time desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+      dbQuery = "select thread_id, forum_threads.user_id, title, body, link, tag, post_count, rating, longitude, latitude, forum_threads.creation_time, forum_threads.last_update_time, last_post_time, user_name from forum_threads inner join users on forum_threads.user_id = users.user_id where forum_threads.user_id = " + strconv.Itoa(id) + " order by creation_time desc"
 
     }
+
+    if pageNumber >= 1 {
+      //only get 25 threads per query, and get records based on page number
+      limit := 25
+      offset := (pageNumber - 1) * limit 
+
+      dbQuery += " limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+    }    
 
   } else { //query all
 
-
-    //only get 25 threads per query, and get records based on page number
-    limit := 25
-    offset := (pageNumber - 1) * limit  
-
     if sortBy == 0 { //get by rating
 
-      dbQuery = "select thread_id, forum_threads.user_id, title, body, link, tag, post_count, rating, forum_threads.creation_time, forum_threads.last_update_time, last_post_time, user_name from forum_threads inner join users on forum_threads.user_id = users.user_id order by rating desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+      dbQuery = "select thread_id, forum_threads.user_id, title, body, link, tag, post_count, rating, longitude, latitude, forum_threads.creation_time, forum_threads.last_update_time, last_post_time, user_name from forum_threads inner join users on forum_threads.user_id = users.user_id order by rating desc"
 
     } else { //get by creation time
 
-      dbQuery = "select thread_id, forum_threads.user_id, title, body, link, tag, post_count, rating, forum_threads.creation_time, forum_threads.last_update_time, last_post_time, user_name from forum_threads inner join users on forum_threads.user_id = users.user_id order by creation_time desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+      dbQuery = "select thread_id, forum_threads.user_id, title, body, link, tag, post_count, rating, longitude, latitude, forum_threads.creation_time, forum_threads.last_update_time, last_post_time, user_name from forum_threads inner join users on forum_threads.user_id = users.user_id order by creation_time desc"
 
     }
+
+    if pageNumber >= 1 {
+      //only get 25 threads per query, and get records based on page number
+      limit := 25
+      offset := (pageNumber - 1) * limit 
+
+      dbQuery += " limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+    }    
 
   }
 
@@ -192,15 +212,15 @@ func getForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, option i
   //iterate through results of query
   for rows.Next() {
     //get the relevant information from the query results
-    err = rows.Scan(&queried_thread_id, &queried_user_id, &queried_title, &queried_body, &queried_link, &queried_tag, &queried_post_count, &queried_rating, &queried_creation_time, &queried_last_update_time, &queried_last_post_time, &queried_user_name)
+    err = rows.Scan(&queried_thread_id, &queried_user_id, &queried_title, &queried_body, &queried_link, &queried_tag, &queried_post_count, &queried_rating, &queried_longitude, &queried_latitude, &queried_creation_time, &queried_last_update_time, &queried_last_post_time, &queried_user_name)
     if err != nil {
       panic(err)
     }
 
     //create outbound object for each row
     forumThreadInfoOutbound := ForumThreadInfoOutbound{Thread_id: queried_thread_id, User_id: queried_user_id, User_name: queried_user_name, Title: queried_title,
-      Body: queried_body, Link: queried_link, Tag: queried_tag, Post_count: queried_post_count, Rating: queried_rating, Creation_time: queried_creation_time, 
-      Last_update_time: queried_last_update_time, Last_post_time: queried_last_post_time}
+      Body: queried_body, Link: queried_link, Tag: queried_tag, Post_count: queried_post_count, Longitude: queried_longitude, Latitude: queried_latitude,
+      Rating: queried_rating, Creation_time: queried_creation_time, Last_update_time: queried_last_update_time, Last_post_time: queried_last_post_time}
 
     //add each outbound object to the collection outbound object
     forumThreadCollectionOutbound.ForumThreads = append(forumThreadCollectionOutbound.ForumThreads, &forumThreadInfoOutbound)
@@ -254,10 +274,6 @@ func getForumThreadProtected(w http.ResponseWriter, r *http.Request, db *sql.DB,
   //get the user from the cookie
   userid := session.Values["userid"].(int)  
 
-  //only get 25 threads per query, and get records based on page number
-  limit := 25
-  offset := (pageNumber - 1) * limit 
-
   //variable(s) to hold the returned values from the query
   var (
     queried_thread_id int
@@ -269,6 +285,8 @@ func getForumThreadProtected(w http.ResponseWriter, r *http.Request, db *sql.DB,
     queried_tag string
     queried_post_count int
     queried_rating int
+    queried_longitude float32
+    queried_latitude float32   
     queried_creation_time time.Time
     queried_last_update_time time.Time
     queried_last_post_time time.Time
@@ -278,13 +296,21 @@ func getForumThreadProtected(w http.ResponseWriter, r *http.Request, db *sql.DB,
   var dbQuery string 
   if sortBy == 0 { 
 
-    dbQuery = "select thread_id, forum_threads.user_id, title, body, link, tag, post_count, rating, forum_threads.creation_time, forum_threads.last_update_time, last_post_time, user_name from forum_threads inner join users on forum_threads.user_id = users.user_id where forum_threads.user_id = " + strconv.Itoa(userid) + " order by rating desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+    dbQuery = "select thread_id, forum_threads.user_id, title, body, link, tag, post_count, rating, longitude, latitude, forum_threads.creation_time, forum_threads.last_update_time, last_post_time, user_name from forum_threads inner join users on forum_threads.user_id = users.user_id where forum_threads.user_id = " + strconv.Itoa(userid) + " order by rating desc"
   
   } else {
 
-    dbQuery = "select thread_id, forum_threads.user_id, title, body, link, tag, post_count, rating, forum_threads.creation_time, forum_threads.last_update_time, last_post_time, user_name from forum_threads inner join users on forum_threads.user_id = users.user_id where forum_threads.user_id = " + strconv.Itoa(userid) + " order by creation_time desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+    dbQuery = "select thread_id, forum_threads.user_id, title, body, link, tag, post_count, rating, longitude, latitude, forum_threads.creation_time, forum_threads.last_update_time, last_post_time, user_name from forum_threads inner join users on forum_threads.user_id = users.user_id where forum_threads.user_id = " + strconv.Itoa(userid) + " order by creation_time desc" 
 
   }
+
+  if pageNumber >= 1 {
+    //only get 25 threads per query, and get records based on page number
+    limit := 25
+    offset := (pageNumber - 1) * limit 
+
+    dbQuery += " limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+  }  
 
   //perform query and check for errors
   rows, err := db.Query(dbQuery)
@@ -298,15 +324,15 @@ func getForumThreadProtected(w http.ResponseWriter, r *http.Request, db *sql.DB,
   //iterate through results of query
   for rows.Next() {
     //get the relevant information from the query results
-    err = rows.Scan(&queried_thread_id, &queried_user_id, &queried_title, &queried_body, &queried_link, &queried_tag, &queried_post_count, &queried_rating, &queried_creation_time, &queried_last_update_time, &queried_last_post_time, &queried_user_name)
+    err = rows.Scan(&queried_thread_id, &queried_user_id, &queried_title, &queried_body, &queried_link, &queried_tag, &queried_post_count, &queried_rating, &queried_longitude, &queried_latitude, &queried_creation_time, &queried_last_update_time, &queried_last_post_time, &queried_user_name)
     if err != nil {
       panic(err)
     }
 
     //create outbound object for each row
     forumThreadInfoOutbound := ForumThreadInfoOutbound{Thread_id: queried_thread_id, User_id: queried_user_id, User_name: queried_user_name, Title: queried_title,
-      Body: queried_body, Link: queried_link, Tag: queried_tag, Post_count: queried_post_count, Rating: queried_rating, Creation_time: queried_creation_time, 
-      Last_update_time: queried_last_update_time, Last_post_time: queried_last_post_time}
+      Body: queried_body, Link: queried_link, Tag: queried_tag, Post_count: queried_post_count, Longitude: queried_longitude, Latitude: queried_latitude,
+      Rating: queried_rating, Creation_time: queried_creation_time, Last_update_time: queried_last_update_time, Last_post_time: queried_last_post_time}
 
     //add each outbound object to the collection outbound object
     forumThreadCollectionOutbound.ForumThreads = append(forumThreadCollectionOutbound.ForumThreads, &forumThreadInfoOutbound)
@@ -540,6 +566,8 @@ func editForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store *
   thread_body := dat["body"].(string)
   thread_link := dat["link"].(string)
   thread_tag := dat["tag"].(string)
+  thread_longitude:= dat["lng"].(float32)
+  thread_latitude := dat["lat"].(float32)  
 
   var (
     queried_user_id int
@@ -582,11 +610,11 @@ func editForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store *
   //TODO: return error if thread id is blank/nan
 
   //update the forum thread post
-  stmt, err := db.Prepare("update forum_threads set title = ?, body = ?, link = ?, tag = ? where thread_id = ?")
+  stmt, err := db.Prepare("update forum_threads set title = ?, body = ?, link = ?, tag = ?, longitude = ?, latitude = ? where thread_id = ?")
   if err != nil {
     log.Fatal(err)
   }
-  res, err := stmt.Exec(thread_title, thread_body, thread_link, thread_tag, thread_id)
+  res, err := stmt.Exec(thread_title, thread_body, thread_link, thread_tag, thread_longitude, thread_latitude, thread_id)
   if err != nil {
     log.Fatal(err)
   }
@@ -767,9 +795,9 @@ func popularThreads(w http.ResponseWriter, r *http.Request, db *sql.DB) {
     queried_count int
   )  
 
-  //get the 5 most popular tags within the past 2 hours
+  //get the 5 most popular tags within the past 24 hours
   //perform query and check for errors
-  rows, err := db.Query("select tag, count(tag) from forum_threads where creation_time > DATE_SUB( NOW(), INTERVAL 2 HOUR) group by tag order by count(tag) desc limit 5")
+  rows, err := db.Query("select tag, count(tag) from forum_threads where creation_time > DATE_SUB( NOW(), INTERVAL 24 HOUR) group by tag order by count(tag) desc limit 5")
   if err != nil {
     panic(err)
   } 

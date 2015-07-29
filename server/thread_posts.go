@@ -151,51 +151,63 @@ func getThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, option in
   
   } else if option == 1 { //query by thread id
 
-    //only get 25 threads per query, and get records based on page number
-    limit := 25
-    offset := (pageNumber - 1) * limit  
-
     if sortBy == 0 { //get by rating
 
-      dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id where thread_id = " + strconv.Itoa(id) + " order by rating desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+      dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id where thread_id = " + strconv.Itoa(id) + " order by rating desc"
 
     } else { //get by creation time
 
-      dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id where thread_id = " + strconv.Itoa(id)  + " order by creation_time desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+      dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id where thread_id = " + strconv.Itoa(id)  + " order by creation_time desc"
 
     }
 
-  } else if option == 2 { //query by user id
+    if pageNumber >= 1 {
+      //only get 25 threads per query, and get records based on page number
+      limit := 25
+      offset := (pageNumber - 1) * limit 
 
-    //only get 25 threads per query, and get records based on page number
-    limit := 25
-    offset := (pageNumber - 1) * limit   
+      dbQuery += " limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+    }       
+
+  } else if option == 2 { //query by user id 
 
     if sortBy == 0 { //get by rating
 
-      dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id where thread_posts.user_id = " + strconv.Itoa(id) + " order by rating desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+      dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id where thread_posts.user_id = " + strconv.Itoa(id) + " order by rating desc"
 
     } else { //get by creation time
 
-      dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id where thread_posts.user_id = " + strconv.Itoa(id)  + " order by creation_time desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+      dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id where thread_posts.user_id = " + strconv.Itoa(id)  + " order by creation_time desc"
 
     }
+
+    if pageNumber >= 1 {
+      //only get 25 threads per query, and get records based on page number
+      limit := 25
+      offset := (pageNumber - 1) * limit 
+
+      dbQuery += " limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+    }      
 
   } else { //query all
 
-    //only get 25 threads per query, and get records based on page number
-    limit := 25
-    offset := (pageNumber - 1) * limit  
-
     if sortBy == 0 { //get by rating
 
-      dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id order by rating desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+      dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id order by rating desc"
 
     } else { //get by creation time
 
-      dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id order by creation_time desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+      dbQuery = "select post_id, thread_id, thread_posts.user_id, contents, rating, thread_posts.creation_time, thread_posts.last_update_time, user_name from thread_posts inner join users on thread_posts.user_id = users.user_id order by creation_time desc"
 
     }
+
+    if pageNumber >= 1 {
+      //only get 25 threads per query, and get records based on page number
+      limit := 25
+      offset := (pageNumber - 1) * limit 
+
+      dbQuery += " limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+    }     
 
   }
 

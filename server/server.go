@@ -233,7 +233,7 @@ func main() {
         }
 
         //look for pagenumber parameter in url
-        pageNumber := 1
+        pageNumber := 0
         var err error
         if val, ok := m["pagenumber"]; ok {
           pageNumber, err = strconv.Atoi(val[0])
@@ -278,7 +278,7 @@ func main() {
         }
 
         //look for pagenumber parameter in url
-        pageNumber := 1
+        pageNumber := 0
         var err error
         if val, ok := m["pagenumber"]; ok {
           pageNumber, err = strconv.Atoi(val[0])
@@ -454,7 +454,7 @@ func main() {
         }
 
         //look for pagenumber parameter in url
-        pageNumber := 1
+        pageNumber := 0
         var err error
         if val, ok := m["pagenumber"]; ok {
           pageNumber, err = strconv.Atoi(val[0])
@@ -604,7 +604,7 @@ http.HandleFunc("/search/", func(w http.ResponseWriter, r *http.Request) {
       }
 
       //look for pagenumber parameter in url
-      pageNumber := 1
+      pageNumber := 0
       var err error
       if val, ok := m["pagenumber"]; ok {
         pageNumber, err = strconv.Atoi(val[0])
