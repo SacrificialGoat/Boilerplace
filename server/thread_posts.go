@@ -90,7 +90,7 @@ func createThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store 
   }
   fmt.Printf("Inserted forum post into forum thread " + strconv.Itoa(thread_id) + ". Last inserted ID = %d, rows affected = %d\n", lastId, rowCnt)
 
-  //update user's bio and avatar_link
+  //update post count and last post time for the forum thread
   stmt, err = db.Prepare("update forum_threads set post_count = post_count + 1, last_post_time = NOW() where thread_id = ?")
   if err != nil {
     log.Fatal(err)
@@ -489,6 +489,21 @@ func deleteThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store 
   }
   fmt.Printf("Deleted votes for forum thread post with id " + strconv.Itoa(id) + ". Rows affected = %d\n", rowCnt)   
 
+  //update post count for the forum thread
+  stmt, err = db.Prepare("update forum_threads inner join thread_posts on forum_threads.thread_id = thread_posts.thread_id set post_count = post_count - 1 where thread_posts.post_id = ?")
+  if err != nil {
+    log.Fatal(err)
+  }
+  res, err = stmt.Exec(id)
+  if err != nil {
+    log.Fatal(err)
+  }
+  rowCnt, err = res.RowsAffected()
+  if err != nil {
+    log.Fatal(err)
+  }
+  fmt.Printf("Decremented post count in forum_threads table. Rows affected = %d\n", rowCnt)  
+
   //delete the forum thread post
   stmt, err = db.Prepare("delete from thread_posts where post_id = ?")
   if err != nil {
@@ -502,7 +517,7 @@ func deleteThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store 
   if err != nil {
     log.Fatal(err)
   }
-  fmt.Printf("Deleted thread post " + strconv.Itoa(id) + ". Rows affected = %d\n", rowCnt)      
+  fmt.Printf("Deleted thread post " + strconv.Itoa(id) + ". Rows affected = %d\n", rowCnt)  
 
   //return 200 status to indicate success
   fmt.Println("about to write 200 header")
