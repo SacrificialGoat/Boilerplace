@@ -81,15 +81,17 @@ func createForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store
     thread_tag = dat["tag"].(string)
   }
 
-  var thread_longitude float32
+  var thread_longitude float64
   if _, ok := dat["lng"]; ok {
-    thread_longitude = dat["lng"].(float32)
+    thread_longitude = dat["lng"].(float64)
   }
 
-  var thread_latitude float32
+  var thread_latitude float64
   if _, ok := dat["lat"]; ok {
-    thread_latitude = dat["lat"].(float32)
+    thread_latitude = dat["lat"].(float64)
   }    
+
+  //TODO: handle lat and long passed in as non float types
 
   //insert forum thread into database
   stmt, err := db.Prepare("insert into forum_threads (user_id, title, body, link, tag, longitude, latitude) values (?, ?, ?, ?, ?, ?, ?)")
@@ -146,8 +148,8 @@ func getForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, option i
     queried_tag string
     queried_post_count int
     queried_rating int
-    queried_longitude float32
-    queried_latitude float32
+    queried_longitude float64
+    queried_latitude float64
     queried_creation_time time.Time
     queried_last_update_time time.Time
     queried_last_post_time time.Time
@@ -285,8 +287,8 @@ func getForumThreadProtected(w http.ResponseWriter, r *http.Request, db *sql.DB,
     queried_tag string
     queried_post_count int
     queried_rating int
-    queried_longitude float32
-    queried_latitude float32   
+    queried_longitude float64
+    queried_latitude float64   
     queried_creation_time time.Time
     queried_last_update_time time.Time
     queried_last_post_time time.Time
@@ -566,8 +568,8 @@ func editForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store *
   thread_body := dat["body"].(string)
   thread_link := dat["link"].(string)
   thread_tag := dat["tag"].(string)
-  thread_longitude:= dat["lng"].(float32)
-  thread_latitude := dat["lat"].(float32)  
+  thread_longitude:= dat["lng"].(float64)
+  thread_latitude := dat["lat"].(float64)  
 
   var (
     queried_user_id int
