@@ -7,8 +7,8 @@ import (
 	"time"
 	"fmt"
 	"encoding/json"
-    // "database/sql"
-
+    "database/sql"
+    "strconv"
 )
 
 const (
@@ -32,6 +32,11 @@ type friend_connection struct {
 	send chan []byte
 	userId string
 	sendUsers chan map[*friend_connection]string
+}
+
+type friendStatus struct {
+	UserId string
+	UserName string
 }
 
 // // reads message from websocket to hub
@@ -116,7 +121,7 @@ func (c *friend_connection) writeFL(mt int, payload []byte) error {
 }
 
 // pumps message from hub to websocket friend_connection.  Send to friend_connections?
-func (c *friend_connection) writePumpFL() {
+func (c *friend_connection) writePumpFL(db *sql.DB) {
 
 	ticker := time.NewTicker(pingPeriod)  // NewTicker has channel
 	// ?? not sure about this
@@ -134,23 +139,51 @@ func (c *friend_connection) writePumpFL() {
 				return
 			}
 
-			// build an array of current connections
+
+			// For TESTING
 			currConn := []string{}
 			for conn := range h {
-				currConn = append(currConn, h[conn])
+					currConn = append(currConn, h[conn])
 			}
-			fmt.Println("Connected users: ", currConn)
-			fmt.Println("Current users: ", c.userId)
+			fmt.Println("Connected users: ", currConn, " -- CurrUser: ", c.userId)
 
-			// TODO: Here x-reference with curr User friendlist
+			// == Getting current user friendlist from database.
+			userFriendList := GetFriendsListInternal(c.userId, db) 
+			onlineFriends := []string{}
 
-			// userFriendList := GetFriendsListInternal(c.userId, db)
-			// fmt.Println("userFriendList: ", userFriendList)
+			if len(userFriendList.Friends) != 0 {
+				i := 0
+				// for i := range userFriendList.Friends {
+				for i < len(userFriendList.Friends) {
 
+					// build an array of current connections
+					found := false
+					for conn := range h {
+						if h[conn] == strconv.Itoa(userFriendList.Friends[i].User_id) {
+							// fmt.Println("Friend is online: ", h[conn])
+							onlineFriends = append(onlineFriends, h[conn])
+							found = true
+						}
+						// fmt.Println("userFriendList.Friends[i].User_id", userFriendList.Friends[i].User_id)
+					}
+					// fmt.Println("Found is",found, "I:", i, " ID:", userFriendList.Friends[i].User_id )
+
+					// cannot do this because remove element in array causes mismatch for "for condition"
+		
+					if found == false {
+						userFriendList.Friends = append(userFriendList.Friends[:i], userFriendList.Friends[i+1:]...) 
+						i--
+					}
+					i++
+				}  
+			}
+
+
+			fmt.Println("Online Friends: ", userFriendList.Friends, "  -- CurrUser: ", c.userId)
 
 
 			// === write to ws connection == 
-			j, _ := json.Marshal(currConn)
+			j, _ := json.Marshal( userFriendList)
 			fmt.Println("JSON string: ", j)
 
 
@@ -171,13 +204,46 @@ func (c *friend_connection) writePumpFL() {
 
 
 
+func GetFriendsListInternal(userId string, db *sql.DB) FriendsListOutbound {
+
+
+  rows, err := db.Query("select users.user_id, users.user_name, users.first_name, users.last_name from friends right join users on friends.friend_id = users.user_id where friends.user_id = " + userId)
+  if err != nil {
+    log.Fatal(err)
+  }
+
+  var (
+    id int
+    username string
+    first string
+    last string
+  )
+
+  friendsList := FriendsListOutbound{Friends: make([]*FriendInfoOutbound, 0)}
+
+  for rows.Next() {
+    err = rows.Scan(&id, &username, &first, &last)
+    if err != nil {
+      panic(err)
+    }
+    friendInfoOutbound := FriendInfoOutbound{User_id: id, User_name: username, First_name: first, Last_name: last}
+    friendsList.Friends = append(friendsList.Friends, &friendInfoOutbound)
+  }
+  return friendsList
+}
+
+
+
+
+
+
 
 // handles websocket request from peer.
 // a friend_connection will be re routed here. Then "ws" gets pointer to that websocket friend_connection. 
 // Then "c" is instantiated with &friend_connection struct (a user's friend_connection). Then pass to h.register.
 // Then call c.writePump goroutine to 1) async write stuff from hub to friend_connection.
 // Sync call c.readPump
-func serveWs(w http.ResponseWriter, r *http.Request) {
+func serveWs(w http.ResponseWriter, r *http.Request, db *sql.DB ) {
 	go h.run()  // place this here because we took out friend_list
 
 	userId := CheckSession(w, r)  // This is in Pete's friend.go
@@ -197,7 +263,7 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 	// test := "Helloworld"
 	// h.broadcastUsers <- test
 	// go c.writePump() // Write from hub to friend_connection. Goroutine. Any new message read from pump will be updated trhough here
-	go c.writePumpFL()
+	go c.writePumpFL(db)
 
 	// c.readPump()  //read data from friend_connection to hub
 }

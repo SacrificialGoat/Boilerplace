@@ -136,31 +136,3 @@ func GetFriendsList(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 }
 
 
-
-// func GetFriendsListInternal(userId string, db *sql.DB) FriendsListOutbound {
-
-
-//   rows, err := db.Query("select users.user_id, users.user_name, users.first_name, users.last_name from friends right join users on friends.friend_id = users.user_id where friends.user_id = " + userId)
-//   if err != nil {
-//     log.Fatal(err)
-//   }
-
-//   var (
-//     id int
-//     username string
-//     first string
-//     last string
-//   )
-
-//   friendsList := FriendsListOutbound{Friends: make([]*FriendInfoOutbound, 0)}
-
-//   for rows.Next() {
-//     err = rows.Scan(&id, &username, &first, &last)
-//     if err != nil {
-//       panic(err)
-//     }
-//     friendInfoOutbound := FriendInfoOutbound{User_id: id, User_name: username, First_name: first, Last_name: last}
-//     friendsList.Friends = append(friendsList.Friends, &friendInfoOutbound)
-//   }
-//   return friendsList
-// }
