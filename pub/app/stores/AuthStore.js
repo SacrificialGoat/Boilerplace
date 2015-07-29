@@ -45,7 +45,10 @@ var AuthStore = assign({}, EventEmitter.prototype, {
     var that = this;
     Auth.logout(function(){
       _loggedIn = false;
+    console.log("logging out...")
       that.emitChange();
+      console.log("logging out EmitChange...")
+
     });
   },
 

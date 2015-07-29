@@ -11,7 +11,7 @@ var ONLINE_STATUS = 'friendonlinestatus'
 var _friendData = {
 	friendList: null,  
 	isTargetFriend: false,
-	onlineFriendList: null
+	onlineFriendList: []
 }
 
 // ========= Private Methods =========
@@ -39,7 +39,7 @@ var _clientSocket = {
   connect: function(){
     console.log('connecting to Friend Online Status...');
     conn = new WebSocket("ws://"+window.location.host+"/friendlist/");
-    _ws =  conn
+    _ws =  conn;
     conn.onclose = function(evt) {
         console.log("WS closing")
     }
@@ -52,6 +52,7 @@ var _clientSocket = {
   },
 
   disconnect: function(){
+    console.log("closing ws....")
     conn.close()
   }
 }
