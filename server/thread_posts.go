@@ -432,6 +432,9 @@ func editThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *s
   }
   //session.Save(r, w)
 
+  //get the user id and username from the cookie
+  userid := session.Values["userid"].(int)     
+
   //parse the body of the request into a string
   body, err := ioutil.ReadAll(r.Body)
   if err != nil {
@@ -447,6 +450,44 @@ func editThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *s
   }
   post_id := int(dat["post_id"].(float64))
   post_contents := dat["contents"].(string)
+
+  var (
+    queried_user_id int
+  )  
+
+  //don't edit the post if the user was not the one who created it
+  err = db.QueryRow("select user_id from thread_posts where post_id = ?", post_id).Scan(&queried_user_id)
+  switch {
+
+    //if post doesn't exist 
+    case err == sql.ErrNoRows:
+      //return 400 status to indicate error
+      fmt.Println("about to write 400 header")
+      fmt.Println("Post cannot be found")     
+      w.Write([]byte(fmt.Sprintf("Post cannot be found"))) 
+      return
+      //break
+
+    //if error querying database  
+    case err != nil:
+      log.Fatal(err)
+      //return 400 status to indicate error
+      fmt.Println("about to write 400 header")
+      w.Write([]byte(fmt.Sprintf("Error querying database")))  
+      return
+      //break
+
+    //if post exists
+    default:
+      if queried_user_id != userid {
+        fmt.Println("about to write 400 header")
+        fmt.Println("Cannot edit another user's post")  
+        w.Write([]byte(fmt.Sprintf("Cannot edit another user's post")))  
+        return
+      }
+      break
+
+  }     
 
   //TODO: return error if post id is blank/nan, return if neither post id nor post contents exist in message of body
 
@@ -501,6 +542,47 @@ func deleteThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store 
     return
   }
   //session.Save(r, w)
+
+  //get the user id and username from the cookie
+  userid := session.Values["userid"].(int)   
+
+  var (
+    queried_user_id int
+  )  
+
+  //don't delete the post if the user was not the one who created it
+  err = db.QueryRow("select user_id from thread_posts where post_id = ?", id).Scan(&queried_user_id)
+  switch {
+
+    //if post doesn't exist 
+    case err == sql.ErrNoRows:
+      //return 400 status to indicate error
+      fmt.Println("about to write 400 header")
+      fmt.Println("Post cannot be found")     
+      w.Write([]byte(fmt.Sprintf("Post cannot be found"))) 
+      return
+      //break
+
+    //if error querying database  
+    case err != nil:
+      log.Fatal(err)
+      //return 400 status to indicate error
+      fmt.Println("about to write 400 header")
+      w.Write([]byte(fmt.Sprintf("Error querying database")))  
+      return
+      //break
+
+    //if post exists
+    default:
+      if queried_user_id != userid {
+        fmt.Println("about to write 400 header")
+        fmt.Println("Cannot delete another user's post")  
+        w.Write([]byte(fmt.Sprintf("Cannot delete another user's post")))  
+        return
+      }
+      break
+
+  }       
 
   //TODO: return error if post id is blank/nan
 
