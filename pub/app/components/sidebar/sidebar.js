@@ -5,8 +5,28 @@ var ChatStore = require('../../stores/ChatStore');
 var AuthStore = require('../../stores/AuthStore');
 var rd3 = require('react-d3');
 var PieChart = rd3.PieChart;
+var Treemap = rd3.Treemap;
 
 // TODO - factor out navbar login form
+
+var getTrending = function(callback) {
+  $.ajax({
+    type: 'GET',
+    url: '/trending/',
+    crossDomain: true,
+    success: function(resp) { // WORKING for fetchuser?
+      // console.log('success',resp);
+      callback(resp);
+    },
+    error: function(resp) {
+      // TODO: Fix this, this always goes to error - not sure.
+      // Found out - jQuery 1.4.2 works with current go server, but breaks with newer ver.
+      console.log('error',resp);
+      callback(null);
+    }
+  });
+
+};
 
 var Sidebar = React.createClass({
 
@@ -14,17 +34,38 @@ var Sidebar = React.createClass({
       return {
         from: "",
         messages: [],
-        data : [
-          {label: "Politics", value: 23},
-          {label: "News", value: 50},
-          {label: "Cats", value: 27}
-        ]
+        data : []
       };
+    },
+
+    loadTrending: function(){
+      // Get Trending data
+      var that = this;
+
+      getTrending(function(data){
+
+        var array = [];
+        var total = 0;
+
+        for (var i = 0; i < data.topics.length; i++) {
+          total += data.topics[i].count;
+        };
+
+        for (var i = 0; i < data.topics.length; i++) {
+          var obj = data.topics[i];
+          array.push({label: obj.tag, value: Math.round((obj.count/total)*100)});
+
+        };
+        that.setState({
+          data:array
+        });
+      });
     },
 
     componentDidMount: function(){
       AuthStore.addChangeListener(this._onAuthChange);
       ChatStore.addChangeListener(this._onChange);
+      this.loadTrending();
     },
 
     componentWillUnmount: function(){
@@ -59,17 +100,18 @@ var Sidebar = React.createClass({
         <ul className="sidebar-nav">
             <a href="#"><img src="/assets/logo.png"></img></a>
             <li>
-                <a href="#">Trending</a>
+                <a href="#">Trending (past 2 hours)</a>
+                <Treemap
+                  data={this.state.data}
+                  width={220}
+                  height={200}
+                  textColor="#484848"
+                  fontSize="10px"/>
             </li>
             <li>
                 <a href="#">Chat (global)</a>
             </li>
             <Chat messages={this.state.messages} user={this.state.from} onSend={this.sendMessage} onChat={this.joinChat} />
-            <li>
-                <a href="#">Friends</a>
-            </li>
-
-
         </ul>
     );
   }
@@ -78,9 +120,10 @@ var Sidebar = React.createClass({
 module.exports = Sidebar;
 
 
+
 // <PieChart
 //   data={this.state.data}
-//   width={230}
-//   height={230}
-//   radius={70}
-//   innerRadius={10}/> 
+//   width={220}
+//   height={200}
+//   radius={50}
+//   innerRadius={10}/>
