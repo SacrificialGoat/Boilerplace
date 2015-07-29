@@ -89,6 +89,8 @@ type ForumThreadInfoOutbound struct {
   Tag string `json:"tag"` 
   Post_count int `json:"post_count"`
   Rating int `json:"rating"`
+  Longitude float32 `json:"lng"`
+  Latitude float32 `json:"lat"`    
   Creation_time time.Time `json:"creation_time"`
   Last_update_time time.Time `json:"last_update_time"`
   Last_post_time time.Time `json:"last_post_time"`

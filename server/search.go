@@ -52,19 +52,23 @@ func searchForForumThreads(w http.ResponseWriter, r *http.Request, db *sql.DB, s
   //change query based on option
   var dbQuery string 
 
-  //only get 25 threads per query, and get records based on page number
-  limit := 25
-  offset := (pageNumber - 1) * limit   
-
   if sortBy == 0 { //get by rating
 
-    dbQuery = "select thread_id, forum_threads.user_id, title, body, post_count, rating, forum_threads.creation_time, forum_threads.last_update_time, user_name from forum_threads inner join users on forum_threads.user_id = users.user_id where title like '%" + titleSearch + "%' order by rating desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+    dbQuery = "select thread_id, forum_threads.user_id, title, body, post_count, rating, forum_threads.creation_time, forum_threads.last_update_time, user_name from forum_threads inner join users on forum_threads.user_id = users.user_id where title like '%" + titleSearch + "%' order by rating desc"
 
   } else { //get by creation time
 
-    dbQuery = "select thread_id, forum_threads.user_id, title, body, post_count, rating, forum_threads.creation_time, forum_threads.last_update_time, user_name from forum_threads inner join users on forum_threads.user_id = users.user_id where title like '%" + titleSearch + "%' order by creation_time desc limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+    dbQuery = "select thread_id, forum_threads.user_id, title, body, post_count, rating, forum_threads.creation_time, forum_threads.last_update_time, user_name from forum_threads inner join users on forum_threads.user_id = users.user_id where title like '%" + titleSearch + "%' order by creation_time desc"
 
   }
+
+  if pageNumber >= 1 {
+    //only get 25 threads per query, and get records based on page number
+    limit := 25
+    offset := (pageNumber - 1) * limit 
+
+    dbQuery += " limit " + strconv.Itoa(limit) + " offset " + strconv.Itoa(offset)
+  }     
 
   //perform query and check for errors
   rows, err := db.Query(dbQuery)
