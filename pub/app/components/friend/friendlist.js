@@ -45,16 +45,14 @@ var FriendList = React.createClass({
 
 		var listItems = this.state.friendOnline.map(function(item, index){
 		  return (
-		    <li key={index}  >
-		      <span>
+		    <div key={index} className="friend-online-status">
 		        {item.username}
-		      </span>
-		    </li>
+		    </div>
 		  )
 		}.bind(this));
 		return (
 			<div className="friend-list" >
-				{this.state.loggedIn ? <ul>{listItems}</ul> : "not logged in"}
+				{this.state.loggedIn ? <div className="friend-online-list">{listItems}</div> : "not logged in"}
 			</div>
 		)
 
