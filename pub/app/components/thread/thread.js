@@ -82,10 +82,17 @@ var Thread = React.createClass({
 
   _onChange: function(){
 
+    if(!this.state.voted){
+      // if person didn't click vote
+      this.setState({
+        rating: ThreadStore.getThread().forumThreads[0].rating
+      });
+    }
+    
+    // Update states from fetch
     this.setState({
       title: ThreadStore.getThread().forumThreads[0].title,
       body: ThreadStore.getThread().forumThreads[0].body,
-      rating: ThreadStore.getThread().forumThreads[0].rating,
       userId: ThreadStore.getThread().forumThreads[0].user_id,
       user_name: ThreadStore.getThread().forumThreads[0].user_name,
       link: ThreadStore.getThread().forumThreads[0].link,
