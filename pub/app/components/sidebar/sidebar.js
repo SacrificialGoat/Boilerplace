@@ -45,18 +45,14 @@ var Sidebar = React.createClass({
       var that = this;
 
       getTrending(function(data){
-
         var array = [];
         var total = 0;
-
         for (var i = 0; i < data.topics.length; i++) {
           total += data.topics[i].count;
         };
-
         for (var i = 0; i < data.topics.length; i++) {
           var obj = data.topics[i];
           array.push({label: obj.tag, value: Math.round((obj.count/total)*100)});
-
         };
         that.setState({
           data:array
@@ -102,13 +98,13 @@ var Sidebar = React.createClass({
         <ul className="sidebar-nav">
             <a href="#"><img src="/assets/logo.png"></img></a>
             <li>
-                <a href="#">Trending (past 2 hours)</a>
+                <a href="#">Trending (past 24 hours)</a>
                 <Treemap
                   data={this.state.data}
-                  width={220}
+                  width={225}
                   height={200}
                   textColor="#484848"
-                  fontSize="10px"/>
+                  fontSize="12px"/>
             </li>
             <li>
                 <a href="#">Chat (global)</a>

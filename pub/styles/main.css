@@ -197,6 +197,12 @@ h2{
   width:40%;
 }
 
+.newThread img{
+  width:70px;
+  padding:-50px;
+  height:70px;
+}
+
 .newThread input[type="textarea"]{
   height:200px;
 }
@@ -397,9 +403,33 @@ h2{
 /* Location */
 
 #map {
-  width: 210px;
-  height: 230px;
-  margin-left:10px
+  width: 100%;
+  height: 650px;
+  font-size:28px;
+  font-family:'century gothic';
+}
+
+.geoThread p{
+  margin:0;
+}
+
+.geoThread a{
+  font-size:22px;
+}
+
+.geoThread .body{
+  font-size: 18px;
+  margin-bottom:10px;
+}
+
+.geoThread .tag{
+  background-color:#D4D4D4;
+  font-size:12px;
+  width:80px;
+  display:inline-block;
+  margin-left:auto;
+  border-radius:20px;
+  text-align:center;
 }
 
 /* Thread (single) */

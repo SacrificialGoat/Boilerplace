@@ -141,6 +141,8 @@ var Navbar = React.createClass({
             </form>
           )}
 
+          <li><Link to="/geo">Geo</Link></li>
+
             {this.state.loggedIn ? (
               null
             ) : (

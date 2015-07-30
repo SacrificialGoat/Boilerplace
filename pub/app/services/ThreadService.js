@@ -1,4 +1,4 @@
-var addThread = function(title,body,link,tag,callback) {
+var addThread = function(title,body,link,tag,lat,lng,callback) {
   return $.ajax({
     type: 'POST',
     url: '/threads/',
@@ -6,7 +6,9 @@ var addThread = function(title,body,link,tag,callback) {
       "title": title,
       "body": body,
       "link": link,
-      "tag": tag
+      "tag": tag,
+      "lat": parseFloat(lat),
+      "lng": parseFloat(lng)
     }),
     crossDomain: true,
     success: function(resp) {
@@ -278,10 +280,10 @@ var Thread = {
     });
   },
 
-  add: function(title, body, link, tag, callback) {
+  add: function(title, body, link, tag, lat, lng, callback) {
     var that = this;
 
-    addThread(title, body, link, tag, function(res) {
+    addThread(title, body, link, tag, lat, lng, function(res) {
       if (callback) {
         callback(res);
       }
