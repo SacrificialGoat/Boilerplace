@@ -9,34 +9,46 @@ var NewThread = React.createClass({
       location.hash = '/login';
     }
     return {
-      success: false
+      success: false,
+      shared: false
     };
   },
 
   getLocation: function(){
-    var that = this;
-    console.log(React.findDOMNode(that.refs.share));
-
-    if(React.findDOMNode(that.refs.share).value){
-      // Geolocation to find current latitude and longitude
-      GMaps.geolocate({
-        success: function(position) {
-          React.findDOMNode(that.refs.lat).value = position.coords.latitude;
-          React.findDOMNode(that.refs.lng).value = position.coords.longitude;
-        },
-        error: function(error) {
-          alert('Geolocation failed: '+error.message);
-        },
-        not_supported: function() {
-          alert("Your browser does not support geolocation");
-        },
-        always: function() {
-          console.log('now at current location');
-        }
-      });      
+    if(this.state.shared){ // already shared
+      // clear it out
+      this.setState({
+        shared: false
+      });
+      React.findDOMNode(this.refs.lat).value = '';
+      React.findDOMNode(this.refs.lng).value = '';
     }else{
-      React.findDOMNode(that.refs.lat).value = '';
-      React.findDOMNode(that.refs.lng).value = '';
+      React.findDOMNode(this.refs.spinner).className = "";
+      var that = this;
+      console.log(React.findDOMNode(that.refs.share));
+
+      if(React.findDOMNode(that.refs.share).value){
+        // Geolocation to find current latitude and longitude
+        GMaps.geolocate({
+          success: function(position) {
+            React.findDOMNode(that.refs.spinner).className = "hidden";
+            React.findDOMNode(that.refs.lat).value = position.coords.latitude;
+            React.findDOMNode(that.refs.lng).value = position.coords.longitude;
+          },
+          error: function(error) {
+            alert('Geolocation failed: '+error.message);
+          },
+          not_supported: function() {
+            alert("Your browser does not support geolocation");
+          },
+          always: function() {
+            console.log('now at current location');
+          }
+        });      
+      }
+      this.setState({
+        shared: true
+      });
     }
   },
 
@@ -88,7 +100,8 @@ var NewThread = React.createClass({
               <input type="textarea" className="form-control" placeholder="Body" ref="body" />
               <input type="text" className="form-control" placeholder="Tag" ref="tag" />
               <p> Share your location? </p>
-              <input type="checkbox" className="form-control" ref="share" onClick={this.getLocation}/>
+              <input type="checkbox" ref="share" onClick={this.getLocation}/>
+              <img className="hidden" ref="spinner" src="/assets/spinner.gif"></img>
               <input type="text" className="form-control" placeholder="Latitude" ref="lat" />
               <input type="text" className="form-control" placeholder="Longitude" ref="lng" />
               <button type="submit" className="btn btn-success" value="Submit">Submit</button>

@@ -197,6 +197,12 @@ h2{
   width:40%;
 }
 
+.newThread img{
+  width:70px;
+  padding:-50px;
+  height:70px;
+}
+
 .newThread input[type="textarea"]{
   height:200px;
 }
