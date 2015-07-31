@@ -627,6 +627,102 @@ http.HandleFunc("/search/", func(w http.ResponseWriter, r *http.Request) {
 })
 
 
+//routes in messages.go
+
+//GET:
+//getMessage                               message/ id 
+//DELETE:
+//deleteMessage                            message/ id
+http.HandleFunc("/message/", func(w http.ResponseWriter, r *http.Request) {
+  switch r.Method {
+    case "GET":
+
+      s := strings.Split(r.URL.Path, "/")
+      if len(s) == 3 {
+        messageId, err := strconv.Atoi(s[2])
+
+        if err != nil {
+          //error
+        }
+
+        recvMessages(w, r, db, store, 0, INVALID_INT, INVALID_INT, messageId)
+
+      } else {
+        //error
+      }
+
+      break 
+    case "POST":
+      break  
+    case "PUT":
+      break  
+    case "DELETE":
+      break  
+    default:
+      break
+  }
+})
+
+//GET:
+//getMessage                               messages/?q=sender&sortby=desc&pagenumber=1
+//getMessage                               messages/?q=recipient&sortby=desc&pagenumber=1
+//POST:
+//sendMessage                              messages/                         body: { ... }    
+http.HandleFunc("/messages/", func(w http.ResponseWriter, r *http.Request) {
+  switch r.Method {
+    case "GET":
+
+      m, _ := url.ParseQuery(r.URL.RawQuery)
+
+      //look for query type parameter in url
+      option := 0
+      if val, ok := m["q"]; ok {
+        if(val[0] == "desc") {
+          option = 1
+        } else {
+          option = 2
+        }
+      }
+
+      //look for sortby parameter in url
+      sortBy := 0
+      if val, ok := m["sortby"]; ok {
+        if val[0] == "creationtime" {
+          sortBy = 1
+        }
+      }
+
+      //look for pagenumber parameter in url
+      pageNumber := 0
+      var err error
+      if val, ok := m["pagenumber"]; ok {
+        pageNumber, err = strconv.Atoi(val[0])
+        if err != nil {
+          //error
+        }
+      }
+
+      recvMessages(w, r, db, store, option, sortBy, pageNumber, INVALID_INT)
+
+      break 
+    case "POST":
+
+      createMessage(w, r, db, store)
+
+      break  
+    case "PUT":
+      break  
+    case "DELETE":
+      break  
+    default:
+      break
+  }
+})
+
+
+
+
+
 /*
   //routes in auth.go
 

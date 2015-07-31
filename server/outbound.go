@@ -129,6 +129,25 @@ type PopularTopicOutbound struct {
   Count int `json:"count"`
 }
 
+//struct containing messages
+type MessageCollectionOutbound struct {
+  Messages []*MessageOutbound `json:"messages"`
+}
+
+//struct containing message info
+type MessageOutbound struct {
+  Message_id int `json:"message_id"`
+  Sender_id int `json:"sender_id"`
+  Sender_name string `json:"sender_name"`
+  Recipient_id int `json:"recipient_id"`
+  Recipient_name string `json:"recipient_name"`
+  Title string `json:"title"`
+  Contents string `json:"contents"`
+  Creation_time time.Time `json:"creation_time"`
+  Last_update_time time.Time `json:"last_update_time"`  
+}
+
+
 
 type FriendInfoOutbound struct {
   User_id int `json:"id"`
