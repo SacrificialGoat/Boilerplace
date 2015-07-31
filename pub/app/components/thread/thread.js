@@ -36,7 +36,8 @@ var Thread = React.createClass({
     return {
       id:this.props.params.id,
       voted: 0,
-      loggedIn: true,
+      alert: false,
+      loggedIn: false,
       title: '',
       body: '',
       userId: null,
@@ -100,7 +101,8 @@ var Thread = React.createClass({
       creation_time: formatDate(ThreadStore.getThread().forumThreads[0].creation_time),
       last_update_time: formatDate(ThreadStore.getThread().forumThreads[0].last_update_time),
       last_post_time: formatDate(ThreadStore.getThread().forumThreads[0].last_post_time),
-      post_count: ThreadStore.getThread().forumThreads[0].post_count
+      post_count: ThreadStore.getThread().forumThreads[0].post_count,
+      loggedIn: AuthStore.loggedIn()
     });
 
     if(ProfileStore.getBio()){
@@ -201,10 +203,26 @@ var Thread = React.createClass({
     }
   },
 
+  // Show alert when not logged in to vote
+  redirect: function(e){
+    e.preventDefault();
+    this.setState({
+      alert: true
+    });
+  },
+
   render: function() {
 
     return (
       <div className="col-md-12 thread">
+        {this.state.alert ? (
+          <div className="alert alert-danger">
+            <strong>Please Log in</strong> to use this feature.
+          </div>
+          ):(
+          null
+        )}
+
         { this.state.editable ? (
           <a href="#" onClick={this.deleteThread}><i className="glyphicon glyphicon-remove delete-icon"></i></a>
           ):(

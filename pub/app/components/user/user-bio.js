@@ -21,8 +21,7 @@ var Bio = React.createClass({
     this.setState({modalIsOpen: true});
   },
 
-  closeModal: function(e) {
-    e.preventDefault();
+  closeModal: function() {
     this.setState({modalIsOpen: false});
   },
 

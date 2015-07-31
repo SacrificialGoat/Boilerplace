@@ -1,8 +1,8 @@
 var React = require('react');
 var InboxItem = require('./inbox-item');
-// var ThreadStore = require('../../stores/ThreadStore');
-// var ThreadActions = require('../../actions/ThreadActions');
-// var ProfileThreadItem = require('./profile-threaditem');
+
+var MessageActions = require('../../actions/MessageActions');
+var MessageStore = require('../../stores/MessageStore');
 
 var Inbox = React.createClass({
   // TODO: Incorporate Later when Auth is in.
@@ -15,19 +15,20 @@ var Inbox = React.createClass({
   },
 
   componentDidMount: function(){
-    // ThreadActions.fetchUserPage({page:this.state.page});
-    // ThreadStore.addChangeListener(this._onChange);
+    MessageActions.fetchPage({page:this.state.page});
+    MessageStore.addChangeListener(this._onChange);
   },
 
   componentWillUnmount: function(){
-    // ThreadStore.removeChangeListener(this._onChange);
+    MessageStore.removeChangeListener(this._onChange);
   },
 
   _onChange: function(){
-    // this.setState({
-    //   threads: ThreadStore.getUserThreads().forumThreads
-    // });
-    // console.log(this.state.threads);
+    console.log(MessageStore.getMessages());
+    this.setState({
+      messages: MessageStore.getMessages()
+    });
+    // console.log(MessageStore.getMessages());
   },
 
   render: function() {

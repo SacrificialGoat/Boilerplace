@@ -10,6 +10,7 @@ var ChatStore = require('../../stores/ChatStore');
 var AuthStore = require('../../stores/AuthStore');
 
 var MessageActions = require('../../actions/MessageActions');
+var MessageStore = require('../../stores/MessageStore');
 
 var User = React.createClass({
   // TODO: Incorporate Later when Auth is in.
@@ -80,6 +81,7 @@ var User = React.createClass({
   },
 
   sendPM: function(title,body){
+    console.log('sending...',this.state.user_id,title,body);
     MessageActions.send({ userId:this.state.user_id, title:title, body:body });
   },
 

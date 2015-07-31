@@ -3,6 +3,7 @@ var MessageConstants = require('../constants/MessageConstants');
 
 var MessageActions = {
   send: function(data){
+    console.log('sending,...',data);
     AppDispatcher.handleAction({
       actionType: MessageConstants.MSG_SEND,
       data: data
