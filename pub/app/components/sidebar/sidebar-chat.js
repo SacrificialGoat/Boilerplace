@@ -35,7 +35,7 @@ var GlobalChat = React.createClass({
           }
         </ul>
         <form onSubmit={this.handleSubmit}>
-          <input ref="message" type="text" placeholder="type a message..."/>
+          <input ref="message" type="text" placeholder="Say something."/>
         </form>
       </div>
     );
