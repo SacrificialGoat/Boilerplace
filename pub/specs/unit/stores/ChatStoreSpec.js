@@ -1,24 +1,15 @@
 var TestUtils = require('react-addons').TestUtils;
 var ChatConstants = require('../../../app/constants/ChatConstants')
 var registeredCallback;
-// var AppDispatcher = require('../../../app/dispatchers/AppDispatcher');
-// this.ChatStore = require('../../../app/stores/ChatStore');
 
+describe("ChatStore", function() {
 
-describe("ClientSocket", function() {
-  beforeEach(function(){
+  beforeAll(function(){
     var AppDispatcher = require('../../../app/dispatchers/AppDispatcher');
     spyOn(AppDispatcher, "register");
     this.ChatStore = require('../../../app/stores/ChatStore');
-    if (AppDispatcher.register.calls.argsFor(0).length > 0) {
-      registeredCallback = AppDispatcher.register.calls.argsFor(0)[0];
-      console.log(registeredCallback);
-    }
+    registeredCallback = AppDispatcher.register.calls.argsFor(0)[0];
   });
-
-  // afterEach(function(){
-  //   AppDispatcher.register.removeAllSpies();
-  // });
 
 
   it("should be an object", function() {
@@ -71,6 +62,57 @@ describe("ClientSocket", function() {
 
   it('should have a removeChangeListener method', function(){
     expect(this.ChatStore.removeChangeListener).toBeDefined();
+  });
+
+
+  it('calls send when it receives a send action', function() {
+    spyOn(this.ChatStore, 'send');
+    spyOn(this.ChatStore, 'emitChange');
+    var payload = {};
+    payload.action = {
+      actionType: ChatConstants.SEND,
+      data: {message: "Hello world"}
+    };
+    registeredCallback(payload);
+    expect(this.ChatStore.send).toHaveBeenCalled();
+    expect(this.ChatStore.send).toHaveBeenCalledWith("Hello world");
+    expect(this.ChatStore.emitChange).toHaveBeenCalled();
+  });
+
+  it('calls sendDM when it receives a sendDM action', function() {
+    spyOn(this.ChatStore, 'sendDM');
+    spyOn(this.ChatStore, 'emitChange');
+    var payload = {};
+    payload.action = {
+      actionType: ChatConstants.SENDDM,
+      data: {message: "Hello Cleveland", userId: 12}
+    };
+    registeredCallback(payload);
+    expect(this.ChatStore.sendDM).toHaveBeenCalled();
+    expect(this.ChatStore.sendDM).toHaveBeenCalledWith(12, "Hello Cleveland");
+    expect(this.ChatStore.emitChange).toHaveBeenCalled();
+  });
+
+  it('emits a change when it receives a receive action', function() {
+    spyOn(this.ChatStore, 'emitChange');
+    var payload = {};
+    payload.action = {
+      actionType: ChatConstants.RECEIVE,
+    };
+    registeredCallback(payload);
+    expect(this.ChatStore.emitChange).toHaveBeenCalled();
+  });
+
+  it('calls connect when it receives a connect action', function() {
+    spyOn(this.ChatStore, 'connect');
+    spyOn(this.ChatStore, 'emitChange');
+    var payload = {};
+    payload.action = {
+      actionType: ChatConstants.CONNECT
+    };
+    registeredCallback(payload);
+    expect(this.ChatStore.connect).toHaveBeenCalled();
+    expect(this.ChatStore.emitChange).toHaveBeenCalled();
   });
 
 });
