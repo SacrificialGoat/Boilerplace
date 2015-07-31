@@ -7,13 +7,14 @@ Combines a quick & reliable Go web server with React/Flux client.
 
 ##Features
 * Threads / Comments
-* Searching
+* Search
 * Upvotes & Downvotes
 * Direct / Global Chat System using WebSockets
-* Profile Page & Editing
-* Adding / Removing Friends
 * Signup / Login
-* Authentication
+* User Authentication
+* User Profiles
+* Friends
+* Geolocation
 
 ##To Develop:
 
@@ -22,7 +23,7 @@ Combines a quick & reliable Go web server with React/Flux client.
 3. Set up schema by typing 'mysql -u root < schema.sql'
 4. Start the server by running the below command (include more server files as they're added).
 
-  go run auth.go forum_threads.go chatter.go chat_events.go outbound.go chat_room.go server.go thread_posts.go users.go friends.go friend_hub.go friend_conn.go
+  go run auth.go forum_threads.go chatter.go chat_events.go outbound.go chat_room.go server.go thread_posts.go users.go friends.go friend_hub.go friend_conn.go search.go
 
 5. Go to /pub folder
 6. npm install
@@ -43,3 +44,29 @@ Combines a quick & reliable Go web server with React/Flux client.
 
 
 [Link to original repo](https://github.com/mikemsrk/go-flux)
+
+
+<!-- Options for branding/names
+A location-based message board.
+
+Grapevine
+Grapevines
+Trellis
+Arbor
+
+Corkboard
+Flyer
+ -->
+
+
+
+
+
+
+
+
+
+
+
+
+

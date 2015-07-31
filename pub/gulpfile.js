@@ -186,16 +186,16 @@ gulp.task('deploy', function () {
 //     .pipe(jest());
 // });
 
-gulp.task('jest', shell.task(['npm test']));
+// gulp.task('jest', shell.task(['npm test']));
 
 gulp.task('test', function () {
 
-  runSequence('jest');
-  gulp.watch(['app/**/*.js','.specs/**/__tests__/*.js'], ['jest'])
+  // runSequence('jest');
+  // gulp.watch(['app/**/*.js','.specs/**/__tests__/*.js'], ['jest'])
 
-  // new Server({
-  //    configFile: __dirname + '/karma.conf.js',
-  //    singleRun: true
-  // }).start();
+  new Server({
+     configFile: __dirname + '/karma.conf.js',
+     singleRun: true
+  }).start();
 
 });

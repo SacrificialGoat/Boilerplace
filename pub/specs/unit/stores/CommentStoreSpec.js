@@ -1,67 +1,72 @@
 var TestUtils = require('react-addons').TestUtils;
-var CommentStore = require('../../../app/stores/CommentStore');
-var AppDispatcher = require('../../../app/dispatchers/AppDispatcher');
+var CommentConstants = require('../../../app/constants/CommentConstants')
+var registeredCallback;
+// var AppDispatcher = require('../../../app/dispatchers/AppDispatcher');
+// this.CommentStore = require('../../../app/stores/CommentStore');
+
 
 describe("CommentStore", function() {
-
   beforeEach(function(){
-    
-
+    var AppDispatcher = require('../../../app/dispatchers/AppDispatcher');
+    spyOn(AppDispatcher, "register");
+    this.CommentStore = require('../../../app/stores/CommentStore');
+    if (AppDispatcher.register.calls.argsFor(0).length > 0) {
+      registeredCallback = AppDispatcher.register.calls.argsFor(0)[0];
+      console.log(registeredCallback);
+    }
   });
 
-  afterEach(function(){
-    
+  // afterEach(function(){
+  //   AppDispatcher.register.removeAllSpies();
+  // });
 
-  });
 
   it("should be an object", function() {
-    expect(typeof CommentStore).toBe('object');
+    expect(typeof this.CommentStore).toBe('object');
   });
 
   it("emitChange should be a function", function() {
-    expect(typeof CommentStore.emitChange).toBe('function');
+    expect(typeof this.CommentStore.emitChange).toBe('function');
   });
 
-  it('should have a addChangeListener method', function(){
-    expect(CommentStore.addChangeListener).toBeDefined();
+  it('should have an addChangeListener method', function(){
+    expect(this.CommentStore.addChangeListener).toBeDefined();
   });
   
   it('should have a removeChangeListener method', function(){
-    expect(CommentStore.removeChangeListener).toBeDefined();
+    expect(this.CommentStore.removeChangeListener).toBeDefined();
   });
 
   it('should have a getComment method', function(){
-    expect(CommentStore.getComment).toBeDefined();
+    expect(this.CommentStore.getComment).toBeDefined();
   });
   
   it('should have a getComments method', function(){
-    expect(CommentStore.getComments).toBeDefined();
+    expect(this.CommentStore.getComments).toBeDefined();
   });
 
   it('should have a getUserComments method', function(){
-    expect(CommentStore.getUserComments).toBeDefined();
+    expect(this.CommentStore.getUserComments).toBeDefined();
   });
   
   it('should have a fetchPage method', function(){
-    expect(CommentStore.fetchPage).toBeDefined();
+    expect(this.CommentStore.fetchPage).toBeDefined();
   });
 
   it('should have a fetchUserPage method', function(){
-    expect(CommentStore.fetchUserPage).toBeDefined();
+    expect(this.CommentStore.fetchUserPage).toBeDefined();
   });
 
-  it('should have a add method', function(){
-    expect(CommentStore.add).toBeDefined();
+  it('should have an add method', function(){
+    expect(this.CommentStore.add).toBeDefined();
   });
 
-  it('should have a upVote method', function(){
-    expect(CommentStore.upVote).toBeDefined();
+  it('should have an upVote method', function(){
+    expect(this.CommentStore.upVote).toBeDefined();
   });
 
   it('should have a downVote method', function(){
-    expect(CommentStore.downVote).toBeDefined();
+    expect(this.CommentStore.downVote).toBeDefined();
   });
-
-
 
 });

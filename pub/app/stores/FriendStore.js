@@ -107,30 +107,30 @@ var FriendStore = assign({}, EventEmitter.prototype, {
 		this.emit(CHANGE_EVENT);
 	}, 
 
+  addChangeListener: function(cb){
+      this.on(CHANGE_EVENT, cb);
+  }, 
 
-    addChangeListener: function(cb){
-        this.on(CHANGE_EVENT, cb);
-    }, 
+  removeChangeListener: function(cb){
+      this.removeListener(CHANGE_EVENT, cb)
+  },
 
-    removeChangeListener: function(cb){
-        this.removeListener(CHANGE_EVENT, cb)
-    },
+  getFriendOnline: function(){
+      return _friendData.onlineFriendList;
+  },
 
-    getFriendOnline: function(){
-        return _friendData.onlineFriendList;
-    },
+  emitChangeOnline: function(){
+      this.emit(ONLINE_STATUS);
+  }, 
 
-    emitChangeOnline: function(){
-        this.emit(ONLINE_STATUS);
-    }, 
+  addChangeListenerOnline: function(cb){
+      this.on(ONLINE_STATUS, cb);
+  }, 
 
-    addChangeListenerOnline: function(cb){
-        this.on(ONLINE_STATUS, cb);
-    }, 
+  removeChangeListenerOnline: function(cb){
+      this.removeListener(ONLINE_STATUS, cb)
+  },
 
-    removeChangeListenerOnline: function(cb){
-        this.removeListener(ONLINE_STATUS, cb)
-    },
 
 });
 
