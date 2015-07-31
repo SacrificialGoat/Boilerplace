@@ -1,8 +1,11 @@
 var TestUtils = require('react-addons').TestUtils;
 var ThreadConstants = require('../../../app/constants/ThreadConstants')
-// var registeredCallback;
-// var AppDispatcher = require('../../../app/dispatchers/AppDispatcher');
-// this.ThreadStore = require('../../../app/stores/ThreadStore');
+var registeredCallback;
+
+var testThread = {threadId: 4, title: "first post", body: "this is a test thread", link: "www.cats.cats", tag: "feline", lat: 0.1234, lng: 5.6789};
+var testQuery = {query: "SEARCH * FROM threads"};
+var testPage = {id: 1, page: {"this": "is a test"}}
+var testIds = {threadId: 4, thread_id: 16};
 
 
 describe("ThreadStore", function() {
@@ -11,7 +14,7 @@ describe("ThreadStore", function() {
     var AppDispatcher = require('../../../app/dispatchers/AppDispatcher');
     spyOn(AppDispatcher, "register");
     this.ThreadStore = require('../../../app/stores/ThreadStore');
-    var registeredCallback = AppDispatcher.register.calls.argsFor(0)[0];
+    registeredCallback = AppDispatcher.register.calls.argsFor(0)[0];
   });
 
   it("should be an object", function() {
@@ -85,5 +88,129 @@ describe("ThreadStore", function() {
   it('should have a removeChangeListener method', function(){
     expect(this.ThreadStore.removeChangeListener).toBeDefined();
   });
+
+var testIds = {threadId: 4, thread_id: 16};
+
+
+  it('should call search when it receives a search action', function() {
+    spyOn(this.ThreadStore, 'search');
+    var payload = {};
+    payload.action = {
+      actionType: ThreadConstants.SEARCH,
+      data: testQuery
+    };
+    registeredCallback(payload);
+    expect(this.ThreadStore.search).toHaveBeenCalled();
+    expect(this.ThreadStore.search).toHaveBeenCalledWith("SEARCH * FROM threads");
+  });
+
+  it('should call fetchPage when it receives a fetchPage action', function() {
+    spyOn(this.ThreadStore, 'fetchPage');
+    var payload = {};
+    payload.action = {
+      actionType: ThreadConstants.FETCHPAGE,
+      data: testPage
+    };
+    registeredCallback(payload);
+    expect(this.ThreadStore.fetchPage).toHaveBeenCalled();
+    expect(this.ThreadStore.fetchPage).toHaveBeenCalledWith({"this": "is a test"});
+  });
+
+  it('should call fetchUserPage when it receives a fetchUserPage action', function() {
+    spyOn(this.ThreadStore, 'fetchUserPage');
+    var payload = {};
+    payload.action = {
+      actionType: ThreadConstants.FETCHUSERPAGE,
+      data: testPage
+    };
+    registeredCallback(payload);
+    expect(this.ThreadStore.fetchUserPage).toHaveBeenCalled();
+    expect(this.ThreadStore.fetchUserPage).toHaveBeenCalledWith({"this": "is a test"});
+  });
+
+  it('should call fetchOtherPage when it receives a fetchOtherPage action', function() {
+    spyOn(this.ThreadStore, 'fetchOtherPage');
+    var payload = {};
+    payload.action = {
+      actionType: ThreadConstants.FETCHOTHERPAGE,
+      data: testPage
+    };
+    registeredCallback(payload);
+    expect(this.ThreadStore.fetchOtherPage).toHaveBeenCalled();
+    expect(this.ThreadStore.fetchOtherPage).toHaveBeenCalledWith(1, {"this": "is a test"});
+  });
+
+  it('should call fetchThread when it receives a fetchThread action', function() {
+    spyOn(this.ThreadStore, 'fetchThread');
+    var payload = {};
+    payload.action = {
+      actionType: ThreadConstants.FETCHTHREAD,
+      data: testPage
+    };
+    registeredCallback(payload);
+    expect(this.ThreadStore.fetchThread).toHaveBeenCalled();
+    expect(this.ThreadStore.fetchThread).toHaveBeenCalledWith(1);
+  });
+
+  it('should call add when it receives an add action', function() {
+    spyOn(this.ThreadStore, 'add');
+    var payload = {};
+    payload.action = {
+      actionType: ThreadConstants.ADD,
+      data: testThread
+    };
+    registeredCallback(payload);
+    expect(this.ThreadStore.add).toHaveBeenCalled();
+    expect(this.ThreadStore.add).toHaveBeenCalledWith("first post", "this is a test thread", "www.cats.cats", "feline", 0.1234, 5.6789);
+  });
+
+  it('should call edit when it receives an edit action', function() {
+    spyOn(this.ThreadStore, 'edit');
+    var payload = {};
+    payload.action = {
+      actionType: ThreadConstants.EDIT,
+      data: testThread
+    };
+    registeredCallback(payload);
+    expect(this.ThreadStore.edit).toHaveBeenCalled();
+    expect(this.ThreadStore.edit).toHaveBeenCalledWith(4, "first post", "this is a test thread", "www.cats.cats", "feline");
+  });
+
+  it('should call delete when it receives an delete action', function() {
+    spyOn(this.ThreadStore, 'delete');
+    var payload = {};
+    payload.action = {
+      actionType: ThreadConstants.DELETE,
+      data: testIds
+    };
+    registeredCallback(payload);
+    expect(this.ThreadStore.delete).toHaveBeenCalled();
+    expect(this.ThreadStore.delete).toHaveBeenCalledWith(4);
+  });
+
+  it('should call upVote when it receives an upvote action', function() {
+    spyOn(this.ThreadStore, 'upVote');
+    var payload = {};
+    payload.action = {
+      actionType: ThreadConstants.UPVOTE,
+      data: testIds
+    };
+    registeredCallback(payload);
+    expect(this.ThreadStore.upVote).toHaveBeenCalled();
+    expect(this.ThreadStore.upVote).toHaveBeenCalledWith(16);
+  });
+
+  it('should call downVote when it receives an downvote action', function() {
+    spyOn(this.ThreadStore, 'downVote');
+    var payload = {};
+    payload.action = {
+      actionType: ThreadConstants.DOWNVOTE,
+      data: testIds
+    };
+    registeredCallback(payload);
+    expect(this.ThreadStore.downVote).toHaveBeenCalled();
+    expect(this.ThreadStore.downVote).toHaveBeenCalledWith(16);
+  });
+  
 
 });

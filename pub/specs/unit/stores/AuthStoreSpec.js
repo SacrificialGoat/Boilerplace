@@ -1,26 +1,15 @@
 var TestUtils = require('react-addons').TestUtils;
-var ThreadConstants = require('../../../app/constants/ChatConstants')
+var AuthConstants = require('../../../app/constants/AuthConstants')
 var registeredCallback;
-// var AppDispatcher = require('../../../app/dispatchers/AppDispatcher');
-// this.AuthStore = require('../../../app/stores/AuthStore');
-
-
 
 describe("AuthStore", function() {
-  beforeEach(function(){
+
+  beforeAll(function(){
     var AppDispatcher = require('../../../app/dispatchers/AppDispatcher');
     spyOn(AppDispatcher, "register");
     this.AuthStore = require('../../../app/stores/AuthStore');
-    if (AppDispatcher.register.calls.argsFor(0).length > 0) {
-      registeredCallback = AppDispatcher.register.calls.argsFor(0)[0];
-      console.log(registeredCallback);
-    }
+    registeredCallback = AppDispatcher.register.calls.argsFor(0)[0];
   });
-
-  // afterEach(function(){
-  //   AppDispatcher.register.removeAllSpies();
-  // });
-
 
   it("should be an object", function() {
     expect(typeof this.AuthStore).toBe('object');
@@ -56,6 +45,44 @@ describe("AuthStore", function() {
   
   it('should have a signup method', function(){
     expect(this.AuthStore.signup).toBeDefined();
+  });
+
+  it('should call signup when it receives a signup action', function() {
+    spyOn(this.AuthStore, 'signup');
+    spyOn(this.AuthStore, 'emitChange');
+    var payload = {};
+    payload.action = {
+      actionType: AuthConstants.SIGNUP,
+      data: {username: "pegleg", password:"deathtowhales", firstname: "Captain", lastname:"Ahab"}
+    };
+    registeredCallback(payload);
+    expect(this.AuthStore.signup).toHaveBeenCalled();
+    expect(this.AuthStore.signup).toHaveBeenCalledWith("pegleg", "deathtowhales", "Captain", "Ahab");
+    expect(this.AuthStore.emitChange).toHaveBeenCalled();
+  });
+
+  it('should call login when it receives a login action', function() {
+    spyOn(this.AuthStore, 'login');
+    spyOn(this.AuthStore, 'emitChange');
+    var payload = {};
+    payload.action = {
+      actionType: AuthConstants.LOGIN,
+      data: {username: "test", pass: "golfing123"}
+    };
+    registeredCallback(payload);
+    expect(this.AuthStore.login).toHaveBeenCalled();
+    expect(this.AuthStore.login).toHaveBeenCalledWith("test","golfing123");
+    expect(this.AuthStore.emitChange).toHaveBeenCalled();
+  });
+
+  it('should call logout when it receives a logout action', function() {
+    spyOn(this.AuthStore, 'logout');
+    var payload = {};
+    payload.action = {
+      actionType: AuthConstants.LOGOUT
+    };
+    registeredCallback(payload);
+    expect(this.AuthStore.logout).toHaveBeenCalled();
   });
 
 

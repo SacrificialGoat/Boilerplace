@@ -1,9 +1,7 @@
 var TestUtils = require('react-addons').TestUtils;
 var ProfileConstants = require('../../../app/constants/ProfileConstants')
+var ProfileService = require('../../../app/services/ProfileService')
 var registeredCallback;
-var $ = require('jquery');
-// var AppDispatcher = require('../../../app/dispatchers/AppDispatcher');
-// this.ProfileStore = require('../../../app/stores/ProfileStore');
 
 var fakeUser = {
   avatar_link: "http://www.image.com",
@@ -28,19 +26,14 @@ var emptyUser = {
 
 describe("ProfileStore", function() {
 
-  beforeEach(function(){
+  beforeAll(function(){
     var AppDispatcher = require('../../../app/dispatchers/AppDispatcher');
     spyOn(AppDispatcher, "register");
     this.ProfileStore = require('../../../app/stores/ProfileStore');
-    if (AppDispatcher.register.calls.argsFor(0).length > 0) {
-      registeredCallback = AppDispatcher.register.calls.argsFor(0)[0];
-      console.log(registeredCallback);
-    }
+    registeredCallback = AppDispatcher.register.calls.argsFor(0)[0];
+    // if (AppDispatcher.register.calls.argsFor(0).length > 0) {
+    // }
   });
-
-  // afterEach(function(){
-  //   AppDispatcher.register.removeAllSpies();
-  // });
 
   it("should be an object", function() {
     expect(typeof this.ProfileStore).toBe('object');
@@ -53,9 +46,19 @@ describe("ProfileStore", function() {
   it('should have a getBio method', function(){
     expect(this.ProfileStore.getBio).toBeDefined();
   });
+
+  it('should return a stored user when getBio is called', function() {
+    var user = this.ProfileStore.getBio();
+    expect(user).toEqual(emptyUser);
+  });
   
   it('should have a getOtherBio method', function(){
     expect(this.ProfileStore.getOtherBio).toBeDefined();
+  });
+
+  it('should return a stored user when getOtherBio is called', function() {
+    var other = this.ProfileStore.getOtherBio();
+    expect(other).toEqual(emptyUser);
   });
 
   it('should have a fetch method', function(){
@@ -70,9 +73,9 @@ describe("ProfileStore", function() {
     expect(this.ProfileStore.update).toBeDefined();
   });
   
-  // it('should have a delete method', function(){
-  //   expect(ProfileStore.delete).toBeDefined();
-  // });
+  it('should have a delete method', function(){
+    expect(this.ProfileStore.delete).toBeDefined();
+  });
 
   it('should initialize with an empty user', function() {
     var empty = this.ProfileStore.getBio();
@@ -81,43 +84,52 @@ describe("ProfileStore", function() {
     expect(empty).toEqual(emptyUser);
   })
 
-  it('requests user data from the profile service', function() {
+  it('requests user data from the profile service when it receives a fetch action', function() {
     spyOn(this.ProfileStore, 'fetch');
+    spyOn(this.ProfileStore, 'emitChange');
     var payload = {};
     payload.action = {
       actionType: ProfileConstants.FETCH
     };
     registeredCallback(payload);
     expect(this.ProfileStore.fetch).toHaveBeenCalled();
+    expect(this.ProfileStore.emitChange).toHaveBeenCalled();
   });
 
-  it('requests user data from the profile service', function() {
-    spyOn(this.ProfileStore, 'fetch');
-    var payload = {};
-    payload.action = {
-      actionType: ProfileConstants.FETCH
-    };
-    registeredCallback(payload);
-    expect(this.ProfileStore.fetch).toHaveBeenCalled();
-    // expect(this.ProfileStore.emitChange).toHaveBeenCalled();
-  });
-
-  it('requests user data by user id', function() {
+  it('requests user data by user id when it receives an fetchById action', function() {
     spyOn(this.ProfileStore, 'fetchById');
+    spyOn(this.ProfileStore, 'emitChange');
     var payload = {};
     payload.action = {
-      actionType: ProfileConstants.FETCHBYID
-      data: {id: 1}
+      actionType: ProfileConstants.FETCHBYID,
+      data: fakeUser
     };
     registeredCallback(payload);
-    expect(this.ProfileStore.fetchbyId).toHaveBeenCalled();
-    expect(this.ProfileStore.fetchbyId.calls.argsFor(0)[0]).toEqual(1);
+    expect(this.ProfileStore.fetchById).toHaveBeenCalled();
+    expect(this.ProfileStore.fetchById).toHaveBeenCalledWith(42);
+    expect(this.ProfileStore.emitChange).toHaveBeenCalled();
   });
 
-    // expect($.ajax).toBeCalledWith({
-    //   type: 'GET',
-    //   url: '/profile/',
-    // });
+  it('updates user data when it receives an update action', function() {
+    spyOn(this.ProfileStore, 'update');
+    var payload = {};
+    payload.action = {
+      actionType: ProfileConstants.UPDATE,
+      data: fakeUser
+    };
+    registeredCallback(payload);
+    expect(this.ProfileStore.update).toHaveBeenCalled();
+    expect(this.ProfileStore.update).toHaveBeenCalledWith("This is a test user.", "http://www.image.com");
+  });
 
+  xit('deletes a user when it receives a delete action', function() {
+    spyOn(this.ProfileStore, 'delete');
+    var payload = {};
+    payload.action = {
+      actionType: ProfileConstants.DELETE,
+    };
+    registeredCallback(payload);
+    expect(this.ProfileStore.delete).toHaveBeenCalled();
+  });
 
 });

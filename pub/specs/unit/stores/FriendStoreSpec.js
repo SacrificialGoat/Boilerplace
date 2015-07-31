@@ -3,14 +3,12 @@ var FriendConstants = require('../../../app/constants/FriendConstants')
 var registeredCallback;
 
 describe("FriendStore", function() {
-  beforeEach(function(){
+
+  beforeAll(function(){
     var AppDispatcher = require('../../../app/dispatchers/AppDispatcher');
     spyOn(AppDispatcher, "register");
     this.FriendStore = require('../../../app/stores/FriendStore');
-    if (AppDispatcher.register.calls.argsFor(0).length > 0) {
-      registeredCallback = AppDispatcher.register.calls.argsFor(0)[0];
-      console.log(registeredCallback);
-    }
+    registeredCallback = AppDispatcher.register.calls.argsFor(0)[0];
   });
 
   it("should be an object", function() {
@@ -69,5 +67,40 @@ describe("FriendStore", function() {
     expect(this.FriendStore.removeChangeListenerOnline).toBeDefined();
   });
 
+  it('should call addFriend when it receives an addFriend action', function() {
+    spyOn(this.FriendStore, 'addFriend');
+    var payload = {};
+    payload.action = {
+      actionType: FriendConstants.ADD_FRIEND,
+      data: {"test": 123}
+    };
+    registeredCallback(payload);
+    expect(this.FriendStore.addFriend).toHaveBeenCalled();
+    expect(this.FriendStore.addFriend).toHaveBeenCalledWith({"test": 123});
+  });
+
+  it('should call removeFriend when it receives a removeFriend action', function() {
+    spyOn(this.FriendStore, 'removeFriend');
+    var payload = {};
+    payload.action = {
+      actionType: FriendConstants.REMOVE_FRIEND,
+      data: {"test": 123}
+    };
+    registeredCallback(payload);
+    expect(this.FriendStore.removeFriend).toHaveBeenCalled();
+    expect(this.FriendStore.removeFriend).toHaveBeenCalledWith({"test": 123});
+  });
+
+  it('should call fetchFriendList when it receives a fetchFriendList action', function() {
+    spyOn(this.FriendStore, 'fetchFriendList');
+    var payload = {};
+    payload.action = {
+      actionType: FriendConstants.FETCH_FRIENDLIST,
+      data: {"test": 123}
+    };
+    registeredCallback(payload);
+    expect(this.FriendStore.fetchFriendList).toHaveBeenCalled();
+    expect(this.FriendStore.fetchFriendList).toHaveBeenCalledWith({"test": 123});
+  });
 
 });
