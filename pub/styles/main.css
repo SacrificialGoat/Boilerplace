@@ -48,6 +48,39 @@ h2{
   margin-right:5px;
 }
 
+.ReactModal__Content{
+  width:35%;
+  height:77%;
+  margin-top:50px;
+  margin-left:auto;
+  margin-right:auto;
+
+}
+
+.sendMsg h2{
+  margin-bottom:20px;
+}
+
+.sendMsg input[type="textarea"]{
+  width:400px;
+  height:400px;
+}
+
+.sendMsg button{
+  width:80px;
+}
+
+.sendMsg .close{
+  float:right;
+  margin-top:-60px;
+  width:80px;
+  margin-left:10px;
+}
+
+.sendMsg .submit{
+
+}
+
 /* User Page */
 
 .chatIcon{
@@ -147,6 +180,7 @@ h2{
 /* Login/Signup Page */
 
 .Auth{
+  margin-top:40px;
   background-color:rgb(22, 35, 39);
   text-align:center;
   opacity:.9;

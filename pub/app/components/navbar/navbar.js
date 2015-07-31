@@ -140,8 +140,13 @@ var Navbar = React.createClass({
               </div>
             </form>
           )}
-
           <li><Link to="/geo">Geo</Link></li>
+
+            {!this.state.loggedIn ? (
+              null
+            ) : (
+              <li><Link to="/inbox">Inbox</Link></li>
+            )}          
 
             {this.state.loggedIn ? (
               null
