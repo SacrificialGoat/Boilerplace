@@ -1,11 +1,12 @@
 var sendMessage = function(userId, title,body,callback) {
+
   return $.ajax({
     type: 'POST',
     url: '/messages/',
     data: JSON.stringify({
-      "userId": userId,
+      "recipient_id": userId,
       "title": title,
-      "body": body
+      "contents": body
     }),
     crossDomain: true,
     success: function(resp) {
@@ -49,10 +50,10 @@ var fetchMessage = function(id,callback) {
 
 // Grabs threads for page number
 var fetchPage = function(page, callback) {
-  
+
   $.ajax({
     type: 'GET',
-    url: '/messages/?pagenumber='+page,
+    url: 'messages/?q=recipient&sortby=desc&pagenumber='+page,
     crossDomain: true,
     success: function(resp) { // WORKING for fetchuser?
       // console.log('success',resp);

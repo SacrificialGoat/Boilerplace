@@ -29,13 +29,13 @@ var InboxItem = React.createClass({
   render: function() {
     // TODO: Clicking on title takes you to individual thread.
     var received = formatDate(this.props.item.creation_time);
-    var body = formatBody(this.props.item.body);
+    // var body = formatBody(this.props.item.body);
 
     return (
       <tr>
-        <td>{this.props.item.user_name}</td>
-        <td><a href={"#/message/"+this.props.item.msg_id}>{this.props.item.title}</a></td>
-        <td>{body}</td>
+        <td>{this.props.item.sender_name}</td>
+        <td>{this.props.item.title}</td>
+        <td>{this.props.item.contents}</td>
         
         <td>
           <FormattedDate
@@ -51,3 +51,7 @@ var InboxItem = React.createClass({
 });
 
 module.exports = InboxItem;
+
+
+// TODO: Insert this after single message page is created.
+// <td><a href={"#/message/"+this.props.item.message_id}>{this.props.item.title}</a></td>
