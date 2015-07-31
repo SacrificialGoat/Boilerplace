@@ -60,9 +60,8 @@ var Bio = React.createClass({
         ) : (
           <p>Avatar Link: <input type="text" ref="avatar"></input></p>
         )}
-
-        <p>Rep: {this.props.item.rep}</p>
-        <p>Id: {this.props.item.user_id}</p>
+        <br/>
+        <p>Reputation: {this.props.item.rep}</p>
 
         {!this.state.editing ? (
           <p>Bio: {this.props.item.bio}</p>

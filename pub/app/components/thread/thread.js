@@ -17,6 +17,8 @@ var ReactIntl = require('react-intl');
 var FormattedRelative = ReactIntl.FormattedRelative;
 var FormattedDate = ReactIntl.FormattedDate;
 
+var Router = require('react-router');
+
 // MySQL Date -> JS Date
 var formatDate = function(str){
   var dateParts = str.split("-");
@@ -31,6 +33,7 @@ var formatDate = function(str){
 
 var Thread = React.createClass({
   // mixins: [React.addons.LinkedStateMixin],
+  mixins : [Router.Navigation],
 
   getInitialState: function(){
     return {
@@ -175,7 +178,8 @@ var Thread = React.createClass({
     ThreadActions.delete({
       threadId: this.state.id
     });
-    location.hash = '/';
+    // location.hash = '/';
+    this.transitionTo("front");
   },
 
   upVote: function(e){

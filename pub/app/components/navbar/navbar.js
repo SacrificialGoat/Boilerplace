@@ -21,6 +21,8 @@ var Link = Router.Link;
 
 var Navbar = React.createClass({
 
+  mixins : [Router.Navigation],
+
   getInitialState: function(){
     return {
       loggedIn: AuthStore.loggedIn(),
@@ -52,7 +54,8 @@ var Navbar = React.createClass({
       this.openModal();
     }
     if(this.state.loggedIn){
-      location.hash = '/';
+      // location.hash = '/';
+      this.transitionTo('front');
     }
   },
 
@@ -113,6 +116,11 @@ var Navbar = React.createClass({
     ChatActions.sendDm({ userId:this.state.dmFrom, message:msg });
   },
 
+  toFront: function(e){
+    e.preventDefault();
+    this.transitionTo("front");
+  },
+
   render: function(){
     return (
     <nav className="navbar navbar-fixed-top">
@@ -131,7 +139,7 @@ var Navbar = React.createClass({
             <span className="icon-bar"></span>
             <span className="icon-bar"></span>
           </button>
-          <a className="navbar-brand" href="#">SacrificialGoat</a>
+          <a className="navbar-brand" href="#" onClick={this.toFront}>SacrificialGoat</a>
         </div>
         
         <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
