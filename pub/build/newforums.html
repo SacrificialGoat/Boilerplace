@@ -315,6 +315,94 @@
 
     });           
 
+    $('#createMessage').click(function() {
+
+      var recipientId = parseInt($('#recipientIdX').val());
+      var title = $('#titleX').val();
+      var contents = $('#contentsX').val();
+
+      $('#recipientIdX').val(''); 
+      $('#titleX').val(''); 
+      $('#contentsX').val(''); 
+
+      $.ajax({
+        type: 'POST',
+        url: 'http://127.0.0.1:8080/messages/',
+        data: JSON.stringify({"recipient_id": recipientId, "title" : title, "contents" : contents}),
+        // contentType: "application/json",
+        // crossDomain: true,
+          success: function(data, textStatus, jqXHR) {
+            console.log(data);
+            // console.log('success');
+            //data - response from server
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            console.log(errorThrown);
+          }
+      });
+
+    }); 
+
+    $('#getMessagesById').click(function() {
+
+      var MessageId = parseInt($('#MessageIdXX').val());
+
+      $('#MessageIdXX').val('');       
+
+      $.ajax({
+        type: 'GET',
+        url: 'http://127.0.0.1:8080/message/' + MessageId,
+        // contentType: "application/json",
+        // crossDomain: true,
+          success: function(data, textStatus, jqXHR) {
+            console.log(data);
+            // console.log('success');
+            //data - response from server
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            console.log(errorThrown);
+          }
+      });
+
+    });
+
+    $('#getMessagesByRecipient').click(function() {
+
+      $.ajax({
+        type: 'GET',
+        url: 'http://127.0.0.1:8080/messages/?q=sender&sortby=asc&pagenumber=1',
+        // contentType: "application/json",
+        // crossDomain: true,
+          success: function(data, textStatus, jqXHR) {
+            console.log(data);
+            // console.log('success');
+            //data - response from server
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            console.log(errorThrown);
+          }
+      });
+
+    });
+
+    $('#getMessagesBySender').click(function() {
+
+      $.ajax({
+        type: 'GET',
+        url: 'http://127.0.0.1:8080/messages/?q=sender&sortby=desc&pagenumber=1',
+        // contentType: "application/json",
+        // crossDomain: true,
+          success: function(data, textStatus, jqXHR) {
+            console.log(data);
+            // console.log('success');
+            //data - response from server
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            console.log(errorThrown);
+          }
+      });
+
+    });    
 
 
   });
@@ -384,6 +472,22 @@ Post Id: <input type="text" id="postId" name="postId" placeholder="Post Id"><br>
 <input id="downvotePostScore" type="submit" value="Downvote Post Score"><br>
 
 <br>
+
+Recipient Id: <input type="text" id="recipientIdX" name="recipientIdX" placeholder="Recipient IdX"><br>
+Title: <input type="text" id="titleX" name="titleX" placeholder="TitleX"><br>
+Contents: <input type="text" id="contentsX" name="contentsX" placeholder="contentsX"><br>
+<input id="createMessage" type="submit" value="Create Message"><br>
+<input id="deleteMessage" type="submit" value="Delete Message"><br>
+
+<br>
+
+Message Id: <input type="text" id="MessageIdXX" name="MessageIdXX" placeholder="Message IdXX"><br>
+<input id="getMessagesById" type="submit" value="Get Messages by Id"><br>
+<input id="getMessagesBySender" type="submit" value="Get Messages by Sender"><br>
+<input id="getMessagesByRecipient" type="submit" value="Get Messages by Recipient"><br>
+
+<br>
+
 
 
 
