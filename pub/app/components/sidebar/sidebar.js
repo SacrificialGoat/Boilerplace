@@ -7,7 +7,7 @@ var rd3 = require('react-d3');
 var PieChart = rd3.PieChart;
 var Treemap = rd3.Treemap;
 
-var FriendList = require("../friend/friendlist")
+// var FriendList = require("../friend/friendlist")
 
 // TODO - factor out navbar login form
 
@@ -110,10 +110,6 @@ var Sidebar = React.createClass({
                 <a href="#">Chat (global)</a>
             </li>
             <Chat messages={this.state.messages} user={this.state.from} onSend={this.sendMessage} onChat={this.joinChat} />
-            <li>
-                <a href="#">Friends</a>
-                <FriendList />
-            </li>
         </ul>
     );
   }
@@ -122,6 +118,10 @@ var Sidebar = React.createClass({
 module.exports = Sidebar;
 
 
+// <li>
+//     <a href="#">Friends</a>
+//     <FriendList />
+// </li>
 
 // <PieChart
 //   data={this.state.data}

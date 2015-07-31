@@ -39,9 +39,9 @@ var MessageStore = assign({}, EventEmitter.prototype, {
     });
   },
 
-  send: function(title,body){
+  send: function(userId,title,body){
     var that = this;
-    Message.send(title,body,function(data){
+    Message.send(userId,title,body,function(data){
       that.emitChange();
     });
   },
@@ -71,7 +71,7 @@ AppDispatcher.register(function(payload){
       MessageStore.fetchPage(action.data.page);
       break;
     case MessageConstants.SEND:
-      MessageStore.add(action.data.title,action.data.body);
+      MessageStore.send(action.data.userId, action.data.title,action.data.body);
       break;
     case MessageConstants.DELETE:
       MessageStore.delete(action.data.threadId);

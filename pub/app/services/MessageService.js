@@ -1,8 +1,9 @@
-var sendMessage = function(title,body,callback) {
+var sendMessage = function(userId, title,body,callback) {
   return $.ajax({
     type: 'POST',
     url: '/messages/',
     data: JSON.stringify({
+      "userId": userId,
       "title": title,
       "body": body
     }),
@@ -111,10 +112,10 @@ var Message = {
     });
   },
 
-  send: function(title, body, callback) {
+  send: function(userId, title, body, callback) {
     var that = this;
 
-    sendMessage(title, body, function(res) {
+    sendMessage(userId, title, body, function(res) {
       if (callback) {
         callback(res);
       }

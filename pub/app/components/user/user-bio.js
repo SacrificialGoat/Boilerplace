@@ -1,7 +1,7 @@
 var React = require('react');
 var Modal = require('react-modal');
 
-var FriendButton = require('../friend/friendbutton');
+// var FriendButton = require('../friend/friendbutton');
 
 
 var appElement = document.getElementById('app');
@@ -16,11 +16,13 @@ var Bio = React.createClass({
     return { modalIsOpen: false };
   },
 
-  openModal: function() {
+  openModal: function(e) {
+    e.preventDefault();
     this.setState({modalIsOpen: true});
   },
 
-  closeModal: function() {
+  closeModal: function(e) {
+    e.preventDefault();
     this.setState({modalIsOpen: false});
   },
 
@@ -33,7 +35,15 @@ var Bio = React.createClass({
 
   message: function(e){
     e.preventDefault();
-    console.log('message clicked');
+    var title = React.findDOMNode(this.refs.title).value
+    var body = React.findDOMNode(this.refs.body).value;
+    if(!title || !body){
+      return;
+    }
+    this.props.onSendPM(title,body);
+    React.findDOMNode(this.refs.title).value = '';
+    React.findDOMNode(this.refs.body).value = '';
+    this.closeModal();
   },
 
   render: function() {
@@ -50,21 +60,21 @@ var Bio = React.createClass({
 
         <i className="glyphicon glyphicon-comment chatIcon" onClick={this.chat}>&nbsp;</i>
         <i className="glyphicon glyphicon-envelope messageBox" onClick={this.openModal}></i>
-        <FriendButton targetuser={this.props.item}/>
+        
 
         <Modal
           isOpen={this.state.modalIsOpen}
           onRequestClose={this.closeModal}
         >
-          <form className="sendMsg">
+          <form className="sendMsg" onSubmit={this.message}>
             <h2>Send Message</h2>
             <button className="form-control close" onClick={this.closeModal}>X</button>
-            <input className="form-control" type="textarea"></input>
+            <input ref="title" className="form-control" placeholder="Title" type="text"></input>
+            <input ref="body" className="form-control" placeholder="Body" type="textarea"></input>
             <br/>
             <button className="form-control submit" type="submit">Send</button>
           </form>
         </Modal>
-
 
       </div>
     );
@@ -72,3 +82,5 @@ var Bio = React.createClass({
 });
 
 module.exports = Bio;
+
+// <FriendButton targetuser={this.props.item}/>

@@ -50,7 +50,7 @@ h2{
 
 .ReactModal__Content{
   width:35%;
-  height:77%;
+  height:83%;
   margin-top:50px;
   margin-left:auto;
   margin-right:auto;
@@ -64,6 +64,11 @@ h2{
 .sendMsg input[type="textarea"]{
   width:400px;
   height:400px;
+}
+
+.sendMsg input[type="text"]{
+  width:400px;
+  margin-bottom:10px;
 }
 
 .sendMsg button{
