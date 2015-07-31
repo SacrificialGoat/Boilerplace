@@ -78,6 +78,19 @@ CREATE TABLE post_votes (
   FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
+CREATE TABLE messages (
+  message_id INT(10) NOT NULL auto_increment,
+  sender_id INT(10),
+  recipient_id INT(10),
+  title VARCHAR(100) DEFAULT '',
+  contents TEXT,
+  creation_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+  last_update_time DATETIME ON UPDATE CURRENT_TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  
+
+  PRIMARY KEY (message_id),
+  FOREIGN KEY (recipient_id) REFERENCES users(user_id)
+);
+
 
 
 CREATE TABLE friends (
