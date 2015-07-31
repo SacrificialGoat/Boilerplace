@@ -5,13 +5,16 @@ var ProfileActions = require('../../actions/ProfileActions');
 var Bio = require('./profile-bio');
 var BioThreads = require('./profile-threads');
 
+var Router = require('react-router');
 
 var Profile = React.createClass({
   // TODO: Incorporate Later when Auth is in.
+  mixins : [Router.Navigation],
 
   getInitialState: function(){
     if(!AuthStore.loggedIn()){
-      location.hash = '/login';
+      // location.hash = '/login';
+      this.transitionTo("front");
     }
     return {
       avatar_link: "",

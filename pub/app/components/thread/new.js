@@ -3,10 +3,16 @@ var ThreadStore = require('../../stores/ThreadStore');
 var ThreadActions = require('../../actions/ThreadActions');
 var AuthStore = require('../../stores/AuthStore');
 
+var Router = require('react-router');
+
 var NewThread = React.createClass({
+
+  mixins : [Router.Navigation],
+
   getInitialState: function(){
     if(!AuthStore.loggedIn()){
-      location.hash = '/login';
+      // location.hash = '/login';
+      this.transitionTo('login');
     }
     return {
       success: false,
@@ -60,7 +66,9 @@ var NewThread = React.createClass({
     ThreadStore.removeChangeListener(this._onChange);
   },
 
-  addThread: function(){
+  addThread: function(e){
+    e.preventDefault();
+    
     // Send action to update user information
     var title = React.findDOMNode(this.refs.title).value.trim();
     var body = React.findDOMNode(this.refs.body).value.trim();
@@ -90,7 +98,8 @@ var NewThread = React.createClass({
   },
 
   _onChange: function(){
-    location.hash = '/';
+    // location.hash = '/';
+    this.transitionTo("front");
   },
 
 

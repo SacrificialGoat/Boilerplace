@@ -28,7 +28,6 @@ var Threads = React.createClass({
     this.setState({
       threads: ThreadStore.getThreads().forumThreads
     });
-    console.log(this.state.threads);
   },
 
   upVote: function(id){

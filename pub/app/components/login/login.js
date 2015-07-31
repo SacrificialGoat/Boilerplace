@@ -3,7 +3,11 @@ var LoginForm = require('./login-form');
 var AuthActions = require('../../actions/AuthActions');
 var AuthStore = require('../../stores/AuthStore');
 
+var Router = require('react-router');
+
 var Login = React.createClass({
+  mixins : [Router.Navigation],
+
   getInitialState: function(){
     return {
       loggedIn: AuthStore.loggedIn()
@@ -23,7 +27,8 @@ var Login = React.createClass({
       loggedIn: AuthStore.loggedIn()
     });
     if(this.state.loggedIn){
-      location.hash = '/';
+      // location.hash = '/';
+      this.transitionTo("front");
     }
   },
 

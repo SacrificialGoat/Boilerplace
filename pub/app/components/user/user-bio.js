@@ -21,7 +21,8 @@ var Bio = React.createClass({
     this.setState({modalIsOpen: true});
   },
 
-  closeModal: function() {
+  closeModal: function(e) {
+    e.preventDefault();
     this.setState({modalIsOpen: false});
   },
 
@@ -60,11 +61,7 @@ var Bio = React.createClass({
         <i className="glyphicon glyphicon-comment chatIcon" onClick={this.chat}>&nbsp;</i>
         <i className="glyphicon glyphicon-envelope messageBox" onClick={this.openModal}></i>
         
-
-        <Modal
-          isOpen={this.state.modalIsOpen}
-          onRequestClose={this.closeModal}
-        >
+        <Modal isOpen={this.state.modalIsOpen} onRequestClose={this.closeModal}>
           <form className="sendMsg" onSubmit={this.message}>
             <h2>Send Message</h2>
             <button className="form-control close" onClick={this.closeModal}>X</button>

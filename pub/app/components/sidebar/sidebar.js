@@ -7,8 +7,9 @@ var rd3 = require('react-d3');
 var PieChart = rd3.PieChart;
 var Treemap = rd3.Treemap;
 
-// var FriendList = require("../friend/friendlist")
+var Router = require('react-router');
 
+// var FriendList = require("../friend/friendlist")
 // TODO - factor out navbar login form
 
 var getTrending = function(callback) {
@@ -31,6 +32,8 @@ var getTrending = function(callback) {
 };
 
 var Sidebar = React.createClass({
+
+    mixins : [Router.Navigation],
 
     getInitialState: function(){
       return {
@@ -96,13 +99,18 @@ var Sidebar = React.createClass({
       ChatActions.send({message:msg});
     },
 
+    toFront: function(e){
+      e.preventDefault();
+      this.transitionTo("front");
+    },
+
     render: function(){
 
     return (
         <ul className="sidebar-nav">
-            <a href="#"><img src="/assets/logo.png"></img></a>
+            <a href="#" onClick={this.toFront}><img src="/assets/logo.png"></img></a>
             <li>
-                <a href="#">Trending</a>
+                <a>Trending</a>
                 <Treemap
                   data={this.state.data}
                   width={225}
@@ -112,7 +120,7 @@ var Sidebar = React.createClass({
             </li>
             {this.state.loggedIn ? (
               <li>
-                  <a href="#">Chat (global)</a>
+                  <a>Chat (global)</a>
               </li>
               ):(
               <p>Please log in to use chat.</p>
