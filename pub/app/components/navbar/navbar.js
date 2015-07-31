@@ -113,7 +113,7 @@ var Navbar = React.createClass({
             <span className="icon-bar"></span>
             <span className="icon-bar"></span>
           </button>
-          <a className="navbar-brand" href="#">SacrificialGoat</a>
+          <a className="navbar-brand" href="#">Boilerplace</a>
         </div>
         
         <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -140,8 +140,13 @@ var Navbar = React.createClass({
               </div>
             </form>
           )}
-
           <li><Link to="/geo">Geo</Link></li>
+
+            {!this.state.loggedIn ? (
+              null
+            ) : (
+              <li><Link to="/inbox">Inbox</Link></li>
+            )}          
 
             {this.state.loggedIn ? (
               null

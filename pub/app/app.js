@@ -8,6 +8,7 @@ var Sidebar = require('./components/sidebar/sidebar');
 var Profile = require('./components/profile/profile');
 var Front = require('./components/front/front');
 var Login = require('./components/login/login');
+var Inbox = require('./components/inbox/inbox');
 var Logout = require('./components/logout/logout');
 var Signup = require('./components/signup/signup');
 var NewThread = require('./components/thread/new');
@@ -60,6 +61,7 @@ var routes = (
   <Route path="/" handler={App}>
     <DefaultRoute handler={Front}/>
     <Route path="profile" handler={Profile}/>
+    <Route path="inbox" handler={Inbox}/>
     <Route path="login" handler={Login}/>
     <Route path="logout" handler={Logout}/>
     <Route path="signup" handler={Signup}/>

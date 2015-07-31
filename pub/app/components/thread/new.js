@@ -73,6 +73,11 @@ var NewThread = React.createClass({
       return;
     }
 
+    if(!lat || !lng){
+      lat = parseFloat(0);
+      lng = parseFloat(0);
+    }
+
     ThreadActions.add({
       title: title,
       body: body,

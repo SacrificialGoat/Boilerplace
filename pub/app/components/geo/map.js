@@ -25,7 +25,7 @@ var Map = React.createClass({
         data[i].infoWindow = {
           content: '<div class="geoThread"><a href="#/thread/'+ data[i].thread_id +'">'+ data[i].title +'</a>' + '<p class="body">' + data[i].body + '</p>' + '<p>Rating: ' + data[i].rating + '</p>' + '<p>Posts: ' + data[i].post_count + '</p>' +'<p class="tag">'+ data[i].tag  + '</p></div>'
         }
-        console.log('adding marker...',data[i]);
+        
         map.addMarker(data[i]);
       };
     },
