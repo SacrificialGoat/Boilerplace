@@ -1,5 +1,11 @@
 var React = require('react');
 var Router = require('react-router');
+var Modal = require('react-modal');
+
+var appElement = document.getElementById('app');
+Modal.setAppElement(appElement);
+Modal.injectCSS();
+
 var AuthActions = require('../../actions/AuthActions');
 var AuthStore = require('../../stores/AuthStore');
 // Placing direct chat listeners on nav bar
@@ -7,9 +13,6 @@ var AuthStore = require('../../stores/AuthStore');
 var ChatStore = require('../../stores/ChatStore');
 var ChatActions = require('../../actions/ChatActions');
 var ChatBox = require('./navbar-chatbox');
-
-// Profile fetching
-var ProfileActions = require('../../actions/ProfileActions');
 
 var ThreadActions = require('../../actions/ThreadActions');
 var Link = Router.Link;
@@ -21,6 +24,8 @@ var Navbar = React.createClass({
   getInitialState: function(){
     return {
       loggedIn: AuthStore.loggedIn(),
+      error: AuthStore.error(),
+      modalIsOpen: false,
       chatWindow: false,
       directMsgs: [],
       dmFrom: 0
@@ -40,10 +45,13 @@ var Navbar = React.createClass({
 
   _onChange: function(){
     this.setState({
-      loggedIn: AuthStore.loggedIn()
+      loggedIn: AuthStore.loggedIn(),
+      error: AuthStore.error()
     });
+    if(AuthStore.error()){
+      this.openModal();
+    }
     if(this.state.loggedIn){
-      ProfileActions.fetch();
       location.hash = '/';
     }
   },
@@ -60,6 +68,16 @@ var Navbar = React.createClass({
         chatWindow: true
       });
     }
+  },
+
+  openModal: function(e) {
+    if(e)e.preventDefault();
+    this.setState({modalIsOpen: true});
+  },
+
+  closeModal: function(e) {
+    e.preventDefault();
+    this.setState({modalIsOpen: false});
   },
 
   navlogout: function(){
@@ -113,7 +131,7 @@ var Navbar = React.createClass({
             <span className="icon-bar"></span>
             <span className="icon-bar"></span>
           </button>
-          <a className="navbar-brand" href="#">Boilerplace</a>
+          <a className="navbar-brand" href="#">SacrificialGoat</a>
         </div>
         
         <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -164,6 +182,15 @@ var Navbar = React.createClass({
         </div>
 
       </div>
+
+      <Modal isOpen={this.state.modalIsOpen} onRequestClose={this.closeModal}>
+        <form className="sendMsg" onSubmit={this.message}>
+          <p>Bad login/signup information.</p>
+          <p>Please try again.</p>
+          <button className="form-control close" onClick={this.closeModal}>X</button>
+        </form>
+      </Modal>
+
     </nav>
     )
   }

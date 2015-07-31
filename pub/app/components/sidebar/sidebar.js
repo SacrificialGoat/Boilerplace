@@ -36,7 +36,8 @@ var Sidebar = React.createClass({
       return {
         from: "",
         messages: [],
-        data : []
+        data : [],
+        loggedIn: AuthStore.loggedIn()
       };
     },
 
@@ -79,9 +80,12 @@ var Sidebar = React.createClass({
 
     _onAuthChange: function(){
       this.setState({
-        from: AuthStore.getUser().username
+        from: AuthStore.getUser().username,
+        loggedIn: AuthStore.loggedIn()
       });
-      this.joinChat(); // On Auth change, if user logs in then connect to chat server.
+      if(AuthStore.loggedIn()){
+        this.joinChat(); // On Auth change, if user logs in then connect to chat server.
+      }
     },
 
     joinChat: function(){
@@ -98,7 +102,7 @@ var Sidebar = React.createClass({
         <ul className="sidebar-nav">
             <a href="#"><img src="/assets/logo.png"></img></a>
             <li>
-                <a href="#">Trending (past 24 hours)</a>
+                <a href="#">Trending</a>
                 <Treemap
                   data={this.state.data}
                   width={225}
@@ -106,10 +110,20 @@ var Sidebar = React.createClass({
                   textColor="#484848"
                   fontSize="12px"/>
             </li>
-            <li>
-                <a href="#">Chat (global)</a>
-            </li>
+            {this.state.loggedIn ? (
+              <li>
+                  <a href="#">Chat (global)</a>
+              </li>
+              ):(
+              <p>Please log in to use chat.</p>
+              )
+            }
+            {this.state.loggedIn ? (
             <Chat messages={this.state.messages} user={this.state.from} onSend={this.sendMessage} onChat={this.joinChat} />
+              ):(
+              null
+              )
+            }
         </ul>
     );
   }

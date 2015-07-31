@@ -6,8 +6,7 @@ var AuthStore = require('../../stores/AuthStore');
 var Signup = React.createClass({
   getInitialState: function(){
     return {
-      loggedIn: AuthStore.loggedIn(),
-      error: AuthStore.error()
+      loggedIn: AuthStore.loggedIn()
     };
   },
 
@@ -21,8 +20,7 @@ var Signup = React.createClass({
 
   _onChange: function(){
     this.setState({
-      loggedIn: AuthStore.loggedIn(),
-      error: AuthStore.error()
+      loggedIn: AuthStore.loggedIn()
     });
     if(this.state.loggedIn){
       location.hash = '/';
@@ -44,7 +42,6 @@ var Signup = React.createClass({
       <div className="Auth center-block">
         <h2>Sign up</h2>
           <SignupForm onSignupSubmit={this.handleSignupSubmit}/>
-          {this.state.error && (<p className="error">Bad signup information</p>)}
       </div>
     );
   }
