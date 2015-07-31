@@ -677,7 +677,7 @@ http.HandleFunc("/messages/", func(w http.ResponseWriter, r *http.Request) {
       //look for query type parameter in url
       option := 0
       if val, ok := m["q"]; ok {
-        if(val[0] == "desc") {
+        if(val[0] == "sender") {
           option = 1
         } else {
           option = 2
@@ -687,7 +687,7 @@ http.HandleFunc("/messages/", func(w http.ResponseWriter, r *http.Request) {
       //look for sortby parameter in url
       sortBy := 0
       if val, ok := m["sortby"]; ok {
-        if val[0] == "creationtime" {
+        if val[0] == "asc" {
           sortBy = 1
         }
       }
@@ -853,10 +853,10 @@ http.HandleFunc("/messages/", func(w http.ResponseWriter, r *http.Request) {
 
   // route for friend_list
   // http.HandleFunc("/friendlist", serveWs)  // 
-  go h.run()  // place this here because we took out friend_list
-  http.HandleFunc("/friendlist/", func(w http.ResponseWriter, r *http.Request ) {
-    serveWs(w, r, db)
-  })
+  //go h.run()  // place this here because we took out friend_list
+  //http.HandleFunc("/friendlist/", func(w http.ResponseWriter, r *http.Request ) {
+  //  serveWs(w, r, db)
+  //})
 
 
   var room = createChatRoom(1)
