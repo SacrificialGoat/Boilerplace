@@ -43,7 +43,7 @@ Combines a quick & reliable Go web server with React/Flux client.
 2. Spec files are inside /specs.
 
 
-[Link to original repo](https://github.com/mikemsrk/go-flux)
+[Link to original repo](https://github.com/mikemsrk/Boilerplace-origin)
 
 
 <!-- Options for branding/names
