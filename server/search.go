@@ -11,6 +11,7 @@ import (
 )
 
 
+//function to search for forum threads
 //sortBy: sort by (does not apply to by thread id since by thread id is unique) - 0) rating, 1) datetime
 func searchForForumThreads(w http.ResponseWriter, r *http.Request, db *sql.DB, sortBy int, pageNumber int, titleSearch string) {
 

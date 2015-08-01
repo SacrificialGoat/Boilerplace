@@ -764,21 +764,13 @@ func initializeDB() *sql.DB {
 }
 
 //handle the chat event which checks if the cookie corresponds to a logged in user and adds the user to the chat room
-//TODO: Return correct status and message if session is invalid
 func chat(w http.ResponseWriter, r *http.Request, store *sessions.CookieStore, room *ChatRoom) {
 
   //check for session to see if client is authenticated
-  session, err := store.Get(r, "flash-session")
-  if err != nil {
-    http.Error(w, err.Error(), http.StatusInternalServerError)
-  }
-  fm := session.Flashes("message")
-  if fm == nil {
-    fmt.Println("Trying to log in as invalid user")
-    fmt.Fprint(w, "No flash messages")
+  ok, session := confirmSession(store, "Trying to perform action as an invalid user", w, r)
+  if ok == false {
     return
   }
-  //session.Save(r, w)
 
   fmt.Println("New user connected to chat")
 

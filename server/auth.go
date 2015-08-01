@@ -132,7 +132,7 @@ func updateUserInfoHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, s
   }
 
   //check for session to see if client is authenticated
-  ok, session := confirmSession(store, "Trying to get forum thread info as an invalid user", w, r)
+  ok, session := confirmSession(store, "Trying to perform action as an invalid user", w, r)
   if ok == false {
     return
   }
@@ -190,7 +190,7 @@ func getUserInfoHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, stor
   }
 
   //check for session to see if client is authenticated
-  ok, session := confirmSession(store, "Trying to get forum thread info as an invalid user", w, r)
+  ok, session := confirmSession(store, "Trying to perform action as an invalid user", w, r)
   if ok == false {
     return
   }
