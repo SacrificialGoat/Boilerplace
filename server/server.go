@@ -722,11 +722,11 @@ http.HandleFunc("/messages/", func(w http.ResponseWriter, r *http.Request) {
 
 
   // route for friend_list
+  // go h.run()  // place this here because we took out friend_list
+  // http.HandleFunc("/friendlist/", func(w http.ResponseWriter, r *http.Request ) {
+  //  serveWs(w, r, db)
+  // })
 
-  go h.run()  // place this here because we took out friend_list
-  http.HandleFunc("/friendlist/", func(w http.ResponseWriter, r *http.Request ) {
-   serveWs(w, r, db)
-  })
 
 
   var room = createChatRoom(1)
