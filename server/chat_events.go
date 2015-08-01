@@ -121,6 +121,11 @@ func evt_sendDirectMessage(message string, chatter *Chatter) {
   if !ok {
     //error
     fmt.Println("Recipient is offline")
+    //send message back to sender to indicate that recipient is offline
+    m := make(map[int]*Chatter)
+    m[chatter.Id] = chatter
+    broadcastStruct := BroadcastStruct{BroadcastType: 0, TargetChatters: m, Message: []byte("err:Recipient is offline")}
+    chatter.Room.Broadcast <- &broadcastStruct
     return
   }
 

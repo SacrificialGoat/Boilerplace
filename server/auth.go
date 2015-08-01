@@ -1,56 +1,36 @@
 package main
 
 import (
-  //"crypto/md5"
   "fmt"
-  //"io"
-  "log"
   "net/http"
-  //"strings"
   "encoding/json"
-  "io/ioutil"
   "database/sql"
   _ "github.com/go-sql-driver/mysql"
   "golang.org/x/crypto/bcrypt"
   "github.com/gorilla/sessions"   
-  //"strconv"
 )
 
 
-//TODO: handle panics/errors, as unhandled panics/errors will shut down the server
-
-
 //function that adds a user to the database
-//TODO: fix all Writes to respond to the clients with the correct status
 func createUserHandler (w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
   fmt.Println("Signing up user...")
 
   //add headers to response
-  w.Header()["Access-Control-Allow-Origin"] = []string{"http://localhost:8080"} //TODO: fix this? refer to http://stackoverflow.com/questions/12830095/setting-http-headers-in-golang??
-  w.Header()["access-control-allow-methods"] = []string{"GET, POST, OPTIONS"}
-  w.Header()["content-type"] = []string{"application/json"}
+  addWriteHeaders(&w, r)
 
   //ignore options requests
-  if r.Method == "OPTIONS" {
-    fmt.Println("options request received")
-    w.WriteHeader(http.StatusTemporaryRedirect)
+  if handleOptionsRequests(w, r) == true {
     return
   }
 
-  //parse the body of the request into a string
-  body, err := ioutil.ReadAll(r.Body)
-  if err != nil {
-    panic(err)
+  //parse the request body into a map
+  dat, ok := parseJsonRequest(w, r)
+  if ok == false {
+    return
   }
-  //fmt.Println(string(body))
-  
-  //parse the JSON string body to get the username, password, firstname, and lastname
-  byt := body
-  var dat map[string]interface{}
-  if err := json.Unmarshal(byt, &dat); err != nil {
-    panic(err)
-  }
+
+  //get user info
   username := dat["username"].(string)
   password := dat["password"].(string)
   first := dat["firstname"].(string)
@@ -59,9 +39,10 @@ func createUserHandler (w http.ResponseWriter, r *http.Request, db *sql.DB) {
   //if any of the above fields are blank, return an error saying so
   for key, value := range dat {
     if value == "" {
-      fmt.Println("about to write 400 header")
-      w.Write([]byte(fmt.Sprintf("Enter information for ", key)))
-      return
+      fmt.Println("Missing information for " + key)
+      w.Header()["Content-Type"] = []string{"text/html"}
+      w.Write([]byte(fmt.Sprintf("Missing information for " + key)))     
+      return   
     }
   }
 
@@ -71,7 +52,7 @@ func createUserHandler (w http.ResponseWriter, r *http.Request, db *sql.DB) {
   )
 
   //query the database for the username
-  err = db.QueryRow("select user_name from users where user_name = ?", username).Scan(&queried_username)
+  err := db.QueryRow("select user_name from users where user_name = ?", username).Scan(&queried_username)
   switch {
 
     //if username doesn't exist
@@ -79,33 +60,39 @@ func createUserHandler (w http.ResponseWriter, r *http.Request, db *sql.DB) {
       //hash the password
       hash, err := bcrypt.GenerateFromPassword([]byte(password), 10)
       if err != nil {
-        fmt.Println(err)
+        handleError(err, "Error hashing password", w)
+        return 
       }
       fmt.Println("hash is ", string(hash))
 
       //add username, password, firstname, and lastname to database
       stmt, err := db.Prepare("insert into users (user_name, first_name, last_name, password_hash) values (?, ?, ?, ?)")
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error preparing query", w)
+        return   
       }
       res, err := stmt.Exec(username, first, last, string(hash))
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error executing query", w)
+        return 
       }
       lastId, err := res.LastInsertId()
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error getting last inserted id", w)
+        return 
       }
       rowCnt, err := res.RowsAffected()
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error getting rows affected", w)
+        return 
       }
-      fmt.Printf("Inserted user " + username + " into database. Last inserted ID = %d, rows affected = %d\n", lastId, rowCnt)
+      fmt.Printf("Inserted user %s into database. Last inserted ID = %d, rows affected = %d\n", username, lastId, rowCnt)
 
       //create session for signed up player
       session, err := store.Get(r, "flash-session")
       if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
+        handleError(err, "Error creating session", w)
+        return 
       }
       session.Values["userid"] = int(lastId)
       session.Values["username"] = username   
@@ -119,17 +106,12 @@ func createUserHandler (w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
     //if error querying database
     case err != nil:
-      log.Fatal(err)
-      //return 400 status to indicate error
-      fmt.Println("about to write 400 header")
-      w.Write([]byte(fmt.Sprintf("Error querying database")))  
+      handleError(err, "Error querying database", w)
       break
     
     //if username exists
     default:
-      //return 400 status to indicate error
-      fmt.Println("about to write 400 header")
-      w.Write([]byte(fmt.Sprintf("Username is already taken")))
+      handleError(err, "Username is already taken", w)
       break
 
   } 
@@ -137,69 +119,54 @@ func createUserHandler (w http.ResponseWriter, r *http.Request, db *sql.DB) {
 }
 
 //function that updates info for a user
-//TODO: Return correct status and message if session is invalid
-//TODO: Return correct status and message if update failed
 func updateUserInfoHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore) { 
 
   fmt.Println("Updating user info...")
 
   //add headers to response
-  w.Header()["access-control-allow-origin"] = []string{"http://localhost:8080"} //TODO: fix this?                                                           
-  w.Header()["access-control-allow-methods"] = []string{"GET, POST, OPTIONS"}
-  w.Header()["Content-Type"] = []string{"application/json"}
+  addWriteHeaders(&w, r)
 
   //ignore options requests
-  if r.Method == "OPTIONS" {
-    fmt.Println("options request received")
-    w.WriteHeader(http.StatusTemporaryRedirect)
+  if handleOptionsRequests(w, r) == true {
     return
   }
 
   //check for session to see if client is authenticated
-  session, err := store.Get(r, "flash-session")
-  if err != nil {
-    http.Error(w, err.Error(), http.StatusInternalServerError)
-  }
-  fm := session.Flashes("message")
-  if fm == nil {
-    fmt.Println("Trying to update user profile as invalid user")
-    fmt.Fprint(w, "No flash messages")
+  ok, session := confirmSession(store, "Trying to get forum thread info as an invalid user", w, r)
+  if ok == false {
     return
   }
-  //session.Save(r, w)
 
   //get the user id and username from the cookie
   userid := session.Values["userid"].(int)
   username := session.Values["username"].(string)
 
-  //parse the body of the request into a string
-  body, err := ioutil.ReadAll(r.Body)
-  if err != nil {
-    panic(err)
-  }
-  //fmt.Println(string(body))
-  
-  //parse the JSON string body to get the bio and avatar_link
-  byt := body
+  //parse the request body into a map
   var dat map[string]interface{}
-  if err := json.Unmarshal(byt, &dat); err != nil {
-    panic(err)
+  dat, ok = parseJsonRequest(w, r)
+  if ok == false {
+    return
   }
+
+  //get user info to update
   bio := dat["bio"].(string)
   avatar_link := dat["avatar_link"].(string)
 
   //update user's bio and avatar_link
   stmt, err := db.Prepare("update users set bio = ?, avatar_link = ? where user_id = ?")
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error preparing query", w)
+    return
   }
   res, err := stmt.Exec(bio, avatar_link, userid)
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error executing query", w)
+    return
   }
   rowCnt, err := res.RowsAffected()
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error getting rows affected", w)
+    return
   }
   fmt.Printf("Updated user " + username + " in users table. Rows affected = %d\n", rowCnt)
 
@@ -210,36 +177,23 @@ func updateUserInfoHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, s
 }
 
 //function to get user info
-//TODO: Return correct status and message if session is invalid
-//TODO: Return correct status and message if update failed
 func getUserInfoHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore) {
 
   fmt.Println("Getting user info...")
 
   //add headers to response
-  w.Header()["access-control-allow-origin"] = []string{"http://localhost:8080"} //TODO: fix this?                                                           
-  w.Header()["access-control-allow-methods"] = []string{"GET, POST, OPTIONS"}
-  w.Header()["Content-Type"] = []string{"application/json"}
+  addWriteHeaders(&w, r)
 
   //ignore options requests
-  if r.Method == "OPTIONS" {
-    fmt.Println("options request received")
-    w.WriteHeader(http.StatusTemporaryRedirect)
+  if handleOptionsRequests(w, r) == true {
     return
   }
 
   //check for session to see if client is authenticated
-  session, err := store.Get(r, "flash-session")
-  if err != nil {
-    http.Error(w, err.Error(), http.StatusInternalServerError)
-  }
-  fm := session.Flashes("message")
-  if fm == nil {
-    fmt.Println("Trying to update user profile as invalid user")
-    fmt.Fprint(w, "No flash messages")
+  ok, session := confirmSession(store, "Trying to get forum thread info as an invalid user", w, r)
+  if ok == false {
     return
   }
-  //session.Save(r, w)
 
   //get the user id and username from the cookie
   userid := session.Values["userid"].(int)
@@ -255,23 +209,17 @@ func getUserInfoHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, stor
   )
 
   //query the database for the user info
-  err = db.QueryRow("select first_name, last_name, bio, rep, avatar_link from users where user_id = ?", userid).Scan(&queried_first_name, &queried_last_name, &queried_bio, &queried_rep, &queried_avatar_link)
+  err := db.QueryRow("select first_name, last_name, bio, rep, avatar_link from users where user_id = ?", userid).Scan(&queried_first_name, &queried_last_name, &queried_bio, &queried_rep, &queried_avatar_link)
   switch {
 
     //if user doesn't exist 
     case err == sql.ErrNoRows:
-      //return 400 status to indicate error
-      fmt.Println("about to write 400 header")
-      fmt.Println("User cannot be found")     
-      w.Write([]byte(fmt.Sprintf("User cannot be found"))) 
+      handleError(err, "User cannot be found", w)    
       break
 
     //if error querying database  
-    case err != nil:
-      log.Fatal(err)
-      //return 400 status to indicate error
-      fmt.Println("about to write 400 header")
-      w.Write([]byte(fmt.Sprintf("Error querying database")))  
+    case err != nil: 
+      handleError(err, "Error querying database", w)   
       break
 
     //if user exists
@@ -284,7 +232,8 @@ func getUserInfoHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, stor
       //json stringify the data
       jsonString, err := json.Marshal(userInfoOutbound)
       if err != nil {
-        panic(err)
+        handleError(err, "Error performing json stringify on object", w)
+        return
       }
       fmt.Println(string(jsonString))      
 
@@ -298,37 +247,25 @@ func getUserInfoHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, stor
 }
 
 //function that authenticates/signs in user
-//TODO: fix all Writes to respond to the clients with the correct status
-//TODO: handle logging in when a session is already assigned to client
 func loginHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore) {
 
   fmt.Println("Authenticating user...")
 
   //add headers to response
-  w.Header()["access-control-allow-origin"] = []string{"http://localhost:8080"} //TODO: fix this?                                                           
-  w.Header()["access-control-allow-methods"] = []string{"GET, POST, OPTIONS"}
-  w.Header()["Content-Type"] = []string{"application/json"}
+  addWriteHeaders(&w, r)
 
   //ignore options requests
-  if r.Method == "OPTIONS" {
-    fmt.Println("options request received")
-    w.WriteHeader(http.StatusTemporaryRedirect)
+  if handleOptionsRequests(w, r) == true {
     return
   }
 
-  //parse the body of the request into a string
-  body, err := ioutil.ReadAll(r.Body)
-  if err != nil {
-    panic(err)
+  //parse the request body into a map
+  dat, ok := parseJsonRequest(w, r)
+  if ok == false {
+    return
   }
-  //fmt.Println(string(body))
 
-  //parse the JSON string body to get the username and password
-  byt := body
-  var dat map[string]interface{}
-  if err := json.Unmarshal(byt, &dat); err != nil {
-    panic(err)
-  }
+  //get username and password
   username := dat["username"].(string)
   password := dat["password"].(string)
 
@@ -339,23 +276,17 @@ func loginHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, store *ses
   )
 
   //query the database for the username
-  err = db.QueryRow("select user_id, password_hash from users where user_name = ?", username).Scan(&queried_user_id, &queried_password_hash)
+  err := db.QueryRow("select user_id, password_hash from users where user_name = ?", username).Scan(&queried_user_id, &queried_password_hash)
   switch {
 
     //if username doesn't exist   
     case err == sql.ErrNoRows:
-      //return 400 status to indicate error
-      fmt.Println("about to write 400 header")
-      fmt.Println("Username cannot be found")     
-      w.Write([]byte(fmt.Sprintf("Username cannot be found"))) 
+      handleError(err, "Username cannot be found", w)
       break
 
     //if error querying database  
     case err != nil:
-      log.Fatal(err)
-      //return 400 status to indicate error
-      fmt.Println("about to write 400 header")
-      w.Write([]byte(fmt.Sprintf("Error querying database")))  
+      handleError(err, "Error querying database", w)
       break
 
     //if username exists  
@@ -367,18 +298,15 @@ func loginHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, store *ses
       err := bcrypt.CompareHashAndPassword([]byte(queried_password_hash), []byte(password))
       if err != nil { 
         //password not a match
-
-        //return 400 status to indicate error
-        fmt.Println("about to write 400 header")
-        fmt.Println("Password incorrect")     
-        w.Write([]byte(fmt.Sprintf("Password incorrect")))     
+        handleError(err, "Password incorrect", w)
       } else { 
         //user is authorized
 
         //create session
         session, err := store.Get(r, "flash-session")
         if err != nil {
-          http.Error(w, err.Error(), http.StatusInternalServerError)
+          handleError(err, "Error creating session", w)
+          return 
         }
         session.Values["userid"] = queried_user_id
         session.Values["username"] = username

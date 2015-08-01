@@ -2,10 +2,8 @@ package main
 
 import (
   "fmt"
-  "log"
   "net/http"
   "encoding/json"
-  "io/ioutil"
   "database/sql"
   _ "github.com/go-sql-driver/mysql"
   "github.com/gorilla/sessions"  
@@ -14,96 +12,80 @@ import (
 )
 
 
-//TODO: handle panics/errors, as unhandled panics/errors will shut down the server
-//TODO: make a checkerr function
-//TODO: put duplicated code into functions
-
-
-//TODO: Return correct status and message if session is invalid
-//TODO: Return correct status and message if insert failed
 //TODO: format retrieved datetime to javascript datetime
 func createThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore) { 
 
   fmt.Println("Creating forum thread post...")
 
   //add headers to response
-  w.Header()["access-control-allow-origin"] = []string{"http://localhost:8080"} //TODO: fix this?                                                           
-  w.Header()["access-control-allow-methods"] = []string{"GET, POST, OPTIONS"}
-  w.Header()["Content-Type"] = []string{"application/json"}
+  addWriteHeaders(&w, r)
 
   //ignore options requests
-  if r.Method == "OPTIONS" {
-    fmt.Println("options request received")
-    w.WriteHeader(http.StatusTemporaryRedirect)
+  if handleOptionsRequests(w, r) == true {
     return
   }
 
   //check for session to see if client is authenticated
-  session, err := store.Get(r, "flash-session")
-  if err != nil {
-    http.Error(w, err.Error(), http.StatusInternalServerError)
-  }
-  fm := session.Flashes("message")
-  if fm == nil {
-    fmt.Println("Trying to create a thread as an invalid user")
-    fmt.Fprint(w, "No flash messages")
+  ok, session := confirmSession(store, "Trying to get forum thread info as an invalid user", w, r)
+  if ok == false {
     return
   }
-  //session.Save(r, w)
 
   //get the user id and username from the cookie
   userid := session.Values["userid"].(int)
   //username := session.Values["username"].(string)
 
-  //parse the body of the request into a string
-  body, err := ioutil.ReadAll(r.Body)
-  if err != nil {
-    panic(err)
-  }
-  //fmt.Println(string(body))
-  
-  //parse the JSON string body to get the forum thread info
-  byt := body
+  //parse the request body into a map
   var dat map[string]interface{}
-  if err := json.Unmarshal(byt, &dat); err != nil {
-    panic(err)
+  dat, ok = parseJsonRequest(w, r)
+  if ok == false {
+    return
   }
+
+  //get thread post info
   thread_id := int(dat["thread_id"].(float64))
   post_contents := dat["contents"].(string)
 
   //insert forum thread post into database
   stmt, err := db.Prepare("insert into thread_posts (thread_id, user_id, contents) values (?, ?, ?)")
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error preparing query", w)
+    return
   }
   res, err := stmt.Exec(thread_id, userid, post_contents)
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error executing query", w)
+    return
   }
   lastId, err := res.LastInsertId()
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error getting last insert id", w)
+    return
   }
   rowCnt, err := res.RowsAffected()
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error getting rows affected", w)
+    return
   }
-  fmt.Printf("Inserted forum post into forum thread " + strconv.Itoa(thread_id) + ". Last inserted ID = %d, rows affected = %d\n", lastId, rowCnt)
+  fmt.Printf("Inserted forum post into forum thread %d. Last inserted ID = %d, rows affected = %d\n", thread_id, lastId, rowCnt)
 
   //update post count and last post time for the forum thread
   stmt, err = db.Prepare("update forum_threads set post_count = post_count + 1, last_post_time = NOW() where thread_id = ?")
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error preparing query", w)
+    return
   }
   res, err = stmt.Exec(thread_id)
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error executing query", w)
+    return
   }
   rowCnt, err = res.RowsAffected()
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error getting rows affected", w)
+    return
   }
-  fmt.Printf("Updated thread " + strconv.Itoa(thread_id) + " in forum_threads table. Rows affected = %d\n", rowCnt)
+  fmt.Printf("Updated thread %d in forum_threads table. Rows affected = %d\n", thread_id, rowCnt)
 
   //return 200 status to indicate success
   fmt.Println("about to write 200 header")
@@ -113,20 +95,15 @@ func createThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store 
 
 //option: query by - 0) post id, 1) thread id, 2) user id, 3) all
 //sortBy: sort by (does not apply to by post id since by post id is unique) - 0) rating, 1) datetime
-//TODO: Return correct status and message if query failed
 func getThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, option int, sortBy int, pageNumber int, id int) {
 
   fmt.Println("Getting forum thread post...")
 
   //add headers to response
-  w.Header()["access-control-allow-origin"] = []string{"http://localhost:8080"} //TODO: fix this?                                                           
-  w.Header()["access-control-allow-methods"] = []string{"GET, POST, OPTIONS"}
-  w.Header()["Content-Type"] = []string{"application/json"}
+  addWriteHeaders(&w, r)
 
   //ignore options requests
-  if r.Method == "OPTIONS" {
-    fmt.Println("options request received")
-    w.WriteHeader(http.StatusTemporaryRedirect)
+  if handleOptionsRequests(w, r) == true {
     return
   }
 
@@ -212,10 +189,10 @@ func getThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, option in
   }
 
   //perform query and check for errors
-  //TODO: ignore norows error??
   rows, err := db.Query(dbQuery)
   if err != nil {
-    panic(err)
+    handleError(err, "Error performing query", w)
+    return
   } 
 
   //outbound object containing a collection of outbound objects for each forum thread
@@ -226,7 +203,8 @@ func getThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, option in
     //get the relevant information from the query results
     err = rows.Scan(&queried_post_id, &queried_thread_id, &queried_user_id, &queried_contents, &queried_rating, &queried_creation_time, &queried_last_update_time, &queried_user_name)
     if err != nil {
-      panic(err)
+      handleError(err, "Error while getting results of query", w)
+      return
     }
 
     //create outbound object for each row
@@ -240,7 +218,8 @@ func getThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, option in
   //json stringify the data
   jsonString, err := json.Marshal(threadPostCollectionOutbound)
   if err != nil {
-    panic(err)
+    handleError(err, "Error performing json stringify on object", w)
+    return
   }
   fmt.Println(string(jsonString))      
 
@@ -250,36 +229,23 @@ func getThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, option in
 
 }
 
-//TODO: Return correct status and message if session is invalid
-//TODO: Return correct status and message if query failed
 func scoreThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore, option int, post_id int) {
 
   fmt.Println("Score thread post...")
 
   //add headers to response
-  w.Header()["access-control-allow-origin"] = []string{"http://localhost:8080"} //TODO: fix this?                                                           
-  w.Header()["access-control-allow-methods"] = []string{"GET, POST, OPTIONS"}
-  w.Header()["Content-Type"] = []string{"application/json"}
+  addWriteHeaders(&w, r)
 
   //ignore options requests
-  if r.Method == "OPTIONS" {
-    fmt.Println("options request received")
-    w.WriteHeader(http.StatusTemporaryRedirect)
+  if handleOptionsRequests(w, r) == true {
     return
   }
 
   //check for session to see if client is authenticated
-  session, err := store.Get(r, "flash-session")
-  if err != nil {
-    http.Error(w, err.Error(), http.StatusInternalServerError)
-  }
-  fm := session.Flashes("message")
-  if fm == nil {
-    fmt.Println("Trying to vote on forum thread post as an invalid user")
-    fmt.Fprint(w, "No flash messages")
+  ok, session := confirmSession(store, "Trying to get forum thread info as an invalid user", w, r)
+  if ok == false {
     return
   }
-  //session.Save(r, w)
 
   //get the user id and username from the cookie
   userid := session.Values["userid"].(int)
@@ -291,7 +257,7 @@ func scoreThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *
   )
 
   //query the post_votes table for the post id and user id
-  err = db.QueryRow("select score from post_votes where post_id = ? and user_id = ?", post_id, userid).Scan(&queried_score)
+  err := db.QueryRow("select score from post_votes where post_id = ? and user_id = ?", post_id, userid).Scan(&queried_score)
   switch {
 
     //if record doesn't exist   
@@ -299,41 +265,49 @@ func scoreThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *
       //insert a new row to indicate that the user has voted for the post
       stmt, err := db.Prepare("insert into post_votes (post_id, user_id, score) values (?, ?, ?)")
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error preparing query", w)
+        return
       }
       res, err := stmt.Exec(post_id, userid, option)
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error executing query", w)
+        return
       }
       fmt.Printf("Inserted record into post_votes table.\n")
 
       //update the forum post by the score
       stmt, err = db.Prepare("update thread_posts set rating = rating + ? where post_id = ?")
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error preparing query", w)
+        return
       }
       res, err = stmt.Exec(option, post_id)
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error executing query", w)
+        return
       }
       rowCnt, err := res.RowsAffected()
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error getting rows affected", w)
+        return
       }
-      fmt.Printf("Updated score of thread post " + strconv.Itoa(post_id) + ". Rows affected = %d\n", rowCnt)     
+      fmt.Printf("Updated score of thread post %d. Rows affected = %d\n", post_id, rowCnt)     
 
       //update rep of user who created post
       stmt, err = db.Prepare("update users inner join thread_posts on users.user_id = thread_posts.user_id set rep = rep + ? where thread_posts.post_id = ?")
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error preparing query", w)
+        return
       }
       res, err = stmt.Exec(option, post_id)
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error executing query", w)
+        return
       }
       rowCnt, err = res.RowsAffected()
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error getting rows affected", w)
+        return
       }
       fmt.Printf("Updated rep of thread post creator. Rows affected = %d\n", rowCnt)       
 
@@ -345,10 +319,7 @@ func scoreThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *
 
     //if error querying database  
     case err != nil:
-      log.Fatal(err)
-      //return 400 status to indicate error
-      fmt.Println("about to write 400 header")
-      w.Write([]byte(fmt.Sprintf("Error querying database")))  
+      handleError(err, "Error querying database", w)
       break
 
     //if record exists
@@ -357,49 +328,54 @@ func scoreThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *
         //update post_votes table for the post id and user id
         stmt, err := db.Prepare("update post_votes set score = ? where post_id = ? and user_id = ?")
         if err != nil {
-          log.Fatal(err)
+          handleError(err, "Error preparing query", w)
+          return
         }
         _, err = stmt.Exec(queried_score + option, post_id, userid)
         if err != nil {
-          log.Fatal(err)
+          handleError(err, "Error executing query", w)
+          return
         }
         fmt.Printf("Updated record in post_votes table.\n")
       } else
       {
-        //return 400 status to indicate error
-        fmt.Println("about to write 400 header")
-        fmt.Println("Cannot upvote twice or downvote twice")     
-        w.Write([]byte(fmt.Sprintf("Cannot upvote twice or downvote twice")))   
+        handleError(err, "Cannot upvote twice or downvote twice", w)
         return
       }
 
       //update the forum thread post by the score
       stmt, err := db.Prepare("update thread_posts set rating = rating + ? where post_id = ?")
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error preparing query", w)
+        return
       }
       res, err := stmt.Exec(option, post_id)
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error executing query", w)
+        return
       }
       rowCnt, err := res.RowsAffected()
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error getting rows affected", w)
+        return
       }
       fmt.Printf("Updated score of thread post " + strconv.Itoa(post_id) + ". Rows affected = %d\n", rowCnt)
 
       //update rep of user who created post
       stmt, err = db.Prepare("update users inner join thread_posts on users.user_id = thread_posts.user_id set rep = rep + ? where thread_posts.post_id = ?")
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error preparing query", w)
+        return
       }
       res, err = stmt.Exec(option, post_id)
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error executing query", w)
+        return
       }
       rowCnt, err = res.RowsAffected()
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error getting rows affected", w)
+        return
       }
       fmt.Printf("Updated rep of thread post creator. Rows affected = %d\n", rowCnt)  
 
@@ -412,54 +388,35 @@ func scoreThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *
 
 }
 
-//TODO: Return correct status and message if session is invalid
-//TODO: Return correct status and message if query failed
-//TODO: don't allow users to modify/delete other users' posts
 func editThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore) {
 
   fmt.Println("Edit thread post...")
 
   //add headers to response
-  w.Header()["access-control-allow-origin"] = []string{"http://localhost:8080"} //TODO: fix this?                                                           
-  w.Header()["access-control-allow-methods"] = []string{"GET, POST, OPTIONS"}
-  w.Header()["Content-Type"] = []string{"application/json"}
+  addWriteHeaders(&w, r)
 
   //ignore options requests
-  if r.Method == "OPTIONS" {
-    fmt.Println("options request received")
-    w.WriteHeader(http.StatusTemporaryRedirect)
+  if handleOptionsRequests(w, r) == true {
     return
   }
 
   //check for session to see if client is authenticated
-  session, err := store.Get(r, "flash-session")
-  if err != nil {
-    http.Error(w, err.Error(), http.StatusInternalServerError)
-  }
-  fm := session.Flashes("message")
-  if fm == nil {
-    fmt.Println("Trying to edit forum thread post as an invalid user")
-    fmt.Fprint(w, "No flash messages")
+  ok, session := confirmSession(store, "Trying to get forum thread info as an invalid user", w, r)
+  if ok == false {
     return
   }
-  //session.Save(r, w)
 
   //get the user id and username from the cookie
   userid := session.Values["userid"].(int)     
 
-  //parse the body of the request into a string
-  body, err := ioutil.ReadAll(r.Body)
-  if err != nil {
-    panic(err)
-  }
-  //fmt.Println(string(body))
-  
-  //parse the JSON string body to get the forum thread info
-  byt := body
+  //parse the request body into a map
   var dat map[string]interface{}
-  if err := json.Unmarshal(byt, &dat); err != nil {
-    panic(err)
+  dat, ok = parseJsonRequest(w, r)
+  if ok == false {
+    return
   }
+
+  //get info to update post with
   post_id := int(dat["post_id"].(float64))
   post_contents := dat["contents"].(string)
 
@@ -468,53 +425,44 @@ func editThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *s
   )  
 
   //don't edit the post if the user was not the one who created it
-  err = db.QueryRow("select user_id from thread_posts where post_id = ?", post_id).Scan(&queried_user_id)
+  err := db.QueryRow("select user_id from thread_posts where post_id = ?", post_id).Scan(&queried_user_id)
   switch {
 
     //if post doesn't exist 
     case err == sql.ErrNoRows:
-      //return 400 status to indicate error
-      fmt.Println("about to write 400 header")
-      fmt.Println("Post cannot be found")     
-      w.Write([]byte(fmt.Sprintf("Post cannot be found"))) 
+      handleError(err, "Post cannot be found", w)
       return
-      //break
 
     //if error querying database  
     case err != nil:
-      log.Fatal(err)
-      //return 400 status to indicate error
-      fmt.Println("about to write 400 header")
-      w.Write([]byte(fmt.Sprintf("Error querying database")))  
+      handleError(err, "Error querying database", w)
       return
-      //break
 
     //if post exists
     default:
       if queried_user_id != userid {
-        fmt.Println("about to write 400 header")
-        fmt.Println("Cannot edit another user's post")  
-        w.Write([]byte(fmt.Sprintf("Cannot edit another user's post")))  
+        handleError(err, "Cannot edit another user's post", w)
         return
       }
       break
 
   }     
 
-  //TODO: return error if post id is blank/nan, return if neither post id nor post contents exist in message of body
-
   //update the forum thread post
   stmt, err := db.Prepare("update thread_posts set contents = ? where post_id = ?")
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error preparing query", w)
+    return
   }
   res, err := stmt.Exec(post_contents, post_id)
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error executing query", w)
+    return
   }
   rowCnt, err := res.RowsAffected()
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error getting rows affected", w)
+    return
   }
   fmt.Printf("Updated contents of thread post " + strconv.Itoa(post_id) + ". Rows affected = %d\n", rowCnt)      
 
@@ -524,36 +472,23 @@ func editThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *s
 
 }
 
-//TODO: Return correct status and message if session is invalid
-//TODO: Return correct status and message if query failed
 func deleteThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore, id int) {
 
   fmt.Println("Delete thread post...")
 
   //add headers to response
-  w.Header()["access-control-allow-origin"] = []string{"http://localhost:8080"} //TODO: fix this?                                                           
-  w.Header()["access-control-allow-methods"] = []string{"GET, POST, OPTIONS"}
-  w.Header()["Content-Type"] = []string{"application/json"}
+  addWriteHeaders(&w, r)
 
   //ignore options requests
-  if r.Method == "OPTIONS" {
-    fmt.Println("options request received")
-    w.WriteHeader(http.StatusTemporaryRedirect)
+  if handleOptionsRequests(w, r) == true {
     return
   }
 
   //check for session to see if client is authenticated
-  session, err := store.Get(r, "flash-session")
-  if err != nil {
-    http.Error(w, err.Error(), http.StatusInternalServerError)
-  }
-  fm := session.Flashes("message")
-  if fm == nil {
-    fmt.Println("Trying to delete forum thread post as an invalid user")
-    fmt.Fprint(w, "No flash messages")
+  ok, session := confirmSession(store, "Trying to get forum thread info as an invalid user", w, r)
+  if ok == false {
     return
   }
-  //session.Save(r, w)
 
   //get the user id and username from the cookie
   userid := session.Values["userid"].(int)   
@@ -563,86 +498,83 @@ func deleteThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store 
   )  
 
   //don't delete the post if the user was not the one who created it
-  err = db.QueryRow("select user_id from thread_posts where post_id = ?", id).Scan(&queried_user_id)
+  err := db.QueryRow("select user_id from thread_posts where post_id = ?", id).Scan(&queried_user_id)
   switch {
 
     //if post doesn't exist 
     case err == sql.ErrNoRows:
-      //return 400 status to indicate error
-      fmt.Println("about to write 400 header")
-      fmt.Println("Post cannot be found")     
-      w.Write([]byte(fmt.Sprintf("Post cannot be found"))) 
+      handleError(err, "Post cannot be found", w)
       return
-      //break
 
     //if error querying database  
     case err != nil:
-      log.Fatal(err)
-      //return 400 status to indicate error
-      fmt.Println("about to write 400 header")
-      w.Write([]byte(fmt.Sprintf("Error querying database")))  
+      handleError(err, "Error querying database", w)
       return
-      //break
 
     //if post exists
     default:
       if queried_user_id != userid {
-        fmt.Println("about to write 400 header")
-        fmt.Println("Cannot delete another user's post")  
-        w.Write([]byte(fmt.Sprintf("Cannot delete another user's post")))  
+        handleError(err, "Cannot delete another user's post", w)
         return
       }
       break
 
   }       
 
-  //TODO: return error if post id is blank/nan
-
   //delete all votes related to the thread post
   stmt, err := db.Prepare("delete from post_votes where post_id = ?")
 
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error with query", w)
+    return
   }
   res, err := stmt.Exec(id)
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error with query", w)
+    return
   }
   rowCnt, err := res.RowsAffected()
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error with query", w)
+    return
   }
-  fmt.Printf("Deleted votes for forum thread post with id " + strconv.Itoa(id) + ". Rows affected = %d\n", rowCnt)   
+  fmt.Printf("Deleted votes for forum thread post with id %d. Rows affected = %d\n", id, rowCnt)   
 
   //update post count for the forum thread
   stmt, err = db.Prepare("update forum_threads inner join thread_posts on forum_threads.thread_id = thread_posts.thread_id set post_count = post_count - 1 where thread_posts.post_id = ?")
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error with query", w)
+    return
   }
   res, err = stmt.Exec(id)
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error with query", w)
+    return
   }
   rowCnt, err = res.RowsAffected()
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error with query", w)
+    return
   }
   fmt.Printf("Decremented post count in forum_threads table. Rows affected = %d\n", rowCnt)  
 
   //delete the forum thread post
   stmt, err = db.Prepare("delete from thread_posts where post_id = ?")
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error with query", w)
+    return
   }
   res, err = stmt.Exec(id)
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error with query", w)
+    return
   }
   rowCnt, err = res.RowsAffected()
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error with query", w)
+    return
   }
-  fmt.Printf("Deleted thread post " + strconv.Itoa(id) + ". Rows affected = %d\n", rowCnt)  
+  fmt.Printf("Deleted thread post %d. Rows affected = %d\n", id, rowCnt)  
 
   //return 200 status to indicate success
   fmt.Println("about to write 200 header")
