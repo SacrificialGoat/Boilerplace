@@ -1,6 +1,6 @@
 ![ScreenShot](http://i.imgur.com/F0m8twX.png)
 
-Fast, responsive boilerplate application to create your own Reddit.
+Fast, responsive location-sharing Reddit application.
 Combines a quick & reliable Go web server with React/Flux client.
 
 ###[See Example](http://54.69.153.183:8080/)
