@@ -3,7 +3,7 @@
 Fast, responsive location-sharing Reddit application.
 Combines a quick & reliable Go web server with React/Flux client.
 
-###[See Example](http://54.69.153.183:8080/)
+###[See Example](http://52.24.8.8:8080/)
 
 ##Features
 * Threads / Comments
