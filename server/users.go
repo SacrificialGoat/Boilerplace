@@ -1,12 +1,8 @@
 package main
 
 import (
-  //"crypto/md5"
   "fmt"
-  //"io"
-  "log"
   "net/http"
-  //"strings"
   "encoding/json"
   "database/sql"
   _ "github.com/go-sql-driver/mysql"
@@ -14,24 +10,16 @@ import (
 )
 
 
-//TODO: handle panics/errors, as unhandled panics/errors will shut down the server
-
-
 //function to get user info
-//TODO: Return correct status and message if update failed
 func getUserInfo(w http.ResponseWriter, r *http.Request, db *sql.DB, option int, userid int, username string) {
 
   fmt.Println("Getting user info...")
 
   //add headers to response
-  w.Header()["access-control-allow-origin"] = []string{"http://localhost:8080"} //TODO: fix this?                                                           
-  w.Header()["access-control-allow-methods"] = []string{"GET, POST, OPTIONS"}
-  w.Header()["Content-Type"] = []string{"application/json"}
+  addWriteHeaders(&w, r)
 
   //ignore options requests
-  if r.Method == "OPTIONS" {
-    fmt.Println("options request received")
-    w.WriteHeader(http.StatusTemporaryRedirect)
+  if handleOptionsRequests(w, r) == true {
     return
   }
 
@@ -60,18 +48,12 @@ func getUserInfo(w http.ResponseWriter, r *http.Request, db *sql.DB, option int,
 
     //if user doesn't exist 
     case err == sql.ErrNoRows:
-      //return 400 status to indicate error
-      fmt.Println("about to write 400 header")
-      fmt.Println("User cannot be found")     
-      w.Write([]byte(fmt.Sprintf("User cannot be found"))) 
+      handleError(err, "User cannot be found", w)
       break
 
     //if error querying database  
     case err != nil:
-      log.Fatal(err)
-      //return 400 status to indicate error
-      fmt.Println("about to write 400 header")
-      w.Write([]byte(fmt.Sprintf("Error querying database")))  
+      handleError(err, "Error querying database", w)
       break
 
     //if user exists  
@@ -84,7 +66,8 @@ func getUserInfo(w http.ResponseWriter, r *http.Request, db *sql.DB, option int,
       //json stringify the data
       jsonString, err := json.Marshal(userInfoOutbound)
       if err != nil {
-        panic(err)
+        handleError(err, "Error performing json stringify on object", w)
+        return
       }
       fmt.Println(string(jsonString))      
 

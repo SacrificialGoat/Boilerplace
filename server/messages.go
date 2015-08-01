@@ -2,10 +2,8 @@ package main
 
 import (
   "fmt"
-  "log"
   "net/http"
   "encoding/json"
-  "io/ioutil"
   "database/sql"
   _ "github.com/go-sql-driver/mysql"
   "github.com/gorilla/sessions"  
@@ -14,53 +12,35 @@ import (
 )
 
 
-//TODO: Return correct status and message if session is invalid
-//TODO: Return correct status and message if insert failed
 func createMessage(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore) { 
 
   fmt.Println("Sending messages...")
 
   //add headers to response
-  w.Header()["access-control-allow-origin"] = []string{"http://localhost:8080"} //TODO: fix this?                                                           
-  w.Header()["access-control-allow-methods"] = []string{"GET, POST, OPTIONS"}
-  w.Header()["Content-Type"] = []string{"application/json"}
+  addWriteHeaders(&w, r)
 
   //ignore options requests
-  if r.Method == "OPTIONS" {
-    fmt.Println("options request received")
-    w.WriteHeader(http.StatusTemporaryRedirect)
+  if handleOptionsRequests(w, r) == true {
     return
   }
 
   //check for session to see if client is authenticated
-  session, err := store.Get(r, "flash-session")
-  if err != nil {
-    http.Error(w, err.Error(), http.StatusInternalServerError)
-  }
-  fm := session.Flashes("message")
-  if fm == nil {
-    fmt.Println("Trying to create a thread as an invalid user")
-    fmt.Fprint(w, "No flash messages")
+  ok, session := confirmSession(store, "Trying to get forum thread info as an invalid user", w, r)
+  if ok == false {
     return
   }
-  //session.Save(r, w)
 
   //get the user/sender id from the cookie
   message_sender_id := session.Values["userid"].(int)
 
-  //parse the body of the request into a string
-  body, err := ioutil.ReadAll(r.Body)
-  if err != nil {
-    panic(err)
-  }
-  //fmt.Println(string(body))
-  
-  //parse the JSON string body to get the forum thread info
-  byt := body
+  //parse the request body into a map
   var dat map[string]interface{}
-  if err := json.Unmarshal(byt, &dat); err != nil {
-    panic(err)
+  dat, ok = parseJsonRequest(w, r)
+  if ok == false {
+    return
   }
+
+  //get the message info
   message_recipient_id := int(dat["recipient_id"].(float64))
   message_title := dat["title"].(string)
   message_contents := dat["contents"].(string)
@@ -68,21 +48,25 @@ func createMessage(w http.ResponseWriter, r *http.Request, db *sql.DB, store *se
   //insert forum thread into database
   stmt, err := db.Prepare("insert into messages (sender_id, recipient_id, title, contents) values (?, ?, ?, ?)")
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error preparing query", w)
+    return
   }
   res, err := stmt.Exec(message_sender_id, message_recipient_id, message_title, message_contents)
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error executing query", w)
+    return
   }
   lastId, err := res.LastInsertId()
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error getting last insert id", w)
+    return
   }
   rowCnt, err := res.RowsAffected()
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error getting rows affected", w)
+    return
   }
-  fmt.Printf("Inserted message " + message_title + " into database. Last inserted ID = %d, rows affected = %d\n", lastId, rowCnt)
+  fmt.Printf("Inserted message %s into database. Last inserted ID = %d, rows affected = %d\n", message_title, lastId, rowCnt)
 
   //return 200 status to indicate success
   fmt.Println("about to write 200 header")
@@ -92,36 +76,23 @@ func createMessage(w http.ResponseWriter, r *http.Request, db *sql.DB, store *se
 
 //option: query by - 0) message id, 1) sender id, 2) recipient id
 //sortBy: sort by (does not apply to by message id since by message id is unique) - 0) rating, 1) datetime
-//TODO: Return correct status and message if session is invalid
-//TODO: Return correct status and message if query failed
 func recvMessages(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore, option int, sortBy int, pageNumber int, id int) {
 
   fmt.Println("Getting messages...")
 
   //add headers to response
-  w.Header()["access-control-allow-origin"] = []string{"http://localhost:8080"} //TODO: fix this?                                                           
-  w.Header()["access-control-allow-methods"] = []string{"GET, POST, OPTIONS"}
-  w.Header()["Content-Type"] = []string{"application/json"}
+  addWriteHeaders(&w, r)
 
   //ignore options requests
-  if r.Method == "OPTIONS" {
-    fmt.Println("options request received")
-    w.WriteHeader(http.StatusTemporaryRedirect)
+  if handleOptionsRequests(w, r) == true {
     return
   }
 
   //check for session to see if client is authenticated
-  session, err := store.Get(r, "flash-session")
-  if err != nil {
-    http.Error(w, err.Error(), http.StatusInternalServerError)
-  }
-  fm := session.Flashes("message")
-  if fm == nil {
-    fmt.Println("Trying to get forum thread info as an invalid user")
-    fmt.Fprint(w, "No flash messages")
+  ok, session := confirmSession(store, "Trying to get forum thread info as an invalid user", w, r)
+  if ok == false {
     return
   }
-  //session.Save(r, w)
 
   //variable(s) to hold the returned values from the query
   var (
@@ -194,7 +165,8 @@ func recvMessages(w http.ResponseWriter, r *http.Request, db *sql.DB, store *ses
   //perform query and check for errors
   rows, err := db.Query(dbQuery)
   if err != nil {
-    panic(err)
+    handleError(err, "Error performing query", w)
+    return
   } 
 
   //outbound object containing a collection of outbound objects for each forum thread
@@ -205,7 +177,8 @@ func recvMessages(w http.ResponseWriter, r *http.Request, db *sql.DB, store *ses
     //get the relevant information from the query results
     err = rows.Scan(&queried_message_id, &queried_sender_id, &queried_sender_name, &queried_recipient_id, &queried_recipient_name, &queried_title, &queried_contents, &queried_creation_time, &queried_last_update_time)
     if err != nil {
-      panic(err)
+      handleError(err, "Error while getting results of query", w)
+      return
     }
 
     //create outbound object for each row
@@ -220,7 +193,8 @@ func recvMessages(w http.ResponseWriter, r *http.Request, db *sql.DB, store *ses
   //json stringify the data
   jsonString, err := json.Marshal(messageCollectionOutbound)
   if err != nil {
-    panic(err)
+    handleError(err, "Error performing json stringify on object", w)
+    return
   }
   fmt.Println(string(jsonString))      
 
@@ -229,5 +203,11 @@ func recvMessages(w http.ResponseWriter, r *http.Request, db *sql.DB, store *ses
   w.Write(jsonString)
 
 }
+
+
+
+//TODO: Message deletion
+
+
 
 

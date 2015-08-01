@@ -2,10 +2,8 @@ package main
 
 import (
   "fmt"
-  "log"
   "net/http"
   "encoding/json"
-  "io/ioutil"
   "database/sql"
   _ "github.com/go-sql-driver/mysql"
   "github.com/gorilla/sessions"  
@@ -14,60 +12,36 @@ import (
 )
 
 
-//TODO: handle panics/errors, as unhandled panics/errors will shut down the server
-//TODO: make a checkerr function
-//TODO: put duplicated code into functions
-
-
-//TODO: Return correct status and message if session is invalid
-//TODO: Return correct status and message if insert failed
 //TODO: format retrieved datetime to javascript datetime
 func createForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore) { 
 
   fmt.Println("Creating forum thread...")
 
   //add headers to response
-  w.Header()["access-control-allow-origin"] = []string{"http://localhost:8080"} //TODO: fix this?                                                           
-  w.Header()["access-control-allow-methods"] = []string{"GET, POST, OPTIONS"}
-  w.Header()["Content-Type"] = []string{"application/json"}
+  addWriteHeaders(&w, r)
 
   //ignore options requests
-  if r.Method == "OPTIONS" {
-    fmt.Println("options request received")
-    w.WriteHeader(http.StatusTemporaryRedirect)
+  if handleOptionsRequests(w, r) == true {
     return
   }
 
   //check for session to see if client is authenticated
-  session, err := store.Get(r, "flash-session")
-  if err != nil {
-    http.Error(w, err.Error(), http.StatusInternalServerError)
-  }
-  fm := session.Flashes("message")
-  if fm == nil {
-    fmt.Println("Trying to create a thread as an invalid user")
-    fmt.Fprint(w, "No flash messages")
+  ok, session := confirmSession(store, "Trying to get forum thread info as an invalid user", w, r)
+  if ok == false {
     return
   }
-  //session.Save(r, w)
 
-  //get the user id and username from the cookie
+  //get the user id from the cookie
   userid := session.Values["userid"].(int)
-  //username := session.Values["username"].(string)
 
-  //parse the body of the request into a string
-  body, err := ioutil.ReadAll(r.Body)
-  if err != nil {
-    panic(err)
-  }
-  //fmt.Println(string(body))
-  
-  //parse the JSON string body to get the forum thread info
-  byt := body
+  //parse the request body into a map
   var dat map[string]interface{}
-  if err := json.Unmarshal(byt, &dat); err != nil {
-    panic(err)
+  dat, ok = parseJsonRequest(w, r)
+  if ok == false {
+    return
   }
+
+  //get the thread info
   thread_title := dat["title"].(string)
   thread_body := dat["body"].(string)
 
@@ -91,49 +65,45 @@ func createForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store
     thread_latitude = dat["lat"].(float64)
   }    
 
-  //TODO: handle lat and long passed in as non float types
-
   //insert forum thread into database
   stmt, err := db.Prepare("insert into forum_threads (user_id, title, body, link, tag, longitude, latitude) values (?, ?, ?, ?, ?, ?, ?)")
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error preparing query", w)
+    return
   }
   res, err := stmt.Exec(userid, thread_title, thread_body, thread_link, thread_tag, thread_longitude, thread_latitude)
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error executing query", w)
+    return
   }
   lastId, err := res.LastInsertId()
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error getting last insert id", w)
+    return
   }
   rowCnt, err := res.RowsAffected()
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error getting rows affected", w)
+    return
   }
-  fmt.Printf("Inserted thread " + thread_title + " into database. Last inserted ID = %d, rows affected = %d\n", lastId, rowCnt)
+  fmt.Printf("Inserted thread %s into database. Last inserted ID = %d, rows affected = %d\n", thread_title, lastId, rowCnt)
 
   //return 200 status to indicate success
   fmt.Println("about to write 200 header")
   w.Write([]byte("{\"thread_id\" : " + strconv.FormatInt(lastId, 10) + "}"))
 }
 
-
 //option: query by - 0) thread id, 1) user id, 2) all
 //sortBy: sort by (does not apply to by thread id since by thread id is unique) - 0) rating, 1) datetime
-//TODO: Return correct status and message if query failed
 func getForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, option int, sortBy int, pageNumber int, id int) {
 
   fmt.Println("Getting forum thread...")
 
   //add headers to response
-  w.Header()["access-control-allow-origin"] = []string{"http://localhost:8080"} //TODO: fix this?                                                           
-  w.Header()["access-control-allow-methods"] = []string{"GET, POST, OPTIONS"}
-  w.Header()["Content-Type"] = []string{"application/json"}
+  addWriteHeaders(&w, r)
 
   //ignore options requests
-  if r.Method == "OPTIONS" {
-    fmt.Println("options request received")
-    w.WriteHeader(http.StatusTemporaryRedirect)
+  if handleOptionsRequests(w, r) == true {
     return
   }
 
@@ -205,7 +175,8 @@ func getForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, option i
   //perform query and check for errors
   rows, err := db.Query(dbQuery)
   if err != nil {
-    panic(err)
+    handleError(err, "Error performing query", w)
+    return
   } 
 
   //outbound object containing a collection of outbound objects for each forum thread
@@ -216,7 +187,8 @@ func getForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, option i
     //get the relevant information from the query results
     err = rows.Scan(&queried_thread_id, &queried_user_id, &queried_title, &queried_body, &queried_link, &queried_tag, &queried_post_count, &queried_rating, &queried_longitude, &queried_latitude, &queried_creation_time, &queried_last_update_time, &queried_last_post_time, &queried_user_name)
     if err != nil {
-      panic(err)
+      handleError(err, "Error while getting results of query", w)
+      return
     }
 
     //create outbound object for each row
@@ -231,7 +203,8 @@ func getForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, option i
   //json stringify the data
   jsonString, err := json.Marshal(forumThreadCollectionOutbound)
   if err != nil {
-    panic(err)
+    handleError(err, "Error performing json stringify on object", w)
+    return
   }
   fmt.Println(string(jsonString))      
 
@@ -242,36 +215,23 @@ func getForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, option i
 }
 
 //sortBy: sort by - 0) rating, 1) datetime
-//TODO: Return correct status and message if session is invalid
-//TODO: Return correct status and message if query failed
 func getForumThreadProtected(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore, sortBy int, pageNumber int) {
 
   fmt.Println("Getting forum thread...")
 
   //add headers to response
-  w.Header()["access-control-allow-origin"] = []string{"http://localhost:8080"} //TODO: fix this?                                                           
-  w.Header()["access-control-allow-methods"] = []string{"GET, POST, OPTIONS"}
-  w.Header()["Content-Type"] = []string{"application/json"}
+  addWriteHeaders(&w, r)
 
   //ignore options requests
-  if r.Method == "OPTIONS" {
-    fmt.Println("options request received")
-    w.WriteHeader(http.StatusTemporaryRedirect)
+  if handleOptionsRequests(w, r) == true {
     return
   }
 
   //check for session to see if client is authenticated
-  session, err := store.Get(r, "flash-session")
-  if err != nil {
-    http.Error(w, err.Error(), http.StatusInternalServerError)
-  }
-  fm := session.Flashes("message")
-  if fm == nil {
-    fmt.Println("Trying to get forum thread info as an invalid user")
-    fmt.Fprint(w, "No flash messages")
+  ok, session := confirmSession(store, "Trying to get forum thread info as an invalid user", w, r)
+  if ok == false {
     return
   }
-  //session.Save(r, w)
 
   //get the user from the cookie
   userid := session.Values["userid"].(int)  
@@ -317,7 +277,8 @@ func getForumThreadProtected(w http.ResponseWriter, r *http.Request, db *sql.DB,
   //perform query and check for errors
   rows, err := db.Query(dbQuery)
   if err != nil {
-    panic(err)
+    handleError(err, "Error performing query", w)
+    return
   } 
 
   //outbound object containing a collection of outbound objects for each forum thread
@@ -328,7 +289,8 @@ func getForumThreadProtected(w http.ResponseWriter, r *http.Request, db *sql.DB,
     //get the relevant information from the query results
     err = rows.Scan(&queried_thread_id, &queried_user_id, &queried_title, &queried_body, &queried_link, &queried_tag, &queried_post_count, &queried_rating, &queried_longitude, &queried_latitude, &queried_creation_time, &queried_last_update_time, &queried_last_post_time, &queried_user_name)
     if err != nil {
-      panic(err)
+      handleError(err, "Error while getting results of query", w)
+      return
     }
 
     //create outbound object for each row
@@ -343,51 +305,36 @@ func getForumThreadProtected(w http.ResponseWriter, r *http.Request, db *sql.DB,
   //json stringify the data
   jsonString, err := json.Marshal(forumThreadCollectionOutbound)
   if err != nil {
-    panic(err)
+    handleError(err, "Error performing json stringify on object", w)
+    return
   }
   fmt.Println(string(jsonString))      
 
   //return 200 status to indicate success
   fmt.Println("about to write 200 header")
   w.Write(jsonString)
-
 }
 
-
-//TODO: Return correct status and message if session is invalid
-//TODO: Return correct status and message if query failed
 func scoreForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore, option int, thread_id int) {
 
   fmt.Println("Score forum thread...")
 
   //add headers to response
-  w.Header()["access-control-allow-origin"] = []string{"http://localhost:8080"} //TODO: fix this?                                                           
-  w.Header()["access-control-allow-methods"] = []string{"GET, POST, OPTIONS"}
-  w.Header()["Content-Type"] = []string{"application/json"}
+  addWriteHeaders(&w, r)
 
   //ignore options requests
-  if r.Method == "OPTIONS" {
-    fmt.Println("options request received")
-    w.WriteHeader(http.StatusTemporaryRedirect)
+  if handleOptionsRequests(w, r) == true {
     return
   }
 
   //check for session to see if client is authenticated
-  session, err := store.Get(r, "flash-session")
-  if err != nil {
-    http.Error(w, err.Error(), http.StatusInternalServerError)
-  }
-  fm := session.Flashes("message")
-  if fm == nil {
-    fmt.Println("Trying to vote on forum thread as an invalid user")
-    fmt.Fprint(w, "No flash messages")
+  ok, session := confirmSession(store, "Trying to get forum thread info as an invalid user", w, r)
+  if ok == false {
     return
   }
-  //session.Save(r, w)
 
-  //get the user id and username from the cookie
-  userid := session.Values["userid"].(int)
-  //username := session.Values["username"].(string)  
+  //get the user from the cookie
+  userid := session.Values["userid"].(int)  
 
   //variable(s) to hold the returned values from the query
   var (
@@ -395,7 +342,7 @@ func scoreForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store 
   )
 
   //query the thread_votes table for the thread id and user id
-  err = db.QueryRow("select score from thread_votes where thread_id = ? and user_id = ?", thread_id, userid).Scan(&queried_score)
+  err := db.QueryRow("select score from thread_votes where thread_id = ? and user_id = ?", thread_id, userid).Scan(&queried_score)
   switch {
 
     //if record doesn't exist   
@@ -403,56 +350,60 @@ func scoreForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store 
       //insert a new row to indicate that the user has voted for the thread
       stmt, err := db.Prepare("insert into thread_votes (thread_id, user_id, score) values (?, ?, ?)")
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error preparing query", w)
+        return
       }
       res, err := stmt.Exec(thread_id, userid, option)
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error executing query", w)
+        return
       }
       fmt.Printf("Inserted record into thread_votes table.\n")
 
       //update the forum thread by the score
       stmt, err = db.Prepare("update forum_threads set rating = rating + ? where thread_id = ?")
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error preparing query", w)
+        return
       }
       res, err = stmt.Exec(option, thread_id)
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error executing query", w)
+        return
       }
       rowCnt, err := res.RowsAffected()
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error getting rows affected", w)
+        return
       }
       fmt.Printf("Updated score of thread " + strconv.Itoa(thread_id) + ". Rows affected = %d\n", rowCnt)     
 
       //update rep of user who created forum thread
       stmt, err = db.Prepare("update users inner join forum_threads on users.user_id = forum_threads.user_id set rep = rep + 2 * ? where forum_threads.thread_id = ?")
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error preparing query", w)
+        return
       }
       res, err = stmt.Exec(option, thread_id)
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error executing query", w)
+        return
       }
       rowCnt, err = res.RowsAffected()
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error getting rows affected", w)
+        return
       }
       fmt.Printf("Updated rep of forum thread creator. Rows affected = %d\n", rowCnt)              
 
       //return 200 status to indicate success
       fmt.Println("about to write 200 header")
       w.WriteHeader(http.StatusOK)
-
       break
 
     //if error querying database  
     case err != nil:
-      log.Fatal(err)
-      //return 400 status to indicate error
-      fmt.Println("about to write 400 header")
-      w.Write([]byte(fmt.Sprintf("Error querying database")))  
+      handleError(err, "Error querying database", w) 
       break
 
     //if record exists
@@ -461,49 +412,54 @@ func scoreForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store 
         //update thread_votes table for the thread id and user id
         stmt, err := db.Prepare("update thread_votes set score = ? where thread_id = ? and user_id = ?")
         if err != nil {
-          log.Fatal(err)
+          handleError(err, "Error preparing query", w)
+          return
         }
         _, err = stmt.Exec(queried_score + option, thread_id, userid)
         if err != nil {
-          log.Fatal(err)
+          handleError(err, "Error executing query", w)
+          return
         }
         fmt.Printf("Updated record in thread_votes table.\n")
       } else
       {
-        //return 400 status to indicate error
-        fmt.Println("about to write 400 header")
-        fmt.Println("Cannot upvote twice or downvote twice")     
-        w.Write([]byte(fmt.Sprintf("Cannot upvote twice or downvote twice")))   
+        handleError(err, "Cannot upvote twice or downvote twice", w)
         return
       }
 
       //update the forum thread by the score
       stmt, err := db.Prepare("update forum_threads set rating = rating + ? where thread_id = ?")
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error preparing query", w)
+        return
       }
       res, err := stmt.Exec(option, thread_id)
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error executing query", w)
+        return
       }
       rowCnt, err := res.RowsAffected()
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error getting rows affected", w)
+        return
       }
-      fmt.Printf("Updated score of thread " + strconv.Itoa(thread_id) + ". Rows affected = %d\n", rowCnt)
+      fmt.Printf("Updated score of thread %d. Rows affected = %d\n", thread_id, rowCnt)
 
       //update rep of user who created forum thread
       stmt, err = db.Prepare("update users inner join forum_threads on users.user_id = forum_threads.user_id set rep = rep + 2 * ? where forum_threads.thread_id = ?")
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error preparing query", w)
+        return
       }
       res, err = stmt.Exec(option, thread_id)
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error executing query", w)
+        return
       }
       rowCnt, err = res.RowsAffected()
       if err != nil {
-        log.Fatal(err)
+        handleError(err, "Error getting rows affected", w)
+        return
       }
       fmt.Printf("Updated rep of forum thread creator. Rows affected = %d\n", rowCnt)               
 
@@ -516,53 +472,35 @@ func scoreForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store 
 
 }
 
-//TODO: Return correct status and message if session is invalid
-//TODO: Return correct status and message if query failed
 func editForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore) {
 
   fmt.Println("Edit forum thread...")
 
   //add headers to response
-  w.Header()["access-control-allow-origin"] = []string{"http://localhost:8080"} //TODO: fix this?                                                           
-  w.Header()["access-control-allow-methods"] = []string{"GET, POST, OPTIONS"}
-  w.Header()["Content-Type"] = []string{"application/json"}
+  addWriteHeaders(&w, r)
 
   //ignore options requests
-  if r.Method == "OPTIONS" {
-    fmt.Println("options request received")
-    w.WriteHeader(http.StatusTemporaryRedirect)
+  if handleOptionsRequests(w, r) == true {
     return
   }
 
   //check for session to see if client is authenticated
-  session, err := store.Get(r, "flash-session")
-  if err != nil {
-    http.Error(w, err.Error(), http.StatusInternalServerError)
-  }
-  fm := session.Flashes("message")
-  if fm == nil {
-    fmt.Println("Trying to edit forum thread as an invalid user")
-    fmt.Fprint(w, "No flash messages")
+  ok, session := confirmSession(store, "Trying to get forum thread info as an invalid user", w, r)
+  if ok == false {
     return
   }
-  //session.Save(r, w)
 
   //get the user id and username from the cookie
-  userid := session.Values["userid"].(int)    
+  userid := session.Values["userid"].(int)
 
-  //parse the body of the request into a string
-  body, err := ioutil.ReadAll(r.Body)
-  if err != nil {
-    panic(err)
-  }
-  //fmt.Println(string(body))
-
-  //parse the JSON string body to get the forum thread info
-  byt := body
+  //parse the request body into a map
   var dat map[string]interface{}
-  if err := json.Unmarshal(byt, &dat); err != nil {
-    panic(err)
+  dat, ok = parseJsonRequest(w, r)
+  if ok == false {
+    return
   }
+
+  //get thread info
   thread_id := int(dat["thread_id"].(float64))
   thread_title := dat["title"].(string)
   thread_body := dat["body"].(string)
@@ -576,55 +514,48 @@ func editForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store *
   )  
 
   //don't edit the thread if the user was not the one who created it
-  err = db.QueryRow("select user_id from forum_threads where thread_id = ?", thread_id).Scan(&queried_user_id)
+  err := db.QueryRow("select user_id from forum_threads where thread_id = ?", thread_id).Scan(&queried_user_id)
   switch {
 
     //if thread doesn't exist 
     case err == sql.ErrNoRows:
-      //return 400 status to indicate error
-      fmt.Println("about to write 400 header")
-      fmt.Println("Thread cannot be found")     
-      w.Write([]byte(fmt.Sprintf("Thread cannot be found"))) 
+      handleError(err, "Thread cannot be found", w)
       return
       //break
 
     //if error querying database  
-    case err != nil:
-      log.Fatal(err)
-      //return 400 status to indicate error
-      fmt.Println("about to write 400 header")
-      w.Write([]byte(fmt.Sprintf("Error querying database")))  
+    case err != nil: 
+      handleError(err, "Error querying database", w)
       return
       //break
 
     //if thread exists
     default:
       if queried_user_id != userid {
-        fmt.Println("about to write 400 header")
-        fmt.Println("Cannot edit another user's thread") 
-        w.Write([]byte(fmt.Sprintf("Cannot edit another user's thread")))  
+        handleError(err, "Cannot edit another user's thread", w)
         return
       }
       break
 
   }    
 
-  //TODO: return error if thread id is blank/nan
-
   //update the forum thread post
   stmt, err := db.Prepare("update forum_threads set title = ?, body = ?, link = ?, tag = ?, longitude = ?, latitude = ? where thread_id = ?")
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error preparing query", w)
+    return
   }
   res, err := stmt.Exec(thread_title, thread_body, thread_link, thread_tag, thread_longitude, thread_latitude, thread_id)
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error executing query", w)
+    return
   }
   rowCnt, err := res.RowsAffected()
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error getting rows affected", w)
+    return
   }
-  fmt.Printf("Updated contents of forum thread " + strconv.Itoa(thread_id) + ". Rows affected = %d\n", rowCnt)      
+  fmt.Printf("Updated contents of forum thread %d. Rows affected = %d\n", thread_id, rowCnt)      
 
   //return 200 status to indicate success
   fmt.Println("about to write 200 header")
@@ -632,36 +563,23 @@ func editForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store *
 
 }
 
-//TODO: Return correct status and message if session is invalid
-//TODO: Return correct status and message if query failed
 func deleteForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore, id int) {
 
   fmt.Println("Delete forum thread...")
 
   //add headers to response
-  w.Header()["access-control-allow-origin"] = []string{"http://localhost:8080"} //TODO: fix this?                                                           
-  w.Header()["access-control-allow-methods"] = []string{"GET, POST, OPTIONS"}
-  w.Header()["Content-Type"] = []string{"application/json"}
+  addWriteHeaders(&w, r)
 
   //ignore options requests
-  if r.Method == "OPTIONS" {
-    fmt.Println("options request received")
-    w.WriteHeader(http.StatusTemporaryRedirect)
+  if handleOptionsRequests(w, r) == true {
     return
   }
 
   //check for session to see if client is authenticated
-  session, err := store.Get(r, "flash-session")
-  if err != nil {
-    http.Error(w, err.Error(), http.StatusInternalServerError)
-  }
-  fm := session.Flashes("message")
-  if fm == nil {
-    fmt.Println("Trying to delete forum thread as an invalid user")
-    fmt.Fprint(w, "No flash messages")
+  ok, session := confirmSession(store, "Trying to get forum thread info as an invalid user", w, r)
+  if ok == false {
     return
   }
-  //session.Save(r, w)
 
   //get the user id and username from the cookie
   userid := session.Values["userid"].(int)
@@ -671,69 +589,65 @@ func deleteForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store
   )  
 
   //don't delete the thread if the user was not the one who created it
-  err = db.QueryRow("select user_id from forum_threads where thread_id = ?", id).Scan(&queried_user_id)
+  err := db.QueryRow("select user_id from forum_threads where thread_id = ?", id).Scan(&queried_user_id)
   switch {
 
     //if thread doesn't exist 
     case err == sql.ErrNoRows:
-      //return 400 status to indicate error
-      fmt.Println("about to write 400 header")
-      fmt.Println("Thread cannot be found")     
-      w.Write([]byte(fmt.Sprintf("Thread cannot be found"))) 
+      handleError(err, "Thread cannot be found", w)
       return
       //break
 
     //if error querying database  
     case err != nil:
-      log.Fatal(err)
-      //return 400 status to indicate error
-      fmt.Println("about to write 400 header")
-      w.Write([]byte(fmt.Sprintf("Error querying database")))  
+      handleError(err, "Error querying database", w)
       return
       //break
 
     //if thread exists
     default:
       if queried_user_id != userid {
-        fmt.Println("about to write 400 header")
-        fmt.Println("Cannot delete another user's thread") 
-        w.Write([]byte(fmt.Sprintf("Cannot delete another user's thread")))  
+        handleError(err, "Cannot delete another user's thread", w)
         return
       }
       break
 
   }  
 
-  //TODO: return error if thread id is blank/nan
-
   //delete all votes related to forum posts
   stmt, err := db.Prepare("delete post_votes from post_votes inner join thread_posts on post_votes.post_id = thread_posts.post_id where thread_posts.thread_id = ?")
 
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error with query", w)
+    return
   }
   res, err := stmt.Exec(id)
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error with query", w)
+    return
   }
   rowCnt, err := res.RowsAffected()
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error with query", w)
+    return
   }
-  fmt.Printf("Deleted votes for forum posts with forum thread id " + strconv.Itoa(id) + ". Rows affected = %d\n", rowCnt)    
+  fmt.Printf("Deleted votes for forum posts with forum thread id %d. Rows affected = %d\n", id, rowCnt)    
 
   //delete all forum posts related to the forum thread
   stmt, err = db.Prepare("delete from thread_posts where thread_id = ?")
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error with query", w)
+    return
   }
   res, err = stmt.Exec(id)
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error with query", w)
+    return
   }
   rowCnt, err = res.RowsAffected()
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error with query", w)
+    return
   }
   fmt.Printf("Deleted forum posts with forum thread id " + strconv.Itoa(id) + ". Rows affected = %d\n", rowCnt)  
 
@@ -741,32 +655,38 @@ func deleteForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store
   stmt, err = db.Prepare("delete from thread_votes where thread_id = ?")
 
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error with query", w)
+    return
   }
   res, err = stmt.Exec(id)
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error with query", w)
+    return
   }
   rowCnt, err = res.RowsAffected()
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error with query", w)
+    return
   }
   fmt.Printf("Deleted votes for forum thread with id " + strconv.Itoa(id) + ". Rows affected = %d\n", rowCnt)      
 
   //delete the forum thread
   stmt, err = db.Prepare("delete from forum_threads where thread_id = ?")
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error with query", w)
+    return
   }
   res, err = stmt.Exec(id)
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error with query", w)
+    return
   }
   rowCnt, err = res.RowsAffected()
   if err != nil {
-    log.Fatal(err)
+    handleError(err, "Error with query", w)
+    return
   }
-  fmt.Printf("Deleted forum thread " + strconv.Itoa(id) + ". Rows affected = %d\n", rowCnt)      
+  fmt.Printf("Deleted forum thread %d. Rows affected = %d\n", id, rowCnt)      
 
   //return 200 status to indicate success
   fmt.Println("about to write 200 header")
@@ -774,20 +694,15 @@ func deleteForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store
 
 }
 
-//TODO: Return correct status and message if query failed
 func popularThreads(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
   fmt.Println("Getting popular forum threads...")
 
   //add headers to response
-  w.Header()["access-control-allow-origin"] = []string{"http://localhost:8080"} //TODO: fix this?                                                           
-  w.Header()["access-control-allow-methods"] = []string{"GET, POST, OPTIONS"}
-  w.Header()["Content-Type"] = []string{"application/json"}
+  addWriteHeaders(&w, r)
 
   //ignore options requests
-  if r.Method == "OPTIONS" {
-    fmt.Println("options request received")
-    w.WriteHeader(http.StatusTemporaryRedirect)
+  if handleOptionsRequests(w, r) == true {
     return
   }
 
@@ -798,10 +713,14 @@ func popularThreads(w http.ResponseWriter, r *http.Request, db *sql.DB) {
   )  
 
   //get the 5 most popular tags within the past 24 hours
+  //rows, err := db.Query("select tag, count(tag) from forum_threads where creation_time > DATE_SUB( NOW(), INTERVAL 24 HOUR) group by tag order by count(tag) desc limit 5")
+
+  //get the 5 most popular tags of all time
   //perform query and check for errors
-  rows, err := db.Query("select tag, count(tag) from forum_threads where creation_time > DATE_SUB( NOW(), INTERVAL 24 HOUR) group by tag order by count(tag) desc limit 5")
+  rows, err := db.Query("select tag, count(tag) from forum_threads group by tag order by count(tag) desc limit 5")
   if err != nil {
-    panic(err)
+    handleError(err, "Error performing query", w)
+    return
   } 
 
   //outbound object containing a collection of outbound objects for each forum thread
@@ -812,7 +731,8 @@ func popularThreads(w http.ResponseWriter, r *http.Request, db *sql.DB) {
     //get the relevant information from the query results
     err = rows.Scan(&queried_tag, &queried_count)
     if err != nil {
-      panic(err)
+      handleError(err, "Error while getting results of query", w)
+      return
     }
 
     //create outbound object for each row
@@ -825,14 +745,14 @@ func popularThreads(w http.ResponseWriter, r *http.Request, db *sql.DB) {
   //json stringify the data
   jsonString, err := json.Marshal(popularTopicCollectionOutbound)
   if err != nil {
-    panic(err)
+    handleError(err, "Error performing json stringify on object", w)
+    return
   }
   fmt.Println(string(jsonString))      
 
   //return 200 status to indicate success
   fmt.Println("about to write 200 header")
   w.Write(jsonString)
-
 
 }
 

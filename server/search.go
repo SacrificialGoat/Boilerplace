@@ -2,37 +2,25 @@ package main
 
 import (
   "fmt"
-  //"log"
   "net/http"
   "encoding/json"
-  //"io/ioutil"
   "database/sql"
   _ "github.com/go-sql-driver/mysql"
-  //"github.com/gorilla/sessions"  
   "strconv"  
   "time"
 )
 
 
-//TODO: handle panics/errors, as unhandled panics/errors will shut down the server
-
-
-
 //sortBy: sort by (does not apply to by thread id since by thread id is unique) - 0) rating, 1) datetime
-//TODO: Return correct status and message if query failed
 func searchForForumThreads(w http.ResponseWriter, r *http.Request, db *sql.DB, sortBy int, pageNumber int, titleSearch string) {
 
   fmt.Println("Searching for forum threads...")
 
   //add headers to response
-  w.Header()["access-control-allow-origin"] = []string{"http://localhost:8080"} //TODO: fix this?                                                           
-  w.Header()["access-control-allow-methods"] = []string{"GET, POST, OPTIONS"}
-  w.Header()["Content-Type"] = []string{"application/json"}
+  addWriteHeaders(&w, r)
 
   //ignore options requests
-  if r.Method == "OPTIONS" {
-    fmt.Println("options request received")
-    w.WriteHeader(http.StatusTemporaryRedirect)
+  if handleOptionsRequests(w, r) == true {
     return
   }
 
@@ -73,7 +61,8 @@ func searchForForumThreads(w http.ResponseWriter, r *http.Request, db *sql.DB, s
   //perform query and check for errors
   rows, err := db.Query(dbQuery)
   if err != nil {
-    panic(err)
+    handleError(err, "Error performing query", w)
+    return
   } 
 
   //outbound object containing a collection of outbound objects for each forum thread
@@ -84,7 +73,8 @@ func searchForForumThreads(w http.ResponseWriter, r *http.Request, db *sql.DB, s
     //get the relevant information from the query results
     err = rows.Scan(&queried_thread_id, &queried_user_id, &queried_title, &queried_body, &queried_post_count, &queried_rating, &queried_creation_time, &queried_last_update_time, &queried_user_name)
     if err != nil {
-      panic(err)
+      handleError(err, "Error while getting results of query", w)
+      return
     }
 
     //create outbound object for each row
@@ -98,7 +88,8 @@ func searchForForumThreads(w http.ResponseWriter, r *http.Request, db *sql.DB, s
   //json stringify the data
   jsonString, err := json.Marshal(forumThreadCollectionOutbound)
   if err != nil {
-    panic(err)
+    handleError(err, "Error performing json stringify on object", w)
+    return
   }
   fmt.Println(string(jsonString))      
 

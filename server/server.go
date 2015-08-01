@@ -58,10 +58,10 @@ func main() {
 
   //routes in auth.go
 
-//GET:
-//getUserInfo                                 profile/
-//POST:
-//updateUserInfo                              profile/                       body: {"bio" : bio, "avatar_link" : avatar_link}
+  //GET:
+  //getUserInfo                                 profile/
+  //POST:
+  //updateUserInfo                              profile/                       body: {"bio" : bio, "avatar_link" : avatar_link}
   http.HandleFunc("/profile/", func(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
       case "GET":
@@ -83,8 +83,8 @@ func main() {
     }
   })
 
-//POST:
-//createUser                                   users/                         body: {"username" : username, "password" : password, "firstname" : firstname, "lastname" : lastname}
+  //POST:
+  //createUser                                   users/                         body: {"username" : username, "password" : password, "firstname" : firstname, "lastname" : lastname}
   http.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
       case "GET":
@@ -103,8 +103,8 @@ func main() {
     }
   })
 
-//POST:
-//authenticate                                 authenticate/                  body: {"username" : username, "password" : password}  
+  //POST:
+  //authenticate                                 authenticate/                  body: {"username" : username, "password" : password}  
   http.HandleFunc("/authenticate/", func(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
       case "GET":
@@ -126,15 +126,15 @@ func main() {
 
   //routes in forum_threads.go
 
-//GET:
-//getForumThreadByThreadId                     thread/ id
-//POST:
-//upvoteForumThread                            thread/XidX/?upvote=true       //id in url so don't need body
-//downvoteForumThread                          thread/XidX/?downvote=true     //id in url so don't need body
-//PUT:
-//editForumThread                              thread/                        body: {"title" : title, "body" : body, "link" : link, "tag" : tag}
-//DELETE:
-//deleteForumThread                            thread/ id
+  //GET:
+  //getForumThreadByThreadId                     thread/ id
+  //POST:
+  //upvoteForumThread                            thread/XidX/?upvote=true       //id in url so don't need body
+  //downvoteForumThread                          thread/XidX/?downvote=true     //id in url so don't need body
+  //PUT:
+  //editForumThread                              thread/                        body: {"title" : title, "body" : body, "link" : link, "tag" : tag}
+  //DELETE:
+  //deleteForumThread                            thread/ id
   http.HandleFunc("/thread/", func(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
       case "GET":
@@ -215,9 +215,9 @@ func main() {
     }
   })
 
-//GET:
-//getForumThreadsByLoggedInUserIdByRating      profilethreads/ ? sortby = XXX & pagenumber = XXX
-//getForumThreadsByLoggedInUserIdByTime        profilethreads/ ? sortby = XXX & pagenumber = XXX  
+  //GET:
+  //getForumThreadsByLoggedInUserIdByRating      profilethreads/ ? sortby = XXX & pagenumber = XXX
+  //getForumThreadsByLoggedInUserIdByTime        profilethreads/ ? sortby = XXX & pagenumber = XXX  
   http.HandleFunc("/profilethreads/", func(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
       case "GET":
@@ -256,13 +256,13 @@ func main() {
     }
   })
 
-//GET:  
-//getForumThreadsByUserIdByRating              threads/ ? userid = XXX & sortby = XXX & pagenumber = XXX
-//getForumThreadsByUserIdByTime                threads/ ? userid = XXX & sortby = XXX & pagenumber = XXX
-//getForumThreadsByRating                      threads/ ? sortby = XXX & pagenumber = XXX
-//getForumThreadsByTime                        threads/ ? sortby = XXX & pagenumber = XXX
-//POST:
-//createForumThread                            threads/                       body: {"title" : title, "body" : body, "link" : link, "tag" : tag}
+  //GET:  
+  //getForumThreadsByUserIdByRating              threads/ ? userid = XXX & sortby = XXX & pagenumber = XXX
+  //getForumThreadsByUserIdByTime                threads/ ? userid = XXX & sortby = XXX & pagenumber = XXX
+  //getForumThreadsByRating                      threads/ ? sortby = XXX & pagenumber = XXX
+  //getForumThreadsByTime                        threads/ ? sortby = XXX & pagenumber = XXX
+  //POST:
+  //createForumThread                            threads/                       body: {"title" : title, "body" : body, "link" : link, "tag" : tag}
   http.HandleFunc("/threads/", func(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
       case "GET":
@@ -317,8 +317,8 @@ func main() {
     }
   })
 
-//GET:
-//trending       trending/
+  //GET:
+  //trending       trending/
   http.HandleFunc("/trending/", func(w http.ResponseWriter, r *http.Request) {
   switch r.Method {
     case "GET":
@@ -340,15 +340,15 @@ func main() {
 
   //routes in thread_posts.go
 
-//GET:
-//getThreadPostByPostId                        post/ id
-//POST:
-//upvoteThreadPost                             post/XidX/?upvote=true         //id in url so don't need body
-//downvoteThreadPost                           post/XidX/?downvote=true       //id in url so don't need body
-//PUT:
-//editThreadPost                               post/                          body: {"thread_id" : threadId, "contents" : contents}
-//DELETE:
-//deleteThreadPost                             post/ id
+  //GET:
+  //getThreadPostByPostId                        post/ id
+  //POST:
+  //upvoteThreadPost                             post/XidX/?upvote=true         //id in url so don't need body
+  //downvoteThreadPost                           post/XidX/?downvote=true       //id in url so don't need body
+  //PUT:
+  //editThreadPost                               post/                          body: {"thread_id" : threadId, "contents" : contents}
+  //DELETE:
+  //deleteThreadPost                             post/ id
   http.HandleFunc("/post/", func(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
       case "GET":
@@ -430,15 +430,15 @@ func main() {
     }
   })
 
-//GET:
-//getThreadPostsByThreadIdByRating             posts / ? threadid = XXX & sortby = rating & pagenumber = XXX
-//getThreadPostsByThreadIdByTime               posts / ? threadid = XXX & sortby = creationtime & pagenumber = XXX
-//getThreadPostsByUserIdByRating               posts / ? userid = XXX & sortby = rating & pagenumber = XXX
-//getThreadPostsByUserIdByTime                 posts / ? userid = XXX & sortby = creationtime & pagenumber = XXX
-//getThreadPostsByRating                       posts / ? sortby = rating & pagenumber = XXX
-//getThreadPostsByTime                         posts / ? sortby = creationtime & pagenumber = XXX
-//POST:
-//createThreadPost                             posts/                         body: {"thread_id" : threadId, "contents" : contents}
+  //GET:
+  //getThreadPostsByThreadIdByRating             posts / ? threadid = XXX & sortby = rating & pagenumber = XXX
+  //getThreadPostsByThreadIdByTime               posts / ? threadid = XXX & sortby = creationtime & pagenumber = XXX
+  //getThreadPostsByUserIdByRating               posts / ? userid = XXX & sortby = rating & pagenumber = XXX
+  //getThreadPostsByUserIdByTime                 posts / ? userid = XXX & sortby = creationtime & pagenumber = XXX
+  //getThreadPostsByRating                       posts / ? sortby = rating & pagenumber = XXX
+  //getThreadPostsByTime                         posts / ? sortby = creationtime & pagenumber = XXX
+  //POST:
+  //createThreadPost                             posts/                         body: {"thread_id" : threadId, "contents" : contents}
   http.HandleFunc("/posts/", func(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
       case "GET":
@@ -501,9 +501,9 @@ func main() {
 
   //routes in users.go
 
-//GET:
-//getUserInfoByUserId                          user / 1
-//getUserInfoByUsername                        user / ? username = XXX
+  //GET:
+  //getUserInfoByUserId                          user / 1
+  //getUserInfoByUsername                        user / ? username = XXX
   http.HandleFunc("/user/", func(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
       case "GET":
@@ -721,136 +721,6 @@ http.HandleFunc("/messages/", func(w http.ResponseWriter, r *http.Request) {
 
 
 
-
-
-/*
-  //routes in auth.go
-
-  //allow user to sign up
-  http.HandleFunc("/createUser", func(w http.ResponseWriter, r *http.Request) {
-    createUserHandler(w, r, db)
-  })    
-
-  //update user info
-  http.HandleFunc("/updateUserInfo", func(w http.ResponseWriter, r *http.Request) {
-    updateUserInfoHandler(w, r, db, store)
-  })
-
-  //get user info
-  http.HandleFunc("/getUserInfo", func(w http.ResponseWriter, r *http.Request) {
-    getUserInfoHandler(w, r, db, store)
-  })
-
-  //authenticate user
-  http.HandleFunc("/authenticate", func(w http.ResponseWriter, r *http.Request) {
-    loginHandler(w, r, db, store)
-  })
-
-
-  //routes in forum_threads.go
-
-  //create forum thread
-  http.HandleFunc("/createForumThread", func(w http.ResponseWriter, r *http.Request) {
-    createForumThread(w, r, db, store)
-  })
-
-  //get forum threads by logged in user id sort by rating
-  http.HandleFunc("/getForumThreadsByLoggedInUserIdByRating", func(w http.ResponseWriter, r *http.Request) {
-    getForumThreadProtected(w, r, db, store, 0)
-  })
-
-  //get forum threads by logged in user id sort by time
-  http.HandleFunc("/getForumThreadsByLoggedInUserIdByTime", func(w http.ResponseWriter, r *http.Request) {
-    getForumThreadProtected(w, r, db, store, 1)
-  })  
-
-  //get forum threads by thread id
-  http.HandleFunc("/getForumThreadsByThreadId", func(w http.ResponseWriter, r *http.Request) {
-    getForumThread(w, r, db, 0, 0)
-  })     
-
-  //get forum threads by user id sort by rating
-  http.HandleFunc("/getForumThreadsByUserIdByRating", func(w http.ResponseWriter, r *http.Request) {
-    getForumThread(w, r, db, 1, 0)
-  })
-
-  //get forum threads by user id sort by datetime
-  http.HandleFunc("/getForumThreadsByUserIdByTime", func(w http.ResponseWriter, r *http.Request) {
-    getForumThread(w, r, db, 1, 1)
-  })   
-
-  //get all forum threads by rating
-  http.HandleFunc("/getForumThreadsByRating", func(w http.ResponseWriter, r *http.Request) {
-    getForumThread(w, r, db, 2, 0)
-  })   
-
-  //get all forum threads by datetime
-  http.HandleFunc("/getForumThreadsByTime", func(w http.ResponseWriter, r *http.Request) {
-    getForumThread(w, r, db, 2, 1)
-  })      
-
-  //upvote forum thread
-  http.HandleFunc("/upvoteForumThread", func(w http.ResponseWriter, r *http.Request) {
-    scoreForumThread(w, r, db, store, 1)
-  })      
-
-  //downvote forum thread
-  http.HandleFunc("/downvoteForumThread", func(w http.ResponseWriter, r *http.Request) {
-    scoreForumThread(w, r, db, store, -1)
-  })
-
-
-  //routes in thread_posts.go
-
-  //create forum thread post
-  http.HandleFunc("/createThreadPost", func(w http.ResponseWriter, r *http.Request) {
-    createThreadPost(w, r, db, store)
-  })
-
-  //get posts by thread id sort by rating
-  http.HandleFunc("/getThreadPostsByRating", func(w http.ResponseWriter, r *http.Request) {
-    getThreadPost(w, r, db, 1, 0)
-  })
-
-  //get posts by thread id sort by datetime
-  http.HandleFunc("/getThreadPostsByDatetime", func(w http.ResponseWriter, r *http.Request) {
-    getThreadPost(w, r, db, 1, 1)
-  })   
-
-  //upvote thread post
-  http.HandleFunc("/upvoteThreadPost", func(w http.ResponseWriter, r *http.Request) {
-    scoreThreadPost(w, r, db, store, 1)
-  })      
-
-  //downvote thread post
-  http.HandleFunc("/downvoteThreadPost", func(w http.ResponseWriter, r *http.Request) {
-    scoreThreadPost(w, r, db, store, -1)
-  })  
-
-
-  //routes in users.go
-
-  //get user info by user id
-  http.HandleFunc("/getUserInfoByUserId", func(w http.ResponseWriter, r *http.Request) {
-    getUserInfo(w, r, db, 0)
-  })
-
-  //get user info by username
-  http.HandleFunc("/getUserInfoByUsername", func(w http.ResponseWriter, r *http.Request) {
-    getUserInfo(w, r, db, 1)
-  })
-*/
-
-  //routes for sockets
-/*
-  //listen for player connection
-  http.HandleFunc("/connect", func(w http.ResponseWriter, r *http.Request) {
-    fmt.Println("trying to connect websocket")
-    connect(w, r, room, store)
-  })
-*/
-
-
   // route for friend_list
 
   go h.run()  // place this here because we took out friend_list
@@ -919,36 +789,6 @@ func chat(w http.ResponseWriter, r *http.Request, store *sessions.CookieStore, r
 }
 
 
-
-/*
-
-//handle the connect event which checks if the cookie corresponds to a logged in user
-//and creates the player in the game
-//TODO: Return correct status and message if session is invalid
-func connect(w http.ResponseWriter, r *http.Request, room *GameRoom, store *sessions.CookieStore) {
-
-  //check for session to see if client is authenticated
-  session, err := store.Get(r, "flash-session")
-  if err != nil {
-    http.Error(w, err.Error(), http.StatusInternalServerError)
-  }
-  fm := session.Flashes("message")
-  if fm == nil {
-    fmt.Println("Trying to log in as invalid user")
-    fmt.Fprint(w, "No flash messages")
-    return
-  }
-  //session.Save(r, w)
-
-  fmt.Println("New user connected")
-
-  //use the id and username attached to the session to create the player
-  playerHandler := PlayerHandler{Id: session.Values["userid"].(int), Username: session.Values["username"].(string), Room: room}
-
-  playerHandler.createPlayer(w, r)
-}
-
-*/
 
 
 

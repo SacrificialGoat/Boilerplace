@@ -68,18 +68,22 @@
       var title = $('#title').val();
       var body = $('#body').val();
       var link = $('#link').val();
-      var tag = $('#tag').val();    
+      var tag = $('#tag').val();      
+      var lng = parseFloat($('#longitude').val());
+      var lat = parseFloat($('#latitude').val());            
 
       $('#threadId').val('');
       $('#title').val(''); 
       $('#body').val(''); 
       $('#link').val(''); 
       $('#tag').val(''); 
+      $('#longitude').val(''); 
+      $('#latitude').val('');   
 
       $.ajax({
         type: 'PUT',
         url: 'http://127.0.0.1:8080/thread/',
-        data: JSON.stringify({"thread_id" : threadId, "title" : title, "body" : body, "link" : link, "tag" : tag}),
+        data: JSON.stringify({"thread_id" : threadId, "title" : title, "body" : body, "link" : link, "tag" : tag, "lng" : lng, "lat" : lat}),
         // contentType: "application/json",
         // crossDomain: true,
           success: function(data, textStatus, jqXHR) {
@@ -477,7 +481,6 @@ Recipient Id: <input type="text" id="recipientIdX" name="recipientIdX" placehold
 Title: <input type="text" id="titleX" name="titleX" placeholder="TitleX"><br>
 Contents: <input type="text" id="contentsX" name="contentsX" placeholder="contentsX"><br>
 <input id="createMessage" type="submit" value="Create Message"><br>
-<input id="deleteMessage" type="submit" value="Delete Message"><br>
 
 <br>
 
