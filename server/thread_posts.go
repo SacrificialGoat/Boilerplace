@@ -12,6 +12,7 @@ import (
 )
 
 
+//function to create a thread post
 //TODO: format retrieved datetime to javascript datetime
 func createThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore) { 
 
@@ -26,7 +27,7 @@ func createThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store 
   }
 
   //check for session to see if client is authenticated
-  ok, session := confirmSession(store, "Trying to get forum thread info as an invalid user", w, r)
+  ok, session := confirmSession(store, "Trying to perform action as an invalid user", w, r)
   if ok == false {
     return
   }
@@ -92,7 +93,7 @@ func createThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store 
   w.Write([]byte("{\"post_id\" : " + strconv.FormatInt(lastId, 10) + "}"))
 }
 
-
+//function to retrieve thread posts
 //option: query by - 0) post id, 1) thread id, 2) user id, 3) all
 //sortBy: sort by (does not apply to by post id since by post id is unique) - 0) rating, 1) datetime
 func getThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, option int, sortBy int, pageNumber int, id int) {
@@ -229,6 +230,7 @@ func getThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, option in
 
 }
 
+//function to score a thread post
 func scoreThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore, option int, post_id int) {
 
   fmt.Println("Score thread post...")
@@ -242,7 +244,7 @@ func scoreThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *
   }
 
   //check for session to see if client is authenticated
-  ok, session := confirmSession(store, "Trying to get forum thread info as an invalid user", w, r)
+  ok, session := confirmSession(store, "Trying to perform action as an invalid user", w, r)
   if ok == false {
     return
   }
@@ -388,6 +390,7 @@ func scoreThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *
 
 }
 
+//function to edit a thread post
 func editThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore) {
 
   fmt.Println("Edit thread post...")
@@ -401,7 +404,7 @@ func editThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *s
   }
 
   //check for session to see if client is authenticated
-  ok, session := confirmSession(store, "Trying to get forum thread info as an invalid user", w, r)
+  ok, session := confirmSession(store, "Trying to perform action as an invalid user", w, r)
   if ok == false {
     return
   }
@@ -472,6 +475,7 @@ func editThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *s
 
 }
 
+//function to delete a thread post
 func deleteThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore, id int) {
 
   fmt.Println("Delete thread post...")
@@ -485,7 +489,7 @@ func deleteThreadPost(w http.ResponseWriter, r *http.Request, db *sql.DB, store 
   }
 
   //check for session to see if client is authenticated
-  ok, session := confirmSession(store, "Trying to get forum thread info as an invalid user", w, r)
+  ok, session := confirmSession(store, "Trying to perform action as an invalid user", w, r)
   if ok == false {
     return
   }

@@ -12,6 +12,7 @@ import (
 )
 
 
+//function to create a forum thread
 //TODO: format retrieved datetime to javascript datetime
 func createForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore) { 
 
@@ -26,7 +27,7 @@ func createForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store
   }
 
   //check for session to see if client is authenticated
-  ok, session := confirmSession(store, "Trying to get forum thread info as an invalid user", w, r)
+  ok, session := confirmSession(store, "Trying to perform action as an invalid user", w, r)
   if ok == false {
     return
   }
@@ -93,6 +94,7 @@ func createForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store
   w.Write([]byte("{\"thread_id\" : " + strconv.FormatInt(lastId, 10) + "}"))
 }
 
+//function to retrieve forum threads
 //option: query by - 0) thread id, 1) user id, 2) all
 //sortBy: sort by (does not apply to by thread id since by thread id is unique) - 0) rating, 1) datetime
 func getForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, option int, sortBy int, pageNumber int, id int) {
@@ -214,6 +216,7 @@ func getForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, option i
 
 }
 
+//function to get forum threads based on cookie
 //sortBy: sort by - 0) rating, 1) datetime
 func getForumThreadProtected(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore, sortBy int, pageNumber int) {
 
@@ -228,7 +231,7 @@ func getForumThreadProtected(w http.ResponseWriter, r *http.Request, db *sql.DB,
   }
 
   //check for session to see if client is authenticated
-  ok, session := confirmSession(store, "Trying to get forum thread info as an invalid user", w, r)
+  ok, session := confirmSession(store, "Trying to perform action as an invalid user", w, r)
   if ok == false {
     return
   }
@@ -315,6 +318,7 @@ func getForumThreadProtected(w http.ResponseWriter, r *http.Request, db *sql.DB,
   w.Write(jsonString)
 }
 
+//function to score a forum thread
 func scoreForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore, option int, thread_id int) {
 
   fmt.Println("Score forum thread...")
@@ -328,7 +332,7 @@ func scoreForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store 
   }
 
   //check for session to see if client is authenticated
-  ok, session := confirmSession(store, "Trying to get forum thread info as an invalid user", w, r)
+  ok, session := confirmSession(store, "Trying to perform action as an invalid user", w, r)
   if ok == false {
     return
   }
@@ -472,6 +476,7 @@ func scoreForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store 
 
 }
 
+//function to edit a forum thread
 func editForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore) {
 
   fmt.Println("Edit forum thread...")
@@ -485,7 +490,7 @@ func editForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store *
   }
 
   //check for session to see if client is authenticated
-  ok, session := confirmSession(store, "Trying to get forum thread info as an invalid user", w, r)
+  ok, session := confirmSession(store, "Trying to perform action as an invalid user", w, r)
   if ok == false {
     return
   }
@@ -563,6 +568,7 @@ func editForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store *
 
 }
 
+//function to delete a forum thread
 func deleteForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore, id int) {
 
   fmt.Println("Delete forum thread...")
@@ -576,7 +582,7 @@ func deleteForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store
   }
 
   //check for session to see if client is authenticated
-  ok, session := confirmSession(store, "Trying to get forum thread info as an invalid user", w, r)
+  ok, session := confirmSession(store, "Trying to perform action as an invalid user", w, r)
   if ok == false {
     return
   }
@@ -694,6 +700,7 @@ func deleteForumThread(w http.ResponseWriter, r *http.Request, db *sql.DB, store
 
 }
 
+//function to get the most popular threads
 func popularThreads(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
   fmt.Println("Getting popular forum threads...")

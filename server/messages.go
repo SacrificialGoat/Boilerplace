@@ -12,6 +12,7 @@ import (
 )
 
 
+//function to create a message
 func createMessage(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore) { 
 
   fmt.Println("Sending messages...")
@@ -25,7 +26,7 @@ func createMessage(w http.ResponseWriter, r *http.Request, db *sql.DB, store *se
   }
 
   //check for session to see if client is authenticated
-  ok, session := confirmSession(store, "Trying to get forum thread info as an invalid user", w, r)
+  ok, session := confirmSession(store, "Trying to perform action as an invalid user", w, r)
   if ok == false {
     return
   }
@@ -73,7 +74,7 @@ func createMessage(w http.ResponseWriter, r *http.Request, db *sql.DB, store *se
   w.Write([]byte("{\"message_id\" : " + strconv.FormatInt(lastId, 10) + "}"))
 }
 
-
+//function to retrieve messages
 //option: query by - 0) message id, 1) sender id, 2) recipient id
 //sortBy: sort by (does not apply to by message id since by message id is unique) - 0) rating, 1) datetime
 func recvMessages(w http.ResponseWriter, r *http.Request, db *sql.DB, store *sessions.CookieStore, option int, sortBy int, pageNumber int, id int) {
@@ -89,7 +90,7 @@ func recvMessages(w http.ResponseWriter, r *http.Request, db *sql.DB, store *ses
   }
 
   //check for session to see if client is authenticated
-  ok, session := confirmSession(store, "Trying to get forum thread info as an invalid user", w, r)
+  ok, session := confirmSession(store, "Trying to perform action as an invalid user", w, r)
   if ok == false {
     return
   }
