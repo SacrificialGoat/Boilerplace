@@ -1,7 +1,7 @@
 var React = require('react');
 var Modal = require('react-modal');
 
-// var FriendButton = require('../friend/friendbutton');
+var FriendButton = require('../friend/friendbutton');
 
 
 var appElement = document.getElementById('app');
@@ -61,6 +61,8 @@ var Bio = React.createClass({
         <i className="glyphicon glyphicon-comment chatIcon" onClick={this.chat}>&nbsp;</i>
         <i className="glyphicon glyphicon-envelope messageBox" onClick={this.openModal}></i>
         
+        <FriendButton targetuser={this.props.item}/>
+        
         <Modal isOpen={this.state.modalIsOpen} onRequestClose={this.closeModal}>
           <form className="sendMsg" onSubmit={this.message}>
             <h2>Send Message</h2>
@@ -79,4 +81,3 @@ var Bio = React.createClass({
 
 module.exports = Bio;
 
-// <FriendButton targetuser={this.props.item}/>
