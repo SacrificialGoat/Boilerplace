@@ -19,7 +19,7 @@ var FriendButton = React.createClass({
 
 	componentWillMount: function(){
 		FriendStore.addChangeListener(this._onChange)
-		FriendStore.fetchFriendList();
+		// FriendStore.fetchFriendList();
 
 	},
 

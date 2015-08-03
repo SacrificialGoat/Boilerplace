@@ -9,7 +9,7 @@ var Treemap = rd3.Treemap;
 
 var Router = require('react-router');
 
-// var FriendList = require("../friend/friendlist")
+var FriendList = require("../friend/friendlist");
 // TODO - factor out navbar login form
 
 var getTrending = function(callback) {
@@ -132,6 +132,14 @@ var Sidebar = React.createClass({
               null
               )
             }
+            {this.state.loggedIn ? (
+            <li>
+                <a href="#">Friends</a>
+                <FriendList />
+            </li>
+              ):(
+              null
+            )}
         </ul>
     );
   }
@@ -140,10 +148,7 @@ var Sidebar = React.createClass({
 module.exports = Sidebar;
 
 
-// <li>
-//     <a href="#">Friends</a>
-//     <FriendList />
-// </li>
+
 
 // <PieChart
 //   data={this.state.data}

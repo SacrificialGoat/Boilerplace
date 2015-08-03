@@ -60,9 +60,10 @@ var App = React.createClass({
 var routes = (
   <Route path="/" handler={App}>
     <DefaultRoute handler={Front}/>
+    <Route name="front" path="front" handler={Front}/>
     <Route path="profile" handler={Profile}/>
     <Route path="inbox" handler={Inbox}/>
-    <Route path="login" handler={Login}/>
+    <Route name="login" path="login" handler={Login}/>
     <Route path="logout" handler={Logout}/>
     <Route path="signup" handler={Signup}/>
     <Route path="new" handler={NewThread}/>
