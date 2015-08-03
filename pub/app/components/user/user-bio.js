@@ -58,10 +58,15 @@ var Bio = React.createClass({
         <p>Id: {this.props.item.user_id}</p>
         <p>Bio: {this.props.item.bio}</p>
 
-        <i className="glyphicon glyphicon-comment chatIcon" onClick={this.chat}>&nbsp;</i>
-        <i className="glyphicon glyphicon-envelope messageBox" onClick={this.openModal}></i>
-        
-        <FriendButton targetuser={this.props.item}/>
+        {this.props.loggedIn ? (
+          <div>
+          <i className="glyphicon glyphicon-comment chatIcon" onClick={this.chat}>&nbsp;</i>
+          <i className="glyphicon glyphicon-envelope messageBox" onClick={this.openModal}></i>
+          <FriendButton targetuser={this.props.item}/>
+          </div>
+        ):(
+          null
+        )}
         
         <Modal isOpen={this.state.modalIsOpen} onRequestClose={this.closeModal}>
           <form className="sendMsg" onSubmit={this.message}>

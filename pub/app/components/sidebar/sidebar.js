@@ -132,10 +132,14 @@ var Sidebar = React.createClass({
               null
               )
             }
+            {this.state.loggedIn ? (
             <li>
                 <a href="#">Friends</a>
                 <FriendList />
             </li>
+              ):(
+              null
+            )}
         </ul>
     );
   }
